@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "cd client && npm install && npm run build"
+    "build": "cd server && npm install && cd ../client && npm install && npm run build"
   },
   "dependencies": {
     "lucide-react": "^0.563.0"
