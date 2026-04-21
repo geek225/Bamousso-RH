@@ -1,0 +1,93 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import Login from './pages/Login';
+import Locked from './pages/Locked';
+import DashboardAdmin from './pages/DashboardAdmin';
+import DashboardHR from './pages/DashboardHR';
+import DashboardEmployee from './pages/DashboardEmployee';
+import Employees from './pages/Employees';
+import Departments from './pages/Departments';
+import Leaves from './pages/Leaves';
+import Attendance from './pages/Attendance';
+import Documents from './pages/Documents';
+import Announcements from './pages/Announcements';
+import Settings from './pages/Settings';
+import DashboardSuperAdmin from './pages/DashboardSuperAdmin';
+import Unauthorized from './pages/Unauthorized';
+import DashboardRedirect from './pages/DashboardRedirect';
+import ProtectedRoute from './components/ProtectedRoute';
+import Landing from './pages/Landing';
+import MainLayout from './layouts/MainLayout';
+import Register from './pages/Register';
+import Payment from './pages/Payment';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentCancelled from './pages/PaymentCancelled';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/locked" element={<Locked />} />
+
+              <Route element={<MainLayout />}>
+                <Route path="/unauthorized" element={<Unauthorized />} />
+                <Route path="/dashboard" element={<DashboardRedirect />} />
+
+                {/* Super Admin Route */}
+                <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                  <Route path="/dashboard/super-admin" element={<DashboardSuperAdmin />} />
+                </Route>
+
+                {/* Modules protégés par rôle (RH/Admin) */}
+                <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']} />}>
+                  <Route path="/dashboard/admin" element={<DashboardAdmin />} />
+                </Route>
+
+                <Route element={<ProtectedRoute allowedRoles={['HR_MANAGER', 'HR_ASSISTANT']} />}>
+                  <Route path="/dashboard/hr" element={<DashboardHR />} />
+                </Route>
+
+                <Route element={<ProtectedRoute allowedRoles={['EMPLOYEE']} />}>
+                  <Route path="/dashboard/employee" element={<DashboardEmployee />} />
+                </Route>
+
+                {/* Pages RH */}
+                <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN', 'HR_MANAGER', 'HR_ASSISTANT']} />}>
+                  <Route path="/employees" element={<Employees />} />
+                  <Route path="/departments" element={<Departments />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Route>
+
+                {/* Modules accessibles à tous */}
+                <Route path="/leaves" element={<Leaves />} />
+                <Route path="/attendance" element={<Attendance />} />
+                <Route path="/documents" element={<Documents />} />
+                <Route path="/announcements" element={<Announcements />} />
+              </Route>
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+export default App;

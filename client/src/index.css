@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    background-color: #f8fafc; /* slate-50 */
+    color: #0f172a; /* slate-900 */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-300);
+    border-radius: 9999px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--color-gray-600);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-gray-400);
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-gray-500);
+  }
+}
+
+/* Améliorations tactiles pour mobile */
+@media (max-width: 768px) {
+  input, button, select, a {
+    min-height: 44px; /* Taille minimale recommandée par Apple/Google pour les cibles tactiles */
+  }
+  
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
