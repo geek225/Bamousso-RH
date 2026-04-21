@@ -3,15 +3,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/server/src/index.ts"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/client/index.html"
+      "destination": "/api/index.ts"
     }
   ],
   "functions": {
-    "server/src/index.ts": {
+    "api/index.ts": {
       "includeFiles": "server/prisma/schema.prisma"
     }
   }
