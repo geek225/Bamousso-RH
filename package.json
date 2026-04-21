@@ -30,6 +30,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.0.9",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
     "typescript": "^5.9.3"
   }
 }
