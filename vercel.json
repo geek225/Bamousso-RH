@@ -12,9 +12,7 @@
   ],
   "functions": {
     "server/src/index.ts": {
-      "includeFiles": [
-        "server/prisma/schema.prisma"
-      ]
+      "includeFiles": "server/prisma/schema.prisma"
     }
   }
 }
