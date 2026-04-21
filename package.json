@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "prisma generate --schema=server/prisma/schema.prisma && cd client && npm install && npm run build"
+    "build": "prisma generate --schema=server/prisma/schema.prisma && cd client && npm install && npm run build && cd .. && rm -rf public && mv client/dist public"
   },
   "dependencies": {
     "@prisma/client": "^5.21.0",
