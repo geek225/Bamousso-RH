@@ -6,7 +6,7 @@ export const createAnnouncement = async (req: Request, res: Response): Promise<a
   try {
     const { title, content, category } = req.body;
     const authorId = (req as any).user.id;
-    const file = req.file;
+    const file = (req as any).file;
 
     let fileUrl: string | null = null;
     let fileType: string | null = null;

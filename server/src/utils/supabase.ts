@@ -1,6 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'fs';
+// Interface locale compatible Multer pour éviter les problèmes de types
+interface MulterFile {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+  path?: string;
+  filename?: string;
+}
 
 dotenv.config();
 
@@ -13,7 +24,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export const uploadToSupabase = async (file: Express.Multer.File, bucket: string = 'bamousso'): Promise<string | null> => {
+export const uploadToSupabase = async (file: MulterFile, bucket: string = 'bamousso'): Promise<string | null> => {
   // Try Supabase upload if credentials exist
   if (supabaseUrl && supabaseKey) {
     try {

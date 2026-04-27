@@ -5,7 +5,7 @@ import { uploadToSupabase } from "../utils/supabase.js";
 export const uploadDocument = async (req: Request, res: Response): Promise<any> => {
   try {
     const { title, type, employeeId } = req.body;
-    const file = req.file;
+    const file = (req as any).file;
 
     if (!file) {
       return res.status(400).json({ message: "Aucun fichier fourni." });
