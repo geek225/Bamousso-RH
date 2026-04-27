@@ -112,7 +112,7 @@ export const createSuperAdmin = async (req: AuthRequest, res: Response): Promise
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: error.errors[0].message });
+      return res.status(400).json({ message: error.issues[0].message });
     }
     res.status(500).json({ message: "Erreur lors de la création du SUPER_ADMIN.", error: error.message });
   }
@@ -127,7 +127,7 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<a
     const currentUser = req.user;
     if (!currentUser) return res.status(401).json({ message: "Non authentifié." });
 
-    const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
+    const { currentPassword, newPassword } = changePasswordSchema.parse(req.body) as { currentPassword: string; newPassword: string };
 
     const user = await prisma.user.findUnique({ where: { id: currentUser.id } });
     if (!user) return res.status(404).json({ message: "Utilisateur introuvable." });
@@ -146,7 +146,7 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<a
     res.json({ message: "Mot de passe mis à jour avec succès." });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: error.errors[0].message });
+      return res.status(400).json({ message: error.issues[0].message });
     }
     res.status(500).json({ message: "Erreur lors du changement de mot de passe.", error: error.message });
   }
