@@ -1,0 +1,176 @@
+/**
+ * Contrôleur SUPER_ADMIN : gestion globale de la plateforme Bamousso RH.
+ * - Vue de toutes les entreprises et abonnements
+ * - Création de nouveaux SUPER_ADMIN
+ * - Changement de mot de passe
+ */
+import type { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import prisma from "../utils/prisma.js";
+import { z } from "zod";
+import type { AuthRequest } from "../middleware/auth.js";
+
+// ─── Schémas de Validation ────────────────────────────────────────────────────
+
+const createSuperAdminSchema = z.object({
+  email: z.string().email("Format d'email invalide"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  firstName: z.string().min(1, "Le prénom est requis"),
+  lastName: z.string().min(1, "Le nom est requis"),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Le mot de passe actuel est requis"),
+  newPassword: z.string().min(6, "Le nouveau mot de passe doit contenir au moins 6 caractères"),
+});
+
+// ─── Tableau de bord SUPER_ADMIN ──────────────────────────────────────────────
+
+/**
+ * Retourne la liste de toutes les entreprises avec leur statut d'abonnement.
+ */
+export const getAllCompanies = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const companies = await prisma.company.findMany({
+      select: {
+        id: true,
+        name: true,
+        isActive: true,
+        isLocked: true,
+        subscriptionStatus: true,
+        subscriptionEndsAt: true,
+        createdAt: true,
+        _count: {
+          select: { users: true }
+        },
+        manager: {
+          select: { email: true, firstName: true, lastName: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    res.json(companies);
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors de la récupération des entreprises.", error: error.message });
+  }
+};
+
+/**
+ * Retourne les statistiques globales de la plateforme.
+ */
+export const getPlatformStats = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const [totalCompanies, activeCompanies, lockedCompanies, totalUsers, superAdmins] = await Promise.all([
+      prisma.company.count(),
+      prisma.company.count({ where: { isActive: true, subscriptionStatus: 'ACTIVE' } }),
+      prisma.company.count({ where: { isLocked: true } }),
+      prisma.user.count({ where: { role: { not: 'SUPER_ADMIN' } } }),
+      prisma.user.findMany({ where: { role: 'SUPER_ADMIN' }, select: { id: true, email: true, firstName: true, lastName: true, createdAt: true } })
+    ]);
+
+    res.json({
+      totalCompanies,
+      activeCompanies,
+      lockedCompanies,
+      totalUsers,
+      superAdmins,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors de la récupération des statistiques.", error: error.message });
+  }
+};
+
+/**
+ * Crée un nouveau compte SUPER_ADMIN (réservé aux SUPER_ADMIN existants).
+ */
+export const createSuperAdmin = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const { email, password, firstName, lastName } = createSuperAdminSchema.parse(req.body);
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ message: "Un compte avec cet email existe déjà." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+        role: 'SUPER_ADMIN',
+        status: 'ACTIVE',
+      },
+    });
+
+    res.status(201).json({
+      message: "SUPER_ADMIN créé avec succès.",
+      user: { id: user.id, email: user.email, role: user.role }
+    });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: error.errors[0].message });
+    }
+    res.status(500).json({ message: "Erreur lors de la création du SUPER_ADMIN.", error: error.message });
+  }
+};
+
+/**
+ * Permet à un utilisateur connecté de changer son propre mot de passe.
+ * Accessible à tous les rôles (SUPER_ADMIN, COMPANY_ADMIN, EMPLOYEE…)
+ */
+export const changePassword = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const currentUser = req.user;
+    if (!currentUser) return res.status(401).json({ message: "Non authentifié." });
+
+    const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
+
+    const user = await prisma.user.findUnique({ where: { id: currentUser.id } });
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable." });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Le mot de passe actuel est incorrect." });
+    }
+
+    const hashedNew = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedNew }
+    });
+
+    res.json({ message: "Mot de passe mis à jour avec succès." });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: error.errors[0].message });
+    }
+    res.status(500).json({ message: "Erreur lors du changement de mot de passe.", error: error.message });
+  }
+};
+
+/**
+ * Active ou désactive le verrou d'une entreprise.
+ */
+export const toggleCompanyLock = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+    const company = await prisma.company.findUnique({ where: { id } });
+    if (!company) return res.status(404).json({ message: "Entreprise non trouvée." });
+
+    const updated = await prisma.company.update({
+      where: { id },
+      data: {
+        isLocked: !company.isLocked,
+        lockedAt: !company.isLocked ? new Date() : null,
+      }
+    });
+
+    res.json({ message: `Entreprise ${updated.isLocked ? 'verrouillée' : 'déverrouillée'} avec succès.`, company: updated });
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors du verrouillage.", error: error.message });
+  }
+};

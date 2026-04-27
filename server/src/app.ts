@@ -20,6 +20,7 @@ import announcementRoutes from "./routes/announcement.routes.js";
 import departmentRoutes from "./routes/department.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 // import paymentRoutes from "./routes/payment.routes.js";
+import superAdminRoutes from "./routes/superadmin.routes.js";
 
 // Chargement des variables d'environnement
 dotenv.config();
@@ -61,6 +62,7 @@ app.use("/api/attendances", attendanceRoutes);  // Pointage
 app.use("/api/documents", documentRoutes);      // Fiches de paie / Contrats
 app.use("/api/announcements", announcementRoutes); // Communications internes
 // app.use("/api/payments", paymentRoutes);           // Paiements GeniusPay
+app.use("/api/admin", superAdminRoutes);               // SUPER_ADMIN & changement de mot de passe
 
 // Route de test pour vérifier que l'API est en ligne
 app.get("/", (req, res) => {
