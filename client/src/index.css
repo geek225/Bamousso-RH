@@ -3,21 +3,21 @@
 
 @theme {
   /* Chromatic Colors */
-  --color-chromatic-brand: var(--chromatic-brand-primary);
-  --color-chromatic-brand-accent: var(--chromatic-brand-accent);
-  --color-chromatic-brand-900: var(--chromatic-brand-900);
-  --color-chromatic-brand-800: var(--chromatic-brand-800);
-  --color-chromatic-brand-700: var(--chromatic-brand-700);
+  --color-brand-primary: var(--chromatic-brand-primary);
+  --color-brand-accent: var(--chromatic-brand-accent);
+  --color-brand-900: var(--chromatic-brand-900);
+  --color-brand-800: var(--chromatic-brand-800);
+  --color-brand-700: var(--chromatic-brand-700);
 
-  --color-chromatic-surface-base: var(--chromatic-surface-base);
-  --color-chromatic-surface-panel: var(--chromatic-surface-panel);
-  --color-chromatic-surface-tonal: var(--chromatic-surface-tonal);
-  --color-chromatic-surface-border: var(--chromatic-surface-border);
+  --color-surface-base: var(--chromatic-surface-base);
+  --color-surface-panel: var(--chromatic-surface-panel);
+  --color-surface-tonal: var(--chromatic-surface-tonal);
+  --color-surface-border: var(--chromatic-surface-border);
 
-  --color-chromatic-text-primary: var(--chromatic-text-primary);
-  --color-chromatic-text-secondary: var(--chromatic-text-secondary);
-  --color-chromatic-text-tertiary: var(--chromatic-text-tertiary);
-  --color-chromatic-text-onbrand: var(--chromatic-text-on-brand);
+  --color-text-primary: var(--chromatic-text-primary);
+  --color-text-secondary: var(--chromatic-text-secondary);
+  --color-text-tertiary: var(--chromatic-text-tertiary);
+  --color-text-onbrand: var(--chromatic-text-on-brand);
 
   /* Precise Spacing */
   --spacing-precise-1: var(--precise-1);
