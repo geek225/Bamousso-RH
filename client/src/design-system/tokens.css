@@ -1,0 +1,60 @@
+:root {
+  /* --- Chromatic Language (Functional Color Zones) --- */
+  
+  /* Brand - Northern Ivorian (Senufo) Palette */
+  --chromatic-brand-900: #2d1b0d; /* Ebony Brown */
+  --chromatic-brand-800: #3e2723;
+  --chromatic-brand-700: #5d4037;
+  --chromatic-brand-primary: #a0522d; /* Sienna / Ochre */
+  --chromatic-brand-accent: #daa520; /* Goldenrod / Savanna Gold */
+
+  /* Surface - Natural & Warm */
+  --chromatic-surface-base: #fdfaf6; /* Warm Cream */
+  --chromatic-surface-panel: #ffffff;
+  --chromatic-surface-tonal: #f5eee6;
+  --chromatic-surface-border: #e8dccb;
+  
+  /* Text - High contrast against warm tones */
+  --chromatic-text-primary: #2d1b0d;
+  --chromatic-text-secondary: #5d4037;
+  --chromatic-text-tertiary: #a1887f;
+  --chromatic-text-on-brand: #ffffff;
+
+  /* Status */
+  --chromatic-success: #2e7d32;
+  --chromatic-warning: #ffa000;
+  --chromatic-error: #c62828;
+
+  /* --- Geometric Precision (Spacing & Layout) --- */
+  
+  --precise-1: 4px;
+  --precise-2: 8px;
+  --precise-3: 12px;
+  --precise-4: 16px;
+  --precise-6: 24px;
+  --precise-8: 32px;
+  --precise-12: 48px;
+  --precise-16: 64px;
+  --precise-24: 96px;
+
+  /* --- Minimalist Typography (Inter Optimized) --- */
+  
+  --font-tight: -0.02em;
+  --font-normal: 0;
+  --font-wide: 0.02em;
+  
+  --line-height-heading: 1.2;
+  --line-height-body: 1.6;
+}
+
+/* Dark Mode Overrides - Deep Indigo & Ebony */
+.dark {
+  --chromatic-surface-base: #1a120b; /* Deep Ebony */
+  --chromatic-surface-panel: #2d1b0d;
+  --chromatic-surface-tonal: #3e2723;
+  --chromatic-surface-border: #5d4037;
+  
+  --chromatic-text-primary: #fdfaf6;
+  --chromatic-text-secondary: #e8dccb;
+  --chromatic-text-tertiary: #a1887f;
+}

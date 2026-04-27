@@ -62,7 +62,7 @@ const PaymentSuccess = () => {
             </div>
             <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Paiement Réussi !</h1>
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              Merci pour votre confiance. Votre abonnement NexTeam est maintenant actif. Vous pouvez vous connecter à votre espace entreprise.
+              Merci pour votre confiance. Votre abonnement Bamousso est maintenant actif. Vous pouvez vous connecter à votre espace entreprise.
             </p>
             <button 
               onClick={() => navigate('/login')}

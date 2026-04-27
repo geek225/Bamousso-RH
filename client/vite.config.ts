@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'École Connectée',
-        short_name: 'École Connectée',
-        description: 'Plateforme de gestion scolaire pour écoles, professeurs et élèves',
+        name: 'BAMOUSSO',
+        short_name: 'Bamousso',
+        description: 'Plateforme moderne de gestion des ressources humaines et de la paie',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',

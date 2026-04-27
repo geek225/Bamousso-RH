@@ -47,7 +47,7 @@ const DashboardEmployee = () => {
                 Bonjour, {user?.firstName} 👋
               </h1>
               <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2 font-medium">
-                <Building2 className="w-4 h-4" /> {company?.name || 'NexTeam'} • {user?.role === 'HR_MANAGER' ? 'RH' : 'Employé'}
+                <Building2 className="w-4 h-4" /> {company?.name || 'Bamousso'} • {user?.role === 'HR_MANAGER' ? 'RH' : 'Employé'}
               </p>
             </div>
           </div>

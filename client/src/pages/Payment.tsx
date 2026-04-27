@@ -36,7 +36,7 @@ const Payment = () => {
     try {
       const response = await api.post('/payments/initiate', {
         amount: plan.rawPrice.toString(),
-        description: `Abonnement NexTeam - Formule ${plan.name}`,
+        description: `Abonnement Bamousso - Formule ${plan.name}`,
         companyId: companyId || "test-company-id" 
       });
 

@@ -64,7 +64,7 @@ const DashboardAdmin = () => {
               Bienvenue, {user?.firstName} 👋
             </h1>
             <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
-              <Building2 className="w-4 h-4" /> {company?.name || 'NexTeam'} • Espace Administrateur
+              <Building2 className="w-4 h-4" /> {company?.name || 'Bamousso'} • Espace Administrateur
             </p>
           </div>
           <div className="bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-6 py-3 rounded-2xl flex items-center gap-3 font-semibold shadow-inner">

@@ -1,11 +1,76 @@
+@import "./design-system/tokens.css";
 @import "tailwindcss";
-@config "../tailwind.config.js";
+
+@theme {
+  /* Chromatic Colors */
+  --color-chromatic-brand: var(--chromatic-brand-primary);
+  --color-chromatic-brand-accent: var(--chromatic-brand-accent);
+  --color-chromatic-brand-900: var(--chromatic-brand-900);
+  --color-chromatic-brand-800: var(--chromatic-brand-800);
+  --color-chromatic-brand-700: var(--chromatic-brand-700);
+
+  --color-chromatic-surface-base: var(--chromatic-surface-base);
+  --color-chromatic-surface-panel: var(--chromatic-surface-panel);
+  --color-chromatic-surface-tonal: var(--chromatic-surface-tonal);
+  --color-chromatic-surface-border: var(--chromatic-surface-border);
+
+  --color-chromatic-text-primary: var(--chromatic-text-primary);
+  --color-chromatic-text-secondary: var(--chromatic-text-secondary);
+  --color-chromatic-text-tertiary: var(--chromatic-text-tertiary);
+  --color-chromatic-text-onbrand: var(--chromatic-text-on-brand);
+
+  /* Precise Spacing */
+  --spacing-precise-1: var(--precise-1);
+  --spacing-precise-2: var(--precise-2);
+  --spacing-precise-3: var(--precise-3);
+  --spacing-precise-4: var(--precise-4);
+  --spacing-precise-6: var(--precise-6);
+  --spacing-precise-8: var(--precise-8);
+  --spacing-precise-12: var(--precise-12);
+  --spacing-precise-16: var(--precise-16);
+  --spacing-precise-24: var(--precise-24);
+
+  /* Minimalist Typography */
+  --letter-spacing-tight-precise: var(--font-tight);
+  --letter-spacing-wide-precise: var(--font-wide);
+}
 
 @layer base {
   body {
-    background-color: #f8fafc; /* slate-50 */
-    color: #0f172a; /* slate-900 */
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--chromatic-surface-base);
+    color: var(--chromatic-text-primary);
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: var(--line-height-body);
+    letter-spacing: var(--font-tight);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Bamousso Custom Pattern Background */
+  .bg-senufo {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30-15-30z' fill='%23a0522d' fill-opacity='0.05'/%3E%3Cpath d='M0 30l30-15 30 15-30 15z' fill='%23daa520' fill-opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  .dark .bg-senufo {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30-15-30z' fill='%23daa520' fill-opacity='0.05'/%3E%3Cpath d='M0 30l30-15 30 15-30 15z' fill='%23a0522d' fill-opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  /* Information-First Headings */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--chromatic-text-primary);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    line-height: var(--line-height-heading);
+    letter-spacing: var(--font-tight);
+  }
+
+  /* Spatial Integrity: Consistent container rules */
+  .container-precise {
+    padding-left: var(--precise-4);
+    padding-right: var(--precise-4);
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1280px;
   }
 
   .custom-scrollbar::-webkit-scrollbar {

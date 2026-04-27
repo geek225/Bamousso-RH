@@ -55,7 +55,7 @@ const Register = () => {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
             <Building2 className="w-8 h-8 text-orange-500" />
-            <span className="text-2xl font-black text-gray-900 dark:text-white">NexTeam SaaS</span>
+            <span className="text-2xl font-black text-gray-900 dark:text-white">BAMOUSSO</span>
           </Link>
           <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">
             Créez votre espace entreprise

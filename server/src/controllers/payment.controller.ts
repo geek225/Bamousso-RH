@@ -28,12 +28,12 @@ export const initiatePayment = async (req: Request, res: Response) => {
     });
 
     const store = new paydunya.Store({
-      name: 'NexTeam SaaS',
+      name: 'BAMOUSSO',
       tagline: 'Solution RH moderne',
       phoneNumber: '22500000000',
       postalAddress: 'Abidjan, Côte d\'Ivoire',
       websiteURL: process.env.FRONTEND_URL,
-      logoURL: 'https://nexteam.ci/logo.png',
+      logoURL: 'https://bamousso.ci/logo.png',
       cancelURL: `${process.env.FRONTEND_URL}/payment-cancelled`,
       returnURL: `${process.env.FRONTEND_URL}/payment-success`,
       callbackURL: `${process.env.BACKEND_URL}/api/payments/webhook`
@@ -60,7 +60,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
         amount: Number(amount),
         currency: "XOF",
         reference: reference,
-        description: description || "Abonnement NexTeam",
+        description: description || "Abonnement Bamousso",
         status: "PENDING",
         companyId: companyId,
       },
@@ -68,9 +68,9 @@ export const initiatePayment = async (req: Request, res: Response) => {
 
     // 2. Création de la facture Paydunya
     const invoice = new paydunya.CheckoutInvoice(setup, store);
-    invoice.addItem(description || "Abonnement NexTeam", 1, Number(amount), Number(amount));
+    invoice.addItem(description || "Abonnement Bamousso", 1, Number(amount), Number(amount));
     invoice.totalAmount = Number(amount);
-    invoice.description = description || "Abonnement NexTeam";
+    invoice.description = description || "Abonnement Bamousso";
     invoice.addCustomData('reference', reference);
 
     const result = await invoice.create();

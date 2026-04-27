@@ -122,7 +122,7 @@ const Employees = () => {
     // Header
     doc.setFontSize(22);
     doc.setTextColor(249, 115, 22); // Orange 500
-    doc.text('NexTeam SaaS', 14, 20);
+    doc.text('BAMOUSSO', 14, 20);
     
     doc.setFontSize(16);
     doc.setTextColor(31, 41, 55); // Gray 800

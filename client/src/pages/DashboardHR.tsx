@@ -45,7 +45,7 @@ const DashboardHR = () => {
               Espace RH • {user?.firstName} 👋
             </h1>
             <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
-              <Briefcase className="w-4 h-4" /> {company?.name || 'NexTeam'} • Pôle Ressources Humaines
+              <Briefcase className="w-4 h-4" /> {company?.name || 'Bamousso'} • Pôle Ressources Humaines
             </p>
           </div>
           <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-6 py-3 rounded-2xl flex items-center gap-3 font-semibold shadow-inner">

@@ -37,7 +37,7 @@ const SettingsPage = () => {
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
           <SettingsIcon className="w-8 h-8 text-orange-500" /> Paramètres de l'Entreprise
         </h1>
-        <p className="text-gray-500 mt-1">Personnalisez l'expérience NexTeam pour vos collaborateurs.</p>
+        <p className="text-gray-500 mt-1">Personnalisez l'expérience Bamousso pour vos collaborateurs.</p>
       </div>
 
       <motion.div 

@@ -76,22 +76,22 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               {company?.logoUrl && !isSuperAdmin ? (
                 <img src={company.logoUrl} alt="Logo Entreprise" className="w-8 h-8 object-contain rounded-md" />
               ) : (
-                <Building2 className="w-7 h-7 text-orange-500" />
+                <Building2 className="w-7 h-7 text-brand-primary" />
               )}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-600">
-                {!isSuperAdmin && company?.name ? company.name : 'NexTeam SaaS'}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-accent">
+                {!isSuperAdmin && company?.name ? company.name : 'BAMOUSSO'}
               </span>
             </h1>
-            <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">{formatRole(user.role)}</p>
+            <p className="text-xs text-text-tertiary mt-1 uppercase tracking-wider">{formatRole(user.role)}</p>
           </div>
           {/* Bouton fermer sur mobile */}
-          <button onClick={onClose} className="lg:hidden p-2 hover:bg-gray-800 rounded">
+          <button onClick={onClose} className="lg:hidden p-2 hover:bg-surface-tonal rounded">
             <X className="w-6 h-6" />
           </button>
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <Link to={dashboardPath} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname.startsWith('/dashboard') ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}>
+          <Link to={dashboardPath} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname.startsWith('/dashboard') ? 'bg-brand-accent/10 text-brand-primary shadow-sm' : 'hover:bg-surface-tonal text-text-secondary'}`}>
             <LayoutDashboard className="w-5 h-5" />
             Tableau de bord
           </Link>
@@ -153,7 +153,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           {canManageHr ? (
             <Link
               to="/settings"
-              className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/settings' ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+              className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/settings' ? 'bg-brand-accent/10 text-brand-primary shadow-sm' : 'hover:bg-surface-tonal text-text-secondary'}`}
             >
               <SettingsIcon className="w-5 h-5" />
               Paramètres
@@ -164,14 +164,14 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
           <button
               onClick={toggleTheme}
-              className="w-full flex items-center justify-center gap-2 p-2.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-300 text-sm font-medium"
+              className="w-full flex items-center justify-center gap-2 p-2.5 bg-surface-tonal hover:bg-surface-border text-text-secondary rounded-xl transition-all duration-300 text-sm font-medium"
           >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
               {theme === 'light' ? 'Mode Nuit' : 'Mode Jour'}
           </button>
 
-          <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shrink-0 shadow-md">
+          <div className="flex items-center gap-3 p-3 bg-surface-tonal rounded-xl shadow-sm border border-surface-border">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white shrink-0 shadow-md">
                   <span className="font-bold text-lg">{user.firstName[0]}{user.lastName[0]}</span>
               </div>
               <div className="min-w-0">

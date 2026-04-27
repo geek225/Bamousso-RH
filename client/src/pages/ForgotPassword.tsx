@@ -37,7 +37,7 @@ const ForgotPassword = () => {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
             <Building2 className="w-8 h-8 text-orange-500" />
-            <span className="text-2xl font-black text-gray-900 dark:text-white">NexTeam</span>
+            <span className="text-2xl font-black text-gray-900 dark:text-white">Bamousso</span>
           </Link>
           <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Mot de passe oublié ?</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">

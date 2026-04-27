@@ -31,7 +31,7 @@ const app = express();
 // Configuration de CORS : Autorise les requêtes provenant du frontend
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL || 'https://nexteam-client.vercel.app'] 
+    ? [process.env.FRONTEND_URL || 'https://bamousso-client.vercel.app'] 
     : true, // En développement, on autorise tout (ou strictement localhost)
   credentials: true
 }));
@@ -64,7 +64,7 @@ app.use("/api/payments", paymentRoutes);           // Paiements GeniusPay
 
 // Route de test pour vérifier que l'API est en ligne
 app.get("/", (req, res) => {
-  res.json({ message: "API NexTeam is running" });
+  res.json({ message: "API Bamousso is running" });
 });
 
 export default app;

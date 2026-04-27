@@ -147,7 +147,7 @@ const DashboardSuperAdmin = () => {
                 Espace Super-Admin 👑
               </h1>
               <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2 font-medium">
-                <Building2 className="w-4 h-4" /> Vision Globale du SaaS NexTeam
+                <Building2 className="w-4 h-4" /> Vision Globale du SaaS Bamousso
               </p>
             </div>
           </div>
