@@ -156,7 +156,7 @@ const Payment = () => {
 
             <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-2xl mb-8 border border-orange-100 dark:border-orange-800">
               <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                Vous allez être redirigé vers la plateforme sécurisée **Paydunya** pour finaliser votre transaction via Mobile Money ou Carte Bancaire.
+                Vous allez être redirigé vers une plateforme sécurisée pour finaliser votre transaction via Mobile Money ou Carte Bancaire.
               </p>
             </div>
 
