@@ -1,18 +1,28 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma.js";
+import { uploadToSupabase } from "../utils/supabase.js";
 
 export const uploadDocument = async (req: Request, res: Response): Promise<any> => {
   try {
     const { title, type, employeeId } = req.body;
-    // En production on utiliserait Supabase Storage ou AWS S3 pour avoir la vraie URL
-    // Pour la démo, on simule une URL
-    const simulatedUrl = `/uploads/${Date.now()}_${title.replace(/\s+/g, '_')}.pdf`;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "Aucun fichier fourni." });
+    }
+
+    // Upload vers Supabase Storage
+    const fileUrl = await uploadToSupabase(file);
+
+    if (!fileUrl) {
+      return res.status(500).json({ message: "Erreur lors de l'upload du fichier vers Supabase." });
+    }
 
     const doc = await prisma.document.create({
       data: {
         title,
         type, // PAYSLIP, CONTRACT, POLICY
-        url: simulatedUrl,
+        url: fileUrl,
         employeeId
       }
     });

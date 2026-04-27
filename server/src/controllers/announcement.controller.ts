@@ -1,17 +1,30 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma.js";
+import { uploadToSupabase } from "../utils/supabase.js";
 
 export const createAnnouncement = async (req: Request, res: Response): Promise<any> => {
   try {
     const { title, content, category } = req.body;
     const authorId = (req as any).user.id;
+    const file = req.file;
+
+    let fileUrl: string | null = null;
+    let fileType: string | null = null;
+
+    // Upload fichier si présent
+    if (file) {
+      fileUrl = await uploadToSupabase(file);
+      fileType = file.mimetype;
+    }
 
     const post = await prisma.forumPost.create({
       data: {
         title,
         content,
         category: category || "ANNOUNCEMENT",
-        authorId
+        authorId,
+        fileUrl: fileUrl || undefined,
+        fileType: fileType || undefined,
       }
     });
 

@@ -5,7 +5,7 @@ import fs from 'fs';
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_KEY || ''; // Use Service Role Key for server-side operations if needed, or Anon key if RLS allows
+const supabaseKey = process.env.SUPABASE_ANON_KEY || ''; 
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn('Supabase URL or Key is missing in environment variables. File uploads might fail.');
@@ -13,7 +13,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
-export const uploadToSupabase = async (file: Express.Multer.File, bucket: string = 'uploads'): Promise<string | null> => {
+export const uploadToSupabase = async (file: Express.Multer.File, bucket: string = 'bamousso'): Promise<string | null> => {
   // Try Supabase upload if credentials exist
   if (supabaseUrl && supabaseKey) {
     try {
