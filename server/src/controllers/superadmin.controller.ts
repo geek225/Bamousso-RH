@@ -157,7 +157,7 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<a
  */
 export const toggleCompanyLock = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const company = await prisma.company.findUnique({ where: { id } });
     if (!company) return res.status(404).json({ message: "Entreprise non trouvée." });
 
