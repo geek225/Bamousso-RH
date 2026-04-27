@@ -24,15 +24,18 @@ export const requestLeave = async (req: Request, res: Response): Promise<any> =>
 
     const leave = await prisma.leaveRequest.create({
       data: {
-        ...data,
-        employeeId: userId,
+        type: data.type,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        reason: data.reason,
+        employee: { connect: { id: userId } },
       },
     });
 
     res.status(201).json(leave);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ errors: error.errors });
+      return res.status(400).json({ errors: error.issues });
     }
     res.status(500).json({ message: "Erreur serveur.", error: error.message });
   }
@@ -69,7 +72,7 @@ export const getLeaves = async (req: Request, res: Response): Promise<any> => {
 
 export const reviewLeave = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { status } = updateLeaveSchema.parse(req.body);
     const approverId = (req as any).user.id;
 
@@ -84,7 +87,7 @@ export const reviewLeave = async (req: Request, res: Response): Promise<any> => 
     res.json(leave);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ errors: error.errors });
+      return res.status(400).json({ errors: error.issues });
     }
     res.status(500).json({ message: "Erreur serveur.", error: error.message });
   }
