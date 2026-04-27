@@ -28,84 +28,131 @@ const Landing = () => {
       </nav>
 
       {/* Hero Section */}
-      <div className="relative pt-20 pb-32 overflow-hidden">
+      <div className="relative pt-20 pb-32 lg:pb-40 overflow-hidden">
         {/* Background Decorations */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-brand-accent/20 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="absolute top-10 right-0 w-[600px] h-[600px] bg-brand-accent/20 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
         
-        <div className="container mx-auto px-6 relative z-10 text-center max-w-4xl">
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.15 }
-              }
-            }}
-          >
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
-              <span className="inline-block py-1 px-4 rounded-full bg-brand-accent/10 text-brand-primary font-bold text-sm mb-8 border border-brand-accent/20 shadow-sm">
-                ⭐ Le Logiciel RH Inspiré par l'Afrique
-              </span>
-            </motion.div>
-            
-            <motion.h1 
-              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-              className="text-5xl md:text-7xl font-extrabold mb-8 tracking-tight leading-tight drop-shadow-sm"
-            >
-              BAMOUSSO : La <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent">Mère</span> de votre Gestion RH.
-            </motion.h1>
-            
-            <motion.p 
-              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-              className="text-xl text-text-secondary mb-10 max-w-2xl mx-auto leading-relaxed"
-            >
-              Comme une mère qui veille sur son foyer avec sagesse et autorité, Bamousso centralise et protège le capital humain de votre entreprise. 
-            </motion.p>
-            
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-8">
             <motion.div 
-              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-              className="flex flex-col sm:flex-row justify-center items-center gap-4"
+              className="lg:w-1/2 text-center lg:text-left"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.15 }
+                }
+              }}
             >
-              <a href="#pricing" className="w-full sm:w-auto bg-brand-900 text-white px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-xl shadow-brand-900/20">
-                Découvrir nos offres <ArrowRight className="w-5 h-5" />
-              </a>
-              <Link to="/login" className="w-full sm:w-auto bg-surface-panel text-text-primary border-2 border-surface-border px-8 py-4 rounded-full font-bold text-lg hover:border-brand-primary hover:text-brand-primary transition-colors flex items-center justify-center gap-2 shadow-sm">
-                Essai Gratuit
-              </Link>
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+                <span className="inline-flex py-1.5 px-5 rounded-full bg-surface-panel text-brand-primary font-bold text-sm mb-8 border border-brand-accent/30 shadow-sm items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
+                  Le Logiciel RH Inspiré par l'Afrique
+                </span>
+              </motion.div>
+              
+              <motion.h1 
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-8 tracking-tight leading-[1.1] drop-shadow-sm"
+              >
+                BAMOUSSO : La <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent">Mère</span> de votre Gestion RH.
+              </motion.h1>
+              
+              <motion.p 
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                className="text-xl text-text-secondary mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+              >
+                Comme une mère qui veille sur son foyer avec sagesse et autorité, Bamousso centralise et protège le capital humain de votre entreprise. 
+              </motion.p>
+              
+              <motion.div 
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
+              >
+                <a href="#pricing" className="w-full sm:w-auto bg-brand-900 text-white px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-xl shadow-brand-900/20">
+                  Découvrir nos offres <ArrowRight className="w-5 h-5" />
+                </a>
+                <Link to="/login" className="w-full sm:w-auto bg-surface-panel text-text-primary border-2 border-surface-border px-8 py-4 rounded-full font-bold text-lg hover:border-brand-primary hover:text-brand-primary transition-colors flex items-center justify-center gap-2 shadow-sm">
+                  Essai Gratuit
+                </Link>
+              </motion.div>
             </motion.div>
-          </motion.div>
+
+            <motion.div 
+              className="lg:w-1/2 w-full max-w-lg mx-auto lg:max-w-none relative"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-brand-900/20 border-8 border-surface-panel transform lg:rotate-2 hover:rotate-0 transition-transform duration-500">
+                <img src="/hero-masks.jpg" alt="Masques Africains Bamousso" className="w-full h-auto object-cover object-center aspect-[4/3] lg:aspect-square" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-900/40 to-transparent mix-blend-multiply"></div>
+              </div>
+              
+              {/* Floating element */}
+              <div className="absolute -bottom-6 -left-6 bg-surface-panel p-6 rounded-2xl shadow-xl border border-surface-border flex items-center gap-4 animate-bounce" style={{ animationDuration: '3s' }}>
+                <div className="w-12 h-12 rounded-full bg-brand-accent/20 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-brand-primary" />
+                </div>
+                <div>
+                  <div className="text-sm text-text-secondary font-medium">Gestion Humaine</div>
+                  <div className="font-bold text-brand-900">100% Centralisée</div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Features */}
-      <div className="bg-surface-panel py-24 border-y border-surface-border">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">La Force d'une Gestion Centralisée</h2>
-            <p className="text-text-secondary">Une suite complète d'outils pensés pour l'excellence opérationnelle en Afrique.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard 
-              icon={<Clock className="w-6 h-6 text-brand-primary" />}
-              title="Pointage & Présence"
-              description="Suivi rigoureux du temps de travail, adapté aux réalités du terrain ivoirien."
-              delay={0.1}
-            />
-            <FeatureCard 
-              icon={<Calendar className="w-6 h-6 text-brand-accent" />}
-              title="Sagesse Administrative"
-              description="Gestion fluide des congés et des absences. Transparence totale pour vos équipes."
-              delay={0.3}
-            />
-            <FeatureCard 
-              icon={<Users className="w-6 h-6 text-brand-700" />}
-              title="Cœur de l'Entreprise"
-              description="Un annuaire dynamique pour renforcer les liens entre vos collaborateurs."
-              delay={0.5}
-            />
+      {/* Features with Collage */}
+      <div className="bg-surface-panel py-24 border-y border-surface-border relative overflow-hidden">
+        {/* Abstract decorative elements inspired by collage */}
+        <div className="absolute -right-20 top-20 opacity-5 pointer-events-none">
+          <img src="/africa-collage.jpg" alt="" className="w-96 rounded-full mix-blend-luminosity grayscale" />
+        </div>
+        <div className="absolute -left-20 bottom-20 opacity-5 pointer-events-none">
+          <img src="/africa-collage.jpg" alt="" className="w-96 rounded-full mix-blend-luminosity grayscale" />
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-16 mb-16">
+            <div className="lg:w-1/3">
+              <h2 className="text-4xl font-extrabold mb-6 leading-tight">La Force d'une Gestion <span className="text-brand-primary">Centralisée</span></h2>
+              <p className="text-text-secondary text-lg mb-8">Une suite complète d'outils pensés pour l'excellence opérationnelle en Afrique. Libérez-vous de la paperasse et concentrez-vous sur l'essentiel : l'humain.</p>
+              <div className="rounded-2xl overflow-hidden shadow-lg border border-surface-border shadow-brand-primary/10">
+                <img src="/africa-collage.jpg" alt="Art Africain" className="w-full h-48 object-cover" />
+              </div>
+            </div>
+            
+            <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FeatureCard 
+                icon={<Clock className="w-6 h-6 text-brand-primary" />}
+                title="Pointage & Présence"
+                description="Suivi rigoureux du temps de travail, adapté aux réalités du terrain ivoirien."
+                delay={0.1}
+              />
+              <FeatureCard 
+                icon={<Calendar className="w-6 h-6 text-brand-accent" />}
+                title="Sagesse Administrative"
+                description="Gestion fluide des congés et des absences. Transparence totale pour vos équipes."
+                delay={0.3}
+              />
+              <FeatureCard 
+                icon={<Users className="w-6 h-6 text-brand-700" />}
+                title="Cœur de l'Entreprise"
+                description="Un annuaire dynamique pour renforcer les liens entre vos collaborateurs."
+                delay={0.5}
+              />
+              <FeatureCard 
+                icon={<CheckCircle className="w-6 h-6 text-brand-900" />}
+                title="Validation Rapide"
+                description="Approuvez les demandes en un clic depuis n'importe où, même sur mobile."
+                delay={0.7}
+              />
+            </div>
           </div>
         </div>
       </div>

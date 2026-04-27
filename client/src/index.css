@@ -48,11 +48,15 @@
 
   /* Bamousso Custom Pattern Background */
   .bg-senufo {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30-15-30z' fill='%23a0522d' fill-opacity='0.05'/%3E%3Cpath d='M0 30l30-15 30 15-30 15z' fill='%23daa520' fill-opacity='0.03'/%3E%3C/svg%3E");
+    background-image: linear-gradient(rgba(253, 250, 246, 0.96), rgba(253, 250, 246, 0.96)), url("/bg-pattern.jpg");
+    background-size: 300px;
+    background-repeat: repeat;
   }
 
   .dark .bg-senufo {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30-15-30z' fill='%23daa520' fill-opacity='0.05'/%3E%3Cpath d='M0 30l30-15 30 15-30 15z' fill='%23a0522d' fill-opacity='0.03'/%3E%3C/svg%3E");
+    background-image: linear-gradient(rgba(26, 18, 11, 0.97), rgba(26, 18, 11, 0.97)), url("/bg-pattern.jpg");
+    background-size: 300px;
+    background-repeat: repeat;
   }
 
   /* Information-First Headings */
