@@ -39,6 +39,7 @@ export const getAllCompanies = async (req: AuthRequest, res: Response): Promise<
         isLocked: true,
         subscriptionStatus: true,
         subscriptionEndsAt: true,
+        plan: true,
         createdAt: true,
         _count: {
           select: { users: true }
@@ -149,6 +150,29 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<a
       return res.status(400).json({ message: error.issues[0].message });
     }
     res.status(500).json({ message: "Erreur lors du changement de mot de passe.", error: error.message });
+  }
+};
+
+/**
+ * Change le plan d'abonnement d'une entreprise.
+ */
+export const updateCompanyPlan = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const id = String(req.params.id);
+    const { plan } = req.body;
+
+    if (!['PIKIN', 'BAMOUSSO', 'KORO'].includes(plan)) {
+      return res.status(400).json({ message: "Plan invalide. Valeurs acceptées : PIKIN, BAMOUSSO, KORO." });
+    }
+
+    const updated = await prisma.company.update({
+      where: { id },
+      data: { plan, subscriptionStatus: 'ACTIVE', isLocked: false }
+    });
+
+    res.json({ message: `Plan mis à jour : ${plan}`, company: updated });
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors de la mise à jour du plan.", error: error.message });
   }
 };
 
