@@ -110,3 +110,19 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* Utilities for PWA / iOS Safe Areas */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+  .mt-safe {
+    margin-top: env(safe-area-inset-top);
+  }
+}

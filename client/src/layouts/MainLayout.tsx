@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import MobileNavbar from '../components/MobileNavbar';
 import { Menu } from 'lucide-react';
 import NotificationCenter from '../components/NotificationCenter';
 
@@ -16,13 +17,10 @@ const MainLayout = () => {
         {/* Header - visible sur mobile et desktop pour les notifications */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 sticky top-0 z-30 flex items-center justify-between h-16 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="md:hidden bg-blue-600 p-1.5 rounded-lg">
-              <Menu 
-                className="w-6 h-6 text-white cursor-pointer" 
-                onClick={() => setIsSidebarOpen(true)}
-              />
+            <div className="md:hidden">
+              <span className="font-black text-xl tracking-tighter text-orange-500">BAMOUSSO</span>
             </div>
-            <span className="font-bold text-gray-800 dark:text-white hidden sm:inline-block">RH Manager</span>
+            <span className="font-bold text-gray-800 dark:text-white hidden md:inline-block">Tableau de bord</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -31,11 +29,14 @@ const MainLayout = () => {
         </header>
 
         {/* Zone de contenu principal - scrollable */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 min-w-0 bg-gray-50 dark:bg-gray-900">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 min-w-0 bg-gray-50 dark:bg-gray-900 pb-24 md:pb-8">
           <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
         </main>
+
+        {/* Navigation mobile en bas */}
+        <MobileNavbar onMenuClick={() => setIsSidebarOpen(true)} />
       </div>
     </div>
   );
