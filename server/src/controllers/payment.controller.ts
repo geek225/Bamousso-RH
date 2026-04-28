@@ -28,7 +28,8 @@ export const initiatePayment = async (req: Request, res: Response) => {
       currency: "XOF",
       metadata: {
         companyId: companyId,
-        plan: plan
+        plan: plan,
+        extraEmployees: req.body.extraEmployees || 0
       },
       success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}`,
       error_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
@@ -60,6 +61,9 @@ export const initiatePayment = async (req: Request, res: Response) => {
   }
 };
 
+import { sendSubscriptionConfirmation, sendAdminSubscriptionNotification } from '../utils/mailer.js';
+import { generateSubscriptionPDF } from '../utils/pdfGenerator.js';
+
 /**
  * Webhook pour confirmer le paiement avec vérification de signature
  */
@@ -87,18 +91,40 @@ export const handleWebhook = async (req: Request, res: Response) => {
 
     if (event === 'payment.success' || data.status === 'completed' || data.status === 'SUCCESS') {
       const companyId = data.metadata?.companyId;
+      const extraEmployees = parseInt(data.metadata?.extraEmployees || '0');
 
       if (companyId) {
-        await prisma.company.update({
+        const company = await prisma.company.update({
           where: { id: companyId },
           data: {
             subscriptionStatus: "ACTIVE",
             isActive: true,
             isLocked: false,
+            extraEmployees: extraEmployees,
             subscriptionEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // +1 an
-          }
+          },
+          include: { users: { where: { role: 'COMPANY_ADMIN' }, take: 1 } }
         });
-        console.log(`Paiement confirmé par Webhook pour ${companyId}`);
+
+        const adminEmail = company.users[0]?.email;
+        const amount = data.amount || 0;
+
+        // Génération du PDF
+        const pdfBuffer = await generateSubscriptionPDF({
+          companyName: company.name,
+          plan: company.plan,
+          amount: amount,
+          date: new Date().toLocaleDateString(),
+          transactionId: data.transaction_id || 'GP-' + Date.now()
+        });
+
+        // Envoi des emails
+        if (adminEmail) {
+          await sendSubscriptionConfirmation(adminEmail, company.name, company.plan, amount, pdfBuffer);
+        }
+        await sendAdminSubscriptionNotification(company.name, company.plan, amount, pdfBuffer);
+
+        console.log(`Paiement confirmé et emails envoyés pour ${company.name}`);
       }
     }
 

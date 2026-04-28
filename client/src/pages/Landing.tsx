@@ -165,15 +165,16 @@ const Landing = () => {
             {/* FITINI */}
             <PricingCard 
               title="FITINI (Petit)"
-              price="50.000"
-              period="/an"
-              description="L'essentiel pour structurer votre petite équipe."
+              price="3.800"
+              period="/mois"
+              description="L'essentiel pour 1 à 3 employés."
               features={[
-                'Jusqu\'à 5 employés', 
+                'Jusqu\'à 3 employés', 
                 'Pointage en temps réel', 
                 'Gestion des congés', 
                 'Support par ticket', 
-                'Gestion des tâches'
+                'Gestion des tâches',
+                '1000 FCFA / employé sup.'
               ]}
               delay={0.2}
               isLoading={false}
@@ -183,17 +184,17 @@ const Landing = () => {
             {/* LOUBA (Popular) */}
             <PricingCard 
               title="LOUBA (Moyen)"
-              price="150.000"
-              period="/an"
-              description="La puissance de gestion complète pour PME."
+              price="4.900"
+              period="/mois"
+              description="Idéal pour 1 à 5 employés."
               features={[
-                'Jusqu\'à 20 employés', 
+                'Jusqu\'à 5 employés', 
                 'Analytique RH avancé', 
                 'Messagerie Interne (Boss/Staff)', 
                 'Gestion des conflits (Anonymat)', 
                 'Demandes d\'explication',
                 'Gestion des salaires',
-                'Support Prioritaire (Chat 500 msg)'
+                '1000 FCFA / employé sup.'
               ]}
               isPopular={true}
               delay={0.4}
@@ -204,9 +205,9 @@ const Landing = () => {
             {/* Kôrô */}
             <PricingCard 
               title="Kôrô (Grand)"
-              price="300.000"
-              period="/an"
-              description="L'excellence africaine sans aucune limite."
+              price="14.700"
+              period="/mois"
+              description="L'excellence avec employés illimités."
               features={[
                 'Employés illimités', 
                 'Toutes les fonctions incluses', 

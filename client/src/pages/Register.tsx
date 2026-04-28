@@ -7,9 +7,9 @@ import { Eye, EyeOff, Building2, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const plans = [
-  { id: 'FITINI', name: 'FITINI', price: '50.000 FCFA', rawPrice: 50000 },
-  { id: 'LOUBA', name: 'LOUBA', price: '150.000 FCFA', rawPrice: 150000 },
-  { id: 'KORO', name: 'Kôrô', price: '300.000 FCFA', rawPrice: 300000 }
+  { id: 'FITINI', name: 'FITINI', price: '3.800 FCFA', rawPrice: 3800, maxBase: 3 },
+  { id: 'LOUBA', name: 'LOUBA', price: '4.900 FCFA', rawPrice: 4900, maxBase: 5 },
+  { id: 'KORO', name: 'Kôrô', price: '14.700 FCFA', rawPrice: 14700, maxBase: Infinity }
 ];
 
 const Register = () => {
@@ -20,23 +20,31 @@ const Register = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(location.state?.selectedPlanId || 'LOUBA');
+  const [extraEmployees, setExtraEmployees] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
     setError('');
     try {
+      const planDetails = plans.find(p => p.id === selectedPlan);
+      const totalAmount = (planDetails?.rawPrice || 0) + (extraEmployees * 1000);
+
       // 1. Appel API pour créer l'entreprise et l'utilisateur
-      const response = await api.post('/auth/register-company', data);
+      const response = await api.post('/auth/register-company', {
+        ...data,
+        plan: selectedPlan,
+        extraEmployees: extraEmployees
+      });
       
       // 2. Connexion automatique
       login(response.data.token, response.data.user, response.data.company);
       
       // 3. Redirection vers la page de paiement avec les infos du forfait
-      const planDetails = plans.find(p => p.id === selectedPlan);
       navigate('/payment', { 
         state: { 
-          plan: planDetails, 
+          plan: { ...planDetails, finalPrice: totalAmount * 12 }, // Paiement ANNUEL
+          extraEmployees,
           companyName: data.companyName,
           companyId: response.data.company?.id || response.data.user?.companyId
         } 
@@ -91,6 +99,33 @@ const Register = () => {
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{plan.price} / mois</span>
                 </label>
               ))}
+            </div>
+
+            {selectedPlan !== 'KORO' && (
+              <div className="mt-8 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border border-orange-200 dark:border-orange-800">
+                <label className="block text-xs font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-2">
+                  Employés supplémentaires (+1000/mois)
+                </label>
+                <div className="flex items-center gap-4">
+                  <input 
+                    type="number" min="0" value={extraEmployees}
+                    onChange={(e) => setExtraEmployees(parseInt(e.target.value) || 0)}
+                    className="w-20 p-2 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 rounded-lg text-gray-900 dark:text-white font-bold"
+                  />
+                  <span className="text-xs text-gray-500 font-medium">
+                    Total : {(plans.find(p => p.id === selectedPlan)?.maxBase || 0) + extraEmployees} employés max
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-bold text-gray-500">Total Annuel</span>
+                <span className="text-xl font-black text-orange-500">
+                  {((plans.find(p => p.id === selectedPlan)?.rawPrice || 0) + (extraEmployees * 1000)) * 12} FCFA
+                </span>
+              </div>
             </div>
           </div>
 

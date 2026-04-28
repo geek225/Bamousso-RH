@@ -35,7 +35,7 @@ const Payment = () => {
 
     try {
       const response = await api.post('/payments/initiate', {
-        amount: plan.rawPrice.toString(),
+        amount: plan.finalPrice.toString(),
         description: `Abonnement Bamousso - Formule ${plan.name}`,
         companyId: companyId,
         plan: plan.name 
@@ -80,12 +80,17 @@ const Payment = () => {
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Forfait</p>
                   <p className="font-bold text-xl text-gray-900 dark:text-white">{plan.name}</p>
+                  {location.state?.extraEmployees > 0 && (
+                    <p className="text-[10px] font-bold text-orange-500 mt-1">
+                      + {location.state.extraEmployees} employé(s) sup.
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-400">Total à payer</span>
-                  <span className="text-2xl font-black text-orange-500">{plan.price}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Total Annuel</span>
+                  <span className="text-2xl font-black text-orange-500">{plan.finalPrice.toLocaleString()} FCFA</span>
                 </div>
               </div>
             </div>
