@@ -267,12 +267,39 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    await prisma.user.delete({
-      where: { id: String(id) },
+    // 3. Robust Cleanup (Manual because some relations don't have onDelete: Cascade)
+    await prisma.$transaction(async (tx) => {
+      // a. Si l'utilisateur est manager d'une entreprise, on retire le lien
+      await tx.company.updateMany({
+        where: { managerId: id },
+        data: { managerId: null }
+      });
+
+      // b. Supprimer les messages (envoyés et reçus)
+      await tx.message.deleteMany({
+        where: {
+          OR: [
+            { senderId: id },
+            { recipientId: id }
+          ]
+        }
+      });
+
+      // c. Supprimer les notifications (champ userId non lié formellement mais à nettoyer)
+      await tx.notification.deleteMany({
+        where: { userId: id }
+      });
+
+      // d. Enfin, supprimer l'utilisateur (les autres relations comme Attendance, Leave, etc. sont en Cascade dans le schema)
+      await tx.user.delete({
+        where: { id: String(id) },
+      });
     });
+
     res.status(200).json({ message: "Utilisateur supprimé avec succès" });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la suppression", error });
+  } catch (error: any) {
+    console.error("Delete User Error:", error);
+    res.status(500).json({ message: "Erreur lors de la suppression", error: error.message });
   }
 };
 
