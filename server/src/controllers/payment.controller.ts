@@ -94,7 +94,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
       const extraEmployees = parseInt(data.metadata?.extraEmployees || '0');
 
       if (companyId) {
-        const company = await prisma.company.update({
+        const company = await (prisma.company.update({
           where: { id: companyId },
           data: {
             subscriptionStatus: "ACTIVE",
@@ -104,7 +104,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
             subscriptionEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // +1 an
           },
           include: { users: { where: { role: 'COMPANY_ADMIN' }, take: 1 } }
-        });
+        }) as any);
 
         const adminEmail = company.users[0]?.email;
         const amount = data.amount || 0;
