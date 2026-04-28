@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface Company {
   id: string;
   name: string;
-  plan: 'PIKINI' | 'LOUBA' | 'KORO';
+  plan: 'PIKINI' | 'LOUBA' | 'KORO' | 'PIKIN' | 'BAMOUSSO';
   subscriptionStatus: string;
   subscriptionEndsAt?: string | null;
   createdAt: string;

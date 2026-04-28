@@ -22,7 +22,7 @@ model Company {
 
   subscriptionStatus String   @default("ACTIVE") // ACTIVE | PAST_DUE | SUSPENDED
   subscriptionEndsAt DateTime?
-  plan               String   @default("PIKIN")  // PIKIN | BAMOUSSO | KORO
+  plan               String   @default("PIKINI")  // PIKINI | LOUBA | KORO
   isLocked           Boolean  @default(false) 
   lockedAt           DateTime?
   createdAt DateTime @default(now())
