@@ -177,22 +177,53 @@ export const updateCompanyPlan = async (req: AuthRequest, res: Response): Promis
 };
 
 /**
- * Supprime définitivement une entreprise et ses données.
+ * Supprime définitivement une entreprise et ses données (Aggressif).
  */
 export const deleteCompany = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
     const id = String(req.params.id);
     
-    // On utilise une transaction pour supprimer proprement l'entreprise et ses relations
-    await prisma.$transaction([
-      prisma.user.deleteMany({ where: { companyId: id } }),
-      prisma.department.deleteMany({ where: { companyId: id } }),
-      prisma.payment.deleteMany({ where: { companyId: id } }),
-      prisma.company.delete({ where: { id } })
-    ]);
+    // 1. On récupère tous les IDs des utilisateurs de cette entreprise
+    const users = await prisma.user.findMany({
+      where: { companyId: id },
+      select: { id: true }
+    });
+    const userIds = users.map(u => u.id);
 
-    res.json({ message: "Entreprise supprimée définitivement." });
+    // 2. On nettoie tout ce qui est lié à ces utilisateurs par transaction
+    await prisma.$transaction(async (tx) => {
+      // Désactiver le manager de l'entreprise pour éviter les blocages de clé étrangère
+      await tx.company.update({
+        where: { id },
+        data: { managerId: null }
+      });
+
+      // Supprimer les données liées aux utilisateurs
+      if (userIds.length > 0) {
+        await tx.attendance.deleteMany({ where: { employeeId: { in: userIds } } });
+        await tx.leaveRequest.deleteMany({ where: { employeeId: { in: userIds } } });
+        await tx.document.deleteMany({ where: { employeeId: { in: userIds } } });
+        await tx.message.deleteMany({ where: { OR: [{ senderId: { in: userIds } }, { recipientId: { in: userIds } }] } });
+        await tx.forumComment.deleteMany({ where: { authorId: { in: userIds } } });
+        await tx.forumPost.deleteMany({ where: { authorId: { in: userIds } } });
+      }
+
+      // Supprimer les départements
+      await tx.department.deleteMany({ where: { companyId: id } });
+
+      // Supprimer les paiements
+      await tx.payment.deleteMany({ where: { companyId: id } });
+
+      // Supprimer les utilisateurs
+      await tx.user.deleteMany({ where: { companyId: id } });
+
+      // Enfin supprimer l'entreprise
+      await tx.company.delete({ where: { id } });
+    });
+
+    res.json({ message: "Entreprise et toutes ses données supprimées avec succès." });
   } catch (error: any) {
+    console.error("Delete Error:", error);
     res.status(500).json({ message: "Erreur lors de la suppression.", error: error.message });
   }
 };
