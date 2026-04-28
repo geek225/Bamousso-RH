@@ -107,7 +107,7 @@ const Register = () => {
                 <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Nom de l'entreprise</label>
                 <input
                   {...register('companyName', { required: "Le nom de l'entreprise est requis" })}
-                  className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all dark:text-white"
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white"
                   placeholder="Ex: TechCorp Inc."
                 />
                 {errors.companyName && <p className="text-red-500 text-xs mt-1">{errors.companyName.message as string}</p>}
@@ -118,7 +118,7 @@ const Register = () => {
                   <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Prénom de l'Admin</label>
                   <input
                     {...register('firstName', { required: "Le prénom est requis" })}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all dark:text-white"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white"
                   />
                   {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName.message as string}</p>}
                 </div>
@@ -126,7 +126,7 @@ const Register = () => {
                   <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Nom de l'Admin</label>
                   <input
                     {...register('lastName', { required: "Le nom est requis" })}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all dark:text-white"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white"
                   />
                   {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName.message as string}</p>}
                 </div>
@@ -137,7 +137,7 @@ const Register = () => {
                 <input
                   {...register('email', { required: "L'email est requis", pattern: { value: /\S+@\S+\.\S+/, message: "Email invalide" } })}
                   type="email"
-                  className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all dark:text-white"
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white"
                   placeholder="admin@entreprise.com"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
@@ -149,7 +149,7 @@ const Register = () => {
                   <input
                     {...register('password', { required: "Le mot de passe est requis", minLength: { value: 6, message: "6 caractères minimum" } })}
                     type={showPassword ? "text" : "password"}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all dark:text-white pr-12"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white pr-12"
                   />
                   <button
                     type="button"
