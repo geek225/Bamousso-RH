@@ -75,6 +75,29 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ message: "Impossible de créer un utilisateur pour une autre entreprise." });
     }
 
+    // Vérification des limites d'employés selon le forfait
+    if (targetCompanyId) {
+      const company = await prisma.company.findUnique({
+        where: { id: targetCompanyId },
+        select: { plan: true, _count: { select: { users: true } } }
+      });
+
+      if (company) {
+        const currentCount = company._count.users;
+        const plan = company.plan || 'PIKINI';
+        
+        let limit = Infinity;
+        if (plan === 'PIKINI') limit = 5;
+        else if (plan === 'LOUBA') limit = 20;
+
+        if (currentCount >= limit) {
+          return res.status(403).json({ 
+            message: `Limite d'employés atteinte pour votre forfait ${plan} (${limit} employés max).` 
+          });
+        }
+      }
+    }
+
     const user = await prisma.user.create({
       data: {
         email,

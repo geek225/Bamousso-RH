@@ -26,6 +26,11 @@ import PaymentCancelled from './pages/PaymentCancelled';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Analytics from './pages/Analytics';
+import Tasks from './pages/Tasks';
+import Messaging from './pages/Messaging';
+import Conflicts from './pages/Conflicts';
+import Explanations from './pages/Explanations';
+import Salaries from './pages/Salaries';
 
 function App() {
   return (
@@ -75,12 +80,17 @@ function App() {
                   <Route path="/settings" element={<Settings />} />
                 </Route>
 
-                {/* Modules accessibles à tous */}
+                {/* Modules accessibles à tous selon forfait */}
                 <Route path="/leaves" element={<Leaves />} />
                 <Route path="/attendance" element={<Attendance />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/announcements" element={<Announcements />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/tasks" element={<Tasks />} />
+                <Route path="/messaging" element={<Messaging />} />
+                <Route path="/conflicts" element={<Conflicts />} />
+                <Route path="/explanations" element={<Explanations />} />
+                <Route path="/salaries" element={<Salaries />} />
               </Route>
             </Route>
 
