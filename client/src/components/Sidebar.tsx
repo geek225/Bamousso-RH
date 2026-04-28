@@ -56,7 +56,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     user.role === 'COMPANY_ADMIN' || user.role === 'HR_MANAGER' || user.role === 'HR_ASSISTANT';
 
   const isSuperAdmin = user.role === 'SUPER_ADMIN';
-  const plan = company?.plan || 'PIKINI';
+  const plan = company?.plan || 'FITINI';
 
   return (
     <>

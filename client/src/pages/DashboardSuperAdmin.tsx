@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface Company {
   id: string;
   name: string;
-  plan: 'PIKINI' | 'LOUBA' | 'KORO' | 'PIKIN' | 'BAMOUSSO';
+  plan: 'FITINI' | 'LOUBA' | 'KORO' | 'PIKIN' | 'BAMOUSSO';
   subscriptionStatus: string;
   subscriptionEndsAt?: string | null;
   createdAt: string;
@@ -35,13 +35,13 @@ interface SuperAdmin {
 }
 
 const PLAN_LABELS: Record<string, string> = {
-  PIKINI: 'PIKINI',
+  FITINI: 'FITINI',
   LOUBA: 'LOUBA',
   KORO: 'Kôrô',
 };
 
 const PLAN_PRICES: Record<string, number> = {
-  PIKINI: 50000,
+  FITINI: 50000,
   LOUBA: 150000,
   KORO: 300000,
 };
@@ -202,7 +202,7 @@ const DashboardSuperAdmin = () => {
                 className="pl-12 pr-10 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-primary appearance-none font-bold text-white cursor-pointer"
               >
                 <option value="ALL" className="bg-brand-900">Tous les plans</option>
-                <option value="PIKINI" className="bg-brand-900">Pikini</option>
+                <option value="FITINI" className="bg-brand-900">Fitini</option>
                 <option value="LOUBA" className="bg-brand-900">Louba</option>
                 <option value="KORO" className="bg-brand-900">Kôrô</option>
               </select>

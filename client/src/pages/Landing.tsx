@@ -162,9 +162,9 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* PIKINI */}
+            {/* FITINI */}
             <PricingCard 
-              title="PIKINI (Petit)"
+              title="FITINI (Petit)"
               price="50.000"
               period="/an"
               description="L'essentiel pour structurer votre petite équipe."
@@ -177,7 +177,7 @@ const Landing = () => {
               ]}
               delay={0.2}
               isLoading={false}
-              onSelect={() => handleSelectPlan('PIKINI')}
+              onSelect={() => handleSelectPlan('FITINI')}
             />
             
             {/* LOUBA (Popular) */}

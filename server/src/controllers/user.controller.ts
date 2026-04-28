@@ -84,10 +84,10 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
       if (company) {
         const currentCount = company._count.users;
-        const plan = company.plan || 'PIKINI';
+        const plan = company.plan || 'FITINI';
         
         let limit = Infinity;
-        if (plan === 'PIKINI') limit = 5;
+        if (plan === 'FITINI') limit = 5;
         else if (plan === 'LOUBA') limit = 20;
 
         if (currentCount >= limit) {

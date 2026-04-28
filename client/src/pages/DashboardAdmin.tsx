@@ -1,15 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Users, Layers, Calendar, Clock, FileText, Megaphone, TrendingUp, Building2, MessageSquare, Lock, Zap } from 'lucide-react';
+import { Users, Layers, Calendar, Clock, FileText, Megaphone, TrendingUp, Building2, MessageSquare, Lock, Zap, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { usePlan, PLAN_MAX_EMPLOYEES } from '../hooks/usePlan';
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  PIKIN:    { label: 'Pikin · Débutant',   color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' },
-  BAMOUSSO: { label: 'Bamousso · Maman',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  KORO:     { label: 'Koro · Ancien',       color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  FITINI:   { label: 'FITINI (Petit)',   color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  PIKIN:    { label: 'FITINI (Petit)',   color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  LOUBA:    { label: 'LOUBA (Moyen)',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  BAMOUSSO: { label: 'LOUBA (Moyen)',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  KORO:     { label: 'Kôrô (Grand)',    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
 };
 
 const DashboardAdmin = () => {
@@ -33,17 +35,20 @@ const DashboardAdmin = () => {
   }, []);
 
   const maxEmp = PLAN_MAX_EMPLOYEES[plan];
-  const badge = PLAN_BADGE[plan] || PLAN_BADGE['PIKIN'];
+  const badge = PLAN_BADGE[plan] || PLAN_BADGE['FITINI'];
 
   const modules = [
     { name: 'Annuaire',      desc: 'Gérer les employés',           icon: Users,         path: '/employees',    color: 'bg-blue-500',   feature: 'employees',   stat: `${stats.employees}${maxEmp ? ' / ' + maxEmp : ''} employés` },
     { name: 'Départements',  desc: 'Structure de l\'entreprise',   icon: Layers,        path: '/departments',  color: 'bg-indigo-500', feature: 'departments', stat: `${stats.departments} départements` },
     { name: 'Pointage',      desc: 'Suivi du temps',               icon: Clock,         path: '/attendance',   color: 'bg-green-500',  feature: 'attendance' },
     { name: 'Congés',        desc: 'Demandes & Absences',          icon: Calendar,      path: '/leaves',       color: 'bg-yellow-500', feature: 'leaves' },
+    { name: 'Tâches',        desc: 'Organisation quotidienne',    icon: Zap,           path: '/tasks',        color: 'bg-amber-500',  feature: 'tasks' },
     { name: 'Documents',     desc: 'Fiches de paie & Contrats',    icon: FileText,      path: '/documents',    color: 'bg-purple-500', feature: 'documents' },
     { name: 'Annonces',      desc: 'Communication interne',        icon: Megaphone,     path: '/announcements',color: 'bg-orange-500', feature: 'announcements' },
-    { name: 'Messagerie',    desc: 'Chat d\'équipe',               icon: MessageSquare, path: '/announcements',color: 'bg-teal-500',   feature: 'messaging',   locked: !canUse('messaging'), minPlan: 'BAMOUSSO' },
-    { name: 'Analytique RH', desc: 'Graphiques & Indicateurs',    icon: TrendingUp,    path: '/analytics',    color: 'bg-pink-500',   feature: 'analytics',   locked: !canUse('analytics'),  minPlan: 'BAMOUSSO' },
+    { name: 'Messagerie',    desc: 'Chat d\'équipe',               icon: MessageSquare, path: '/messaging',    color: 'bg-teal-500',   feature: 'messaging',   locked: !canUse('messaging'), minPlan: 'LOUBA' },
+    { name: 'Conflits',      desc: 'Espace sécurisé',              icon: Lock,          path: '/conflicts',    color: 'bg-rose-500',   feature: 'conflicts',   locked: !canUse('conflicts'), minPlan: 'LOUBA' },
+    { name: 'Salaires',      desc: 'Gestion des paies',            icon: Wallet,        path: '/salaries',     color: 'bg-emerald-500', feature: 'salaries',    locked: !canUse('salaries'),  minPlan: 'LOUBA' },
+    { name: 'Analytique RH', desc: 'Graphiques & Indicateurs',    icon: TrendingUp,    path: '/analytics',    color: 'bg-pink-500',   feature: 'analytics',   locked: !canUse('analytics'),  minPlan: 'LOUBA' },
   ];
 
   const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
@@ -89,7 +94,7 @@ const DashboardAdmin = () => {
           if (isLocked) {
             return (
               <motion.div key={index} variants={item}>
-                <div className="relative group block bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700 opacity-70 cursor-not-allowed">
+                <Link to="/register" state={{ selectedPlanId: minPlan }} className="relative group block bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700 transition-all hover:border-brand-primary/50">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
                       <div className={`w-14 h-14 rounded-2xl ${mod.color} opacity-40 flex items-center justify-center text-white shadow-lg`}>
@@ -97,18 +102,21 @@ const DashboardAdmin = () => {
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-gray-500 dark:text-gray-500 flex items-center gap-2">
-                          {mod.name} <Lock className="w-4 h-4" />
+                          {mod.name} <Lock className="w-4 h-4 text-brand-primary" />
                         </h3>
                         <p className="text-sm text-gray-400 mt-1">{mod.desc}</p>
                       </div>
                     </div>
                   </div>
-                  <div className="mt-6">
+                  <div className="mt-6 flex justify-between items-center">
                     <span className="inline-flex items-center gap-1.5 bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-xs font-bold">
                       <Zap className="w-3 h-3" /> Formule {minPlan}
                     </span>
+                    <span className="text-brand-primary text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all">
+                      S'abonner →
+                    </span>
                   </div>
-                </div>
+                </Link>
               </motion.div>
             );
           }

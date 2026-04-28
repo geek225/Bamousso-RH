@@ -7,7 +7,7 @@ import { Eye, EyeOff, Building2, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const plans = [
-  { id: 'PIKINI', name: 'PIKINI', price: '50.000 FCFA', rawPrice: 50000 },
+  { id: 'FITINI', name: 'FITINI', price: '50.000 FCFA', rawPrice: 50000 },
   { id: 'LOUBA', name: 'LOUBA', price: '150.000 FCFA', rawPrice: 150000 },
   { id: 'KORO', name: 'Kôrô', price: '300.000 FCFA', rawPrice: 300000 }
 ];
