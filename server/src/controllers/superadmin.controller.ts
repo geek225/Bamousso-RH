@@ -161,8 +161,8 @@ export const updateCompanyPlan = async (req: AuthRequest, res: Response): Promis
     const id = String(req.params.id);
     const { plan } = req.body;
 
-    if (!['PIKIN', 'BAMOUSSO', 'KORO'].includes(plan)) {
-      return res.status(400).json({ message: "Plan invalide. Valeurs acceptées : PIKIN, BAMOUSSO, KORO." });
+    if (!['FITINI', 'LOUBA', 'KORO', 'PIKIN', 'BAMOUSSO'].includes(plan)) {
+      return res.status(400).json({ message: "Plan invalide." });
     }
 
     const updated = await prisma.company.update({
@@ -173,6 +173,27 @@ export const updateCompanyPlan = async (req: AuthRequest, res: Response): Promis
     res.json({ message: `Plan mis à jour : ${plan}`, company: updated });
   } catch (error: any) {
     res.status(500).json({ message: "Erreur lors de la mise à jour du plan.", error: error.message });
+  }
+};
+
+/**
+ * Supprime définitivement une entreprise et ses données.
+ */
+export const deleteCompany = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const id = String(req.params.id);
+    
+    // On utilise une transaction pour supprimer proprement l'entreprise et ses relations
+    await prisma.$transaction([
+      prisma.user.deleteMany({ where: { companyId: id } }),
+      prisma.department.deleteMany({ where: { companyId: id } }),
+      prisma.payment.deleteMany({ where: { companyId: id } }),
+      prisma.company.delete({ where: { id } })
+    ]);
+
+    res.json({ message: "Entreprise supprimée définitivement." });
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors de la suppression.", error: error.message });
   }
 };
 

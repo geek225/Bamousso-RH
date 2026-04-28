@@ -57,7 +57,7 @@ export const sendSubscriptionConfirmation = async (email: string, companyName: s
           <div style="background-color: #f8fafc; padding: 20px; border-radius: 16px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>Formule :</strong> ${plan}</p>
             <p style="margin: 5px 0;"><strong>Montant réglé :</strong> ${amount.toLocaleString()} FCFA</p>
-            <p style="margin: 5px 0;"><strong>Durée :</strong> 1 an (Activation Automatique)</p>
+            <p style="margin: 5px 0;"><strong>Durée :</strong> 1 mois (Activation Automatique)</p>
           </div>
 
           <p style="color: #475569; line-height: 1.6;">Vous pouvez dès maintenant vous connecter à votre tableau de bord avec les identifiants que vous avez enregistrés lors de votre inscription.</p>
@@ -97,7 +97,7 @@ export const sendAdminSubscriptionNotification = async (companyName: string, pla
             <li><strong>Montant :</strong> ${amount.toLocaleString()} FCFA</li>
             <li><strong>Date :</strong> ${new Date().toLocaleDateString()}</li>
           </ul>
-          <p>Le compte a été activé automatiquement pour 1 an.</p>
+          <p>Le compte a été activé automatiquement pour 1 mois.</p>
         </div>
       `,
     });

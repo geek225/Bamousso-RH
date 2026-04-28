@@ -41,9 +41,9 @@ const PLAN_LABELS: Record<string, string> = {
 };
 
 const PLAN_PRICES: Record<string, number> = {
-  FITINI: 50000,
-  LOUBA: 150000,
-  KORO: 300000,
+  FITINI: 3800,
+  LOUBA: 4900,
+  KORO: 14700,
 };
 
 const DashboardSuperAdmin = () => {
@@ -88,6 +88,17 @@ const DashboardSuperAdmin = () => {
     }
   };
 
+  const handleDeleteCompany = async (company: Company) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement ${company.name} ? Cette action est irréversible.`)) return;
+    try {
+      await api.delete(`/admin/companies/${company.id}`);
+      void fetchData();
+    } catch (error) {
+      console.error('Error deleting company', error);
+      alert('Erreur lors de la suppression');
+    }
+  };
+
   const handleUpdatePlan = async (newPlan: string) => {
     if (!selectedCompany) return;
     try {
@@ -122,7 +133,7 @@ const DashboardSuperAdmin = () => {
   });
 
   const getDaysRemaining = (date?: string | null) => {
-    if (!date) return 'Jamais';
+    if (!date) return 'En attente';
     const diff = new Date(date).getTime() - new Date().getTime();
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
     if (days < 0) return 'Expiré';
@@ -130,10 +141,13 @@ const DashboardSuperAdmin = () => {
     return `${days} jours`;
   };
 
-  const totalRevenue = companies.reduce((acc, c) => acc + (c.subscriptionStatus === 'ACTIVE' ? PLAN_PRICES[c.plan] : 0), 0);
+  const totalRevenue = companies.reduce((acc, c) => {
+    const price = PLAN_PRICES[c.plan] || 0;
+    return acc + (c.subscriptionStatus === 'ACTIVE' ? price : 0);
+  }, 0);
 
   const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return 'Illimité';
+    if (!dateStr) return 'Non activé';
     return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
@@ -254,6 +268,13 @@ const DashboardSuperAdmin = () => {
                     className={`flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all ${company.isLocked ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-rose-600 text-white shadow-lg shadow-rose-600/20 active:scale-95'}`}
                   >
                     {company.isLocked ? 'Réactiver' : 'Suspendre'}
+                  </button>
+                  <button 
+                    onClick={() => handleDeleteCompany(company)}
+                    className="p-4 rounded-2xl bg-white/5 border border-white/10 text-gray-500 hover:text-rose-500 hover:border-rose-500/30 transition-all active:scale-95"
+                    title="Supprimer définitivement"
+                  >
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               </motion.div>

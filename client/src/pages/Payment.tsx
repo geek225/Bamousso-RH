@@ -89,7 +89,7 @@ const Payment = () => {
               </div>
               <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-400">Total Annuel</span>
+                  <span className="text-gray-600 dark:text-gray-400">Total Mensuel</span>
                   <span className="text-2xl font-black text-orange-500">{plan.finalPrice.toLocaleString()} FCFA</span>
                 </div>
               </div>

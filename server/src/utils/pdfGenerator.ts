@@ -43,7 +43,7 @@ export const generateSubscriptionPDF = (data: {
 
     // Table Content
     doc.fillColor('#333333');
-    doc.text(`Abonnement Annuel - Formule ${data.plan}`, 60, 285);
+    doc.text(`Abonnement Mensuel - Formule ${data.plan}`, 60, 285);
     doc.text('1', 350, 285);
     doc.text(`${data.amount.toLocaleString()} FCFA`, 450, 285);
 
@@ -55,7 +55,7 @@ export const generateSubscriptionPDF = (data: {
 
     // Footer
     doc.fontSize(10).fillColor('#999999').text(
-      'Merci de votre confiance. Votre abonnement est activé pour une durée de 12 mois.',
+      'Merci de votre confiance. Votre abonnement est activé pour une durée de 30 jours.',
       50, 700, { align: 'center', width: 500 }
     );
 

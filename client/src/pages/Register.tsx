@@ -43,7 +43,7 @@ const Register = () => {
       // 3. Redirection vers la page de paiement avec les infos du forfait
       navigate('/payment', { 
         state: { 
-          plan: { ...planDetails, finalPrice: totalAmount * 12 }, // Paiement ANNUEL
+          plan: { ...planDetails, finalPrice: totalAmount }, // Paiement MENSUEL
           extraEmployees,
           companyName: data.companyName,
           companyId: response.data.company?.id || response.data.user?.companyId
@@ -121,9 +121,9 @@ const Register = () => {
 
             <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-gray-500">Total Annuel</span>
+                <span className="text-sm font-bold text-gray-500">Total Mensuel</span>
                 <span className="text-xl font-black text-orange-500">
-                  {((plans.find(p => p.id === selectedPlan)?.rawPrice || 0) + (extraEmployees * 1000)) * 12} FCFA
+                  {((plans.find(p => p.id === selectedPlan)?.rawPrice || 0) + (extraEmployees * 1000))} FCFA
                 </span>
               </div>
             </div>
