@@ -102,7 +102,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
             isLocked: false,
             extraEmployees: extraEmployees,
             subscriptionEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // +1 an
-          },
+          } as any,
           include: { users: { where: { role: 'COMPANY_ADMIN' }, take: 1 } }
         }) as any);
 
