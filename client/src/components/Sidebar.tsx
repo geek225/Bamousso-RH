@@ -1,7 +1,11 @@
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Building2, LayoutDashboard, LogOut, Moon, Sun, Users, Layers, X, Calendar, Clock, FileText, Megaphone, Settings as SettingsIcon } from 'lucide-react';
+import { 
+  Building2, LayoutDashboard, LogOut, Moon, Sun, Users, Layers, X, 
+  Calendar, Clock, FileText, Megaphone, Settings as SettingsIcon,
+  ListTodo, AlertTriangle, Banknote, MessageCircle, FileWarning, BarChart3
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ConfirmationModal from './ConfirmationModal';
 
@@ -28,7 +32,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     }
   };
 
-  // Fermer la sidebar sur mobile quand on change de page
   useEffect(() => {
     onClose();
   }, [location.pathname]);
@@ -53,10 +56,11 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     user.role === 'COMPANY_ADMIN' || user.role === 'HR_MANAGER' || user.role === 'HR_ASSISTANT';
 
   const isSuperAdmin = user.role === 'SUPER_ADMIN';
+  const plan = company?.plan || 'PIKINI';
 
   return (
     <>
-      {/* Overlay pour mobile - ferme la sidebar quand on clique à côté */}
+      {/* Overlay pour mobile */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
@@ -72,7 +76,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         <div className="p-6 border-b border-white/5 flex flex-col gap-1">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-black flex items-center gap-2 tracking-tighter">
-              {/* Affichage du logo de l'entreprise s'il existe, sinon l'icône par défaut */}
               {company?.logoUrl && !isSuperAdmin ? (
                 <img src={company.logoUrl} alt="Logo Entreprise" className="w-9 h-9 object-contain rounded-xl" />
               ) : (
@@ -84,7 +87,6 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                 {!isSuperAdmin && company?.name ? company.name : 'BAMOUSSO'}
               </span>
             </h1>
-            {/* Bouton fermer sur mobile */}
             <button onClick={onClose} className="lg:hidden p-2 hover:bg-white/10 rounded-full">
               <X className="w-6 h-6" />
             </button>
@@ -100,17 +102,11 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
           {!isSuperAdmin && canManageHr && (
             <>
-              <Link
-                to="/employees"
-                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/employees' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-              >
+              <Link to="/employees" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/employees' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                 <Users className="w-5 h-5" />
                 Employés
               </Link>
-              <Link
-                to="/departments"
-                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/departments' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-              >
+              <Link to="/departments" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/departments' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                 <Layers className="w-5 h-5" />
                 Départements
               </Link>
@@ -119,26 +115,53 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
           {!isSuperAdmin && (
             <>
-              <Link
-                to="/attendance"
-                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/attendance' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-              >
+              <Link to="/attendance" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/attendance' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                 <Clock className="w-5 h-5" />
                 Pointage
               </Link>
 
-              <Link
-                to="/leaves"
-                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/leaves' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-              >
+              <Link to="/leaves" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/leaves' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                 <Calendar className="w-5 h-5" />
                 Congés
               </Link>
 
-              <Link
-                to="/documents"
-                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/documents' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-              >
+              <Link to="/tasks" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/tasks' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                <ListTodo className="w-5 h-5" />
+                Tâches
+              </Link>
+
+              {(plan === 'LOUBA' || plan === 'KORO') && (
+                <>
+                  <Link to="/messaging" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/messaging' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                    <MessageCircle className="w-5 h-5" />
+                    Messagerie
+                  </Link>
+
+                  <Link to="/conflicts" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/conflicts' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                    <AlertTriangle className="w-5 h-5" />
+                    Conflits
+                  </Link>
+
+                  <Link to="/explanations" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/explanations' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                    <FileWarning className="w-5 h-5" />
+                    Explications
+                  </Link>
+
+                  <Link to="/salaries" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/salaries' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                    <Banknote className="w-5 h-5" />
+                    Salaires
+                  </Link>
+
+                  {canManageHr && (
+                    <Link to="/analytics" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/analytics' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                      <BarChart3 className="w-5 h-5" />
+                      Analytique
+                    </Link>
+                  )}
+                </>
+              )}
+
+              <Link to="/documents" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/documents' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                 <FileText className="w-5 h-5" />
                 Documents
               </Link>

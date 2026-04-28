@@ -162,41 +162,61 @@ const Landing = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Starter */}
+            {/* PIKINI */}
             <PricingCard 
-              title="Pikin (Débutant)"
-              price="200"
-              period="/mois"
-              description="L'essentiel pour démarrer sereinement."
-              features={['Jusqu\'à 20 employés', 'Pointage standard', 'Gestion des congés', 'Support par ticket']}
+              title="PIKINI (Petit)"
+              price="50.000"
+              period="/an"
+              description="L'essentiel pour structurer votre petite équipe."
+              features={[
+                'Jusqu\'à 5 employés', 
+                'Pointage en temps réel', 
+                'Gestion des congés', 
+                'Support par ticket', 
+                'Gestion des tâches'
+              ]}
               delay={0.2}
               isLoading={false}
-              onSelect={() => handleSelectPlan('STARTER')}
+              onSelect={() => handleSelectPlan('PIKINI')}
             />
             
-            {/* Business (Popular) */}
+            {/* LOUBA (Popular) */}
             <PricingCard 
-              title="Bamousso (Maman)"
-              price="300"
-              period="/mois"
-              description="La puissance de gestion pour vos équipes."
-              features={['Jusqu\'à 100 employés', 'Pointage géolocalisé', 'Messagerie interne', 'Support prioritaire', 'Analytique RH']}
+              title="LOUBA (Moyen)"
+              price="150.000"
+              period="/an"
+              description="La puissance de gestion complète pour PME."
+              features={[
+                'Jusqu\'à 20 employés', 
+                'Analytique RH avancé', 
+                'Messagerie Interne (Boss/Staff)', 
+                'Gestion des conflits (Anonymat)', 
+                'Demandes d\'explication',
+                'Gestion des salaires',
+                'Support Prioritaire (Chat 500 msg)'
+              ]}
               isPopular={true}
               delay={0.4}
               isLoading={false}
-              onSelect={() => handleSelectPlan('BUSINESS')}
+              onSelect={() => handleSelectPlan('LOUBA')}
             />
             
-            {/* Enterprise */}
+            {/* Kôrô */}
             <PricingCard 
-              title="Koro (Ancien)"
-              price="400"
-              period="/mois"
-              description="L'excellence pour les grandes institutions."
-              features={['Employés illimités', 'Intégration API', 'Hébergement VIP', 'Accompagnement dédié']}
+              title="Kôrô (Grand)"
+              price="300.000"
+              period="/an"
+              description="L'excellence africaine sans aucune limite."
+              features={[
+                'Employés illimités', 
+                'Toutes les fonctions incluses', 
+                'Support VIP illimité', 
+                'Accompagnement dédié',
+                'Version Illimitée'
+              ]}
               delay={0.6}
               isLoading={false}
-              onSelect={() => handleSelectPlan('ENTERPRISE')}
+              onSelect={() => handleSelectPlan('KORO')}
             />
           </div>
         </div>

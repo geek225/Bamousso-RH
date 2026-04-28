@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface Company {
   id: string;
   name: string;
-  plan: 'PIKIN' | 'BAMOUSSO' | 'KORO';
+  plan: 'PIKINI' | 'LOUBA' | 'KORO';
   subscriptionStatus: string;
   subscriptionEndsAt?: string | null;
   createdAt: string;
@@ -35,15 +35,15 @@ interface SuperAdmin {
 }
 
 const PLAN_LABELS: Record<string, string> = {
-  PIKIN: 'Pikin (Débutant)',
-  BAMOUSSO: 'Bamousso (Maman)',
-  KORO: 'Koro (Ancien)',
+  PIKINI: 'PIKINI',
+  LOUBA: 'LOUBA',
+  KORO: 'Kôrô',
 };
 
 const PLAN_PRICES: Record<string, number> = {
-  PIKIN: 200,
-  BAMOUSSO: 300,
-  KORO: 400,
+  PIKINI: 50000,
+  LOUBA: 150000,
+  KORO: 300000,
 };
 
 const DashboardSuperAdmin = () => {
@@ -121,6 +121,15 @@ const DashboardSuperAdmin = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const getDaysRemaining = (date?: string | null) => {
+    if (!date) return 'Jamais';
+    const diff = new Date(date).getTime() - new Date().getTime();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    if (days < 0) return 'Expiré';
+    if (days === 0) return 'Aujourd\'hui';
+    return `${days} jours`;
+  };
+
   const totalRevenue = companies.reduce((acc, c) => acc + (c.subscriptionStatus === 'ACTIVE' ? PLAN_PRICES[c.plan] : 0), 0);
 
   const formatDate = (dateStr?: string | null) => {
@@ -193,9 +202,9 @@ const DashboardSuperAdmin = () => {
                 className="pl-12 pr-10 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-primary appearance-none font-bold text-white cursor-pointer"
               >
                 <option value="ALL" className="bg-brand-900">Tous les plans</option>
-                <option value="PIKIN" className="bg-brand-900">Pikin</option>
-                <option value="BAMOUSSO" className="bg-brand-900">Bamousso</option>
-                <option value="KORO" className="bg-brand-900">Koro</option>
+                <option value="PIKINI" className="bg-brand-900">Pikini</option>
+                <option value="LOUBA" className="bg-brand-900">Louba</option>
+                <option value="KORO" className="bg-brand-900">Kôrô</option>
               </select>
             </div>
           </div>
@@ -232,7 +241,10 @@ const DashboardSuperAdmin = () => {
                   </div>
                   <div className="flex justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
                     <span>Échéance</span>
-                    <span className="text-brand-accent">{formatDate(company.subscriptionEndsAt)}</span>
+                    <div className="text-right">
+                      <div className="text-brand-accent">{formatDate(company.subscriptionEndsAt)}</div>
+                      <div className="text-[9px] text-emerald-500">{getDaysRemaining(company.subscriptionEndsAt)}</div>
+                    </div>
                   </div>
                 </div>
 

@@ -7,9 +7,9 @@ import { Eye, EyeOff, Building2, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const plans = [
-  { id: 'STARTER', name: 'Starter', price: '200', rawPrice: 200 },
-  { id: 'BUSINESS', name: 'Business', price: '300', rawPrice: 300 },
-  { id: 'ENTERPRISE', name: 'Enterprise', price: '400', rawPrice: 400 }
+  { id: 'PIKINI', name: 'PIKINI', price: '50.000 FCFA', rawPrice: 50000 },
+  { id: 'LOUBA', name: 'LOUBA', price: '150.000 FCFA', rawPrice: 150000 },
+  { id: 'KORO', name: 'Kôrô', price: '300.000 FCFA', rawPrice: 300000 }
 ];
 
 const Register = () => {
@@ -19,7 +19,7 @@ const Register = () => {
   const location = useLocation();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(location.state?.selectedPlanId || 'BUSINESS');
+  const [selectedPlan, setSelectedPlan] = useState(location.state?.selectedPlanId || 'LOUBA');
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: any) => {

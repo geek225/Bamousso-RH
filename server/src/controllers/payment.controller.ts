@@ -95,7 +95,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
             subscriptionStatus: "ACTIVE",
             isActive: true,
             isLocked: false,
-            subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+            subscriptionEndsAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // +1 an
           }
         });
         console.log(`Paiement confirmé par Webhook pour ${companyId}`);
