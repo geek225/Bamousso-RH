@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
+import crypto from 'crypto';
 import prisma from '../utils/prisma.js';
 
 /**
@@ -13,7 +14,6 @@ export const initiatePayment = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "Montant et ID entreprise requis." });
     }
 
-    // Identifiants GeniusPay (à configurer dans les variables d'environnement)
     const apiKey = process.env.GENIUSPAY_KEY;
     const apiSecret = process.env.GENIUSPAY_SECRET;
 
@@ -22,7 +22,6 @@ export const initiatePayment = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, message: "Configuration de paiement incomplète sur le serveur." });
     }
 
-    // Appel à l'API GeniusPay pour créer une transaction
     const response = await axios.post('https://pay.genius.ci/api/v1/merchant/payments', {
       amount: parseInt(amount),
       description: description || "Abonnement Bamousso RH",
@@ -31,7 +30,6 @@ export const initiatePayment = async (req: Request, res: Response) => {
         companyId: companyId,
         plan: plan
       },
-      // URLs de retour (noms exacts de la doc)
       success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}`,
       error_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
     }, {
@@ -63,30 +61,44 @@ export const initiatePayment = async (req: Request, res: Response) => {
 };
 
 /**
- * Webhook pour confirmer le paiement
+ * Webhook pour confirmer le paiement avec vérification de signature
  */
 export const handleWebhook = async (req: Request, res: Response) => {
   try {
-    const { event, data } = req.body;
+    const signature = req.headers['x-webhook-signature'] as string;
+    const timestamp = req.headers['x-webhook-timestamp'] as string;
+    const webhookSecret = process.env.GENIUSPAY_WEBHOOK_SECRET;
 
-    // TODO: Vérifier la signature pour la sécurité si GeniusPay le supporte
+    // Vérification de la signature si le secret est configuré
+    if (webhookSecret && signature && timestamp) {
+      const payload = JSON.stringify(req.body);
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(`${timestamp}.${payload}`)
+        .digest('hex');
+
+      if (signature !== expectedSignature) {
+        console.error("Signature Webhook invalide !");
+        return res.status(401).send('Invalid signature');
+      }
+    }
+
+    const { event, data } = req.body;
 
     if (event === 'payment.success' || data.status === 'completed' || data.status === 'SUCCESS') {
       const companyId = data.metadata?.companyId;
-      const plan = data.metadata?.plan;
 
       if (companyId) {
-        // Mettre à jour l'entreprise
         await prisma.company.update({
           where: { id: companyId },
           data: {
             subscriptionStatus: "ACTIVE",
             isActive: true,
             isLocked: false,
-            subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // +30 jours
+            subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           }
         });
-        console.log(`Paiement réussi pour l'entreprise ${companyId}`);
+        console.log(`Paiement confirmé par Webhook pour ${companyId}`);
       }
     }
 
