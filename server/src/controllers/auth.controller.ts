@@ -41,6 +41,8 @@ const registerCompanySchema = z.object({
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   firstName: z.string().min(1, "Le prénom est requis"),
   lastName: z.string().min(1, "Le nom est requis"),
+  plan: z.string().optional(),
+  extraEmployees: z.number().optional(),
 });
 
 const forgotPasswordSchema = z.object({
@@ -94,7 +96,7 @@ export const register = async (req: Request, res: Response) => {
  */
 export const registerCompany = async (req: Request, res: Response) => {
   try {
-    const { companyName, email, password, firstName, lastName } = registerCompanySchema.parse(req.body);
+    const { companyName, email, password, firstName, lastName, plan, extraEmployees } = registerCompanySchema.parse(req.body);
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -107,10 +109,12 @@ export const registerCompany = async (req: Request, res: Response) => {
       const company = await tx.company.create({
         data: {
           name: companyName,
-          isActive: true,
-          subscriptionStatus: "ACTIVE",
+          isActive: false, // Inactif jusqu'au paiement
+          subscriptionStatus: "PAST_DUE", // En attente de paiement
           subscriptionEndsAt: null,
-          isLocked: false,
+          plan: plan || "FITINI",
+          extraEmployees: extraEmployees || 0,
+          isLocked: true, // Verrouillé jusqu'au paiement
           lockedAt: null,
         },
       });
