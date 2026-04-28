@@ -37,7 +37,8 @@ const Payment = () => {
       const response = await api.post('/payments/initiate', {
         amount: plan.rawPrice.toString(),
         description: `Abonnement Bamousso - Formule ${plan.name}`,
-        companyId: companyId || "test-company-id" 
+        companyId: companyId,
+        plan: plan.name 
       });
 
       if (response.data.success && response.data.url) {

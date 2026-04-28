@@ -19,7 +19,7 @@ import documentRoutes from "./routes/document.routes.js";
 import announcementRoutes from "./routes/announcement.routes.js";
 import departmentRoutes from "./routes/department.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
-// import paymentRoutes from "./routes/payment.routes.js";
+import paymentRoutes from "./routes/payment.routes.js";
 import superAdminRoutes from "./routes/superadmin.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 
@@ -62,7 +62,7 @@ app.use("/api/leaves", leaveRoutes);            // Gestion des congés
 app.use("/api/attendances", attendanceRoutes);  // Pointage
 app.use("/api/documents", documentRoutes);      // Fiches de paie / Contrats
 app.use("/api/announcements", announcementRoutes); // Communications internes
-// app.use("/api/payments", paymentRoutes);           // Paiements
+app.use("/api/payments", paymentRoutes);           // Paiements
 app.use("/api/admin", superAdminRoutes);               // SUPER_ADMIN & changement de mot de passe
 app.use("/api/analytics", analyticsRoutes);            // Analytics RH (Bamousso+)
 
