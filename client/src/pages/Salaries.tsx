@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Banknote, TrendingUp, Download, Eye, Wallet, History } from 'lucide-react';
+import { Banknote, TrendingUp, Download, Wallet, History } from 'lucide-react';
 
 const Salaries = () => {
   return (

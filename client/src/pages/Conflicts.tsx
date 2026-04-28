@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { AlertTriangle, ShieldCheck, UserX, Send } from 'lucide-react';
+import { ShieldCheck, UserX, Send } from 'lucide-react';
 import { useState } from 'react';
 
 const Conflicts = () => {

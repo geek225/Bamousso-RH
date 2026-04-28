@@ -1,5 +1,4 @@
-import { motion } from 'framer-motion';
-import { MessageCircle, Search, Send, Paperclip, MoreVertical, Phone, Video } from 'lucide-react';
+import { Search, Send, Paperclip, MoreVertical, Phone, Video } from 'lucide-react';
 
 const Messaging = () => {
   return (
