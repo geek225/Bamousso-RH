@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import MobileNavbar from '../components/MobileNavbar';
-import { Menu } from 'lucide-react';
 import NotificationCenter from '../components/NotificationCenter';
 
 const MainLayout = () => {
