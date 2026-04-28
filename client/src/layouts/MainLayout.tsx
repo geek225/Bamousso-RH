@@ -8,18 +8,18 @@ const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+    <div className="flex min-h-screen bg-senufo transition-colors duration-200">
       {/* Sidebar - Pass props for control */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden md:ml-64">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden md:ml-64 relative z-10">
         {/* Header - visible sur mobile et desktop pour les notifications */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 sticky top-0 z-30 flex items-center justify-between h-16 shrink-0">
+        <header className="glass-card border-none px-6 sticky top-0 z-30 flex items-center justify-between h-20 shrink-0 mx-4 mt-4 rounded-3xl">
           <div className="flex items-center gap-2">
             <div className="md:hidden">
-              <span className="font-black text-xl tracking-tighter text-orange-500">BAMOUSSO</span>
+              <span className="font-black text-2xl tracking-tighter text-brand-primary">BAMOUSSO</span>
             </div>
-            <span className="font-bold text-gray-800 dark:text-white hidden md:inline-block">Tableau de bord</span>
+            <span className="font-black text-xl text-white hidden md:inline-block tracking-tight">Tableau de Bord</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -28,7 +28,7 @@ const MainLayout = () => {
         </header>
 
         {/* Zone de contenu principal - scrollable */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 min-w-0 bg-gray-50 dark:bg-gray-900 pb-24 md:pb-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 min-w-0 pb-24 md:pb-8">
           <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>

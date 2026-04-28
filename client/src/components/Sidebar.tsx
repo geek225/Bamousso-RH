@@ -66,32 +66,34 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
       {/* Sidebar principale */}
       <div className={`
-        w-64 bg-white dark:bg-gray-900 text-gray-800 dark:text-white h-screen fixed left-0 top-0 flex flex-col z-50 transition-all duration-300 ease-in-out border-r border-gray-200 dark:border-gray-800 shadow-xl
+        w-64 bg-[#1a0f0a] text-white h-screen fixed left-0 top-0 flex flex-col z-50 transition-all duration-300 ease-in-out border-r border-white/5 shadow-2xl
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-extrabold flex items-center gap-2 tracking-tight">
+        <div className="p-6 border-b border-white/5 flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-black flex items-center gap-2 tracking-tighter">
               {/* Affichage du logo de l'entreprise s'il existe, sinon l'icône par défaut */}
               {company?.logoUrl && !isSuperAdmin ? (
-                <img src={company.logoUrl} alt="Logo Entreprise" className="w-8 h-8 object-contain rounded-md" />
+                <img src={company.logoUrl} alt="Logo Entreprise" className="w-9 h-9 object-contain rounded-xl" />
               ) : (
-                <Building2 className="w-7 h-7 text-brand-primary" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center shadow-lg">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
               )}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-primary to-brand-accent">
+              <span className="text-white">
                 {!isSuperAdmin && company?.name ? company.name : 'BAMOUSSO'}
               </span>
             </h1>
-            <p className="text-xs text-text-tertiary mt-1 uppercase tracking-wider">{formatRole(user.role)}</p>
+            {/* Bouton fermer sur mobile */}
+            <button onClick={onClose} className="lg:hidden p-2 hover:bg-white/10 rounded-full">
+              <X className="w-6 h-6" />
+            </button>
           </div>
-          {/* Bouton fermer sur mobile */}
-          <button onClick={onClose} className="lg:hidden p-2 hover:bg-surface-tonal rounded">
-            <X className="w-6 h-6" />
-          </button>
+          <p className="text-[10px] font-black text-brand-primary uppercase tracking-[0.2em] mt-2 opacity-80">{formatRole(user.role)}</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto custom-scrollbar">
-          <Link to={dashboardPath} className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname.startsWith('/dashboard') ? 'bg-brand-accent/10 text-brand-primary shadow-sm' : 'hover:bg-surface-tonal text-text-secondary'}`}>
+          <Link to={dashboardPath} className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname.startsWith('/dashboard') ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
             <LayoutDashboard className="w-5 h-5" />
             Tableau de bord
           </Link>
@@ -100,14 +102,14 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <>
               <Link
                 to="/employees"
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/employees' ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/employees' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
               >
                 <Users className="w-5 h-5" />
                 Employés
               </Link>
               <Link
                 to="/departments"
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/departments' ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/departments' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
               >
                 <Layers className="w-5 h-5" />
                 Départements
@@ -119,7 +121,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <>
               <Link
                 to="/attendance"
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/attendance' ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/attendance' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
               >
                 <Clock className="w-5 h-5" />
                 Pointage
@@ -127,7 +129,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
               <Link
                 to="/leaves"
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/leaves' ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/leaves' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
               >
                 <Calendar className="w-5 h-5" />
                 Congés
@@ -135,7 +137,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
               <Link
                 to="/documents"
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/documents' ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/documents' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
               >
                 <FileText className="w-5 h-5" />
                 Documents
@@ -143,7 +145,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
               <Link
                 to="/announcements"
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/announcements' ? 'bg-orange-50 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 shadow-sm' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/announcements' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
               >
                 <Megaphone className="w-5 h-5" />
                 Annonces
@@ -153,7 +155,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           {canManageHr ? (
             <Link
               to="/settings"
-              className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 font-medium ${location.pathname === '/settings' ? 'bg-brand-accent/10 text-brand-primary shadow-sm' : 'hover:bg-surface-tonal text-text-secondary'}`}
+              className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/settings' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
             >
               <SettingsIcon className="w-5 h-5" />
               Paramètres
@@ -161,28 +163,28 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
           ) : null}
         </nav>
 
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
+        <div className="p-4 border-t border-white/5 space-y-4">
           <button
               onClick={toggleTheme}
-              className="w-full flex items-center justify-center gap-2 p-2.5 bg-surface-tonal hover:bg-surface-border text-text-secondary rounded-xl transition-all duration-300 text-sm font-medium"
+              className="w-full flex items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition-all duration-300 text-sm font-bold"
           >
               {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
               {theme === 'light' ? 'Mode Nuit' : 'Mode Jour'}
           </button>
 
-          <div className="flex items-center gap-3 p-3 bg-surface-tonal rounded-xl shadow-sm border border-surface-border">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white shrink-0 shadow-md">
-                  <span className="font-bold text-lg">{user.firstName[0]}{user.lastName[0]}</span>
+          <div className="flex items-center gap-3 p-3 glass-card rounded-2xl">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white shrink-0 shadow-lg">
+                  <span className="font-black text-lg">{user.firstName[0]}{user.lastName[0]}</span>
               </div>
               <div className="min-w-0">
-                  <p className="font-medium text-sm text-gray-900 dark:text-white truncate">{user.firstName} {user.lastName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                  <p className="font-bold text-sm text-white truncate">{user.firstName} {user.lastName}</p>
+                  <p className="text-[10px] text-gray-400 truncate uppercase tracking-wider font-bold">{user.email}</p>
               </div>
           </div>
 
           <button
             onClick={() => setIsLogoutModalOpen(true)}
-            className="w-full flex items-center justify-center gap-2 p-2.5 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/20 dark:text-red-500 rounded-xl transition-all duration-300 text-sm font-semibold"
+            className="w-full flex items-center justify-center gap-2 p-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl transition-all duration-300 text-sm font-black"
           >
             <LogOut className="w-4 h-4" />
             Se déconnecter

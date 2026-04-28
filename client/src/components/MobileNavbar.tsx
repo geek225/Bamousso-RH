@@ -29,29 +29,30 @@ const MobileNavbar = ({ onMenuClick }: MobileNavbarProps) => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 pb-safe">
-      <div className="flex items-center justify-around h-16 px-2">
+    <div className="md:hidden fixed bottom-4 left-4 right-4 glass-card border-white/10 z-50 rounded-[2rem] overflow-hidden">
+      <div className="flex items-center justify-around h-20 px-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || (item.path.startsWith('/dashboard') && location.pathname.startsWith('/dashboard'));
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
-                isActive ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'
+              className={`flex flex-col items-center justify-center flex-1 h-full gap-1.5 transition-all ${
+                isActive ? 'text-brand-primary' : 'text-gray-500'
               }`}
             >
-              <item.icon className={`w-5 h-5 ${isActive ? 'fill-orange-500/10' : ''}`} />
-              <span className="text-[10px] font-bold uppercase tracking-tight">{item.label}</span>
+              <item.icon className={`w-6 h-6 ${isActive ? 'fill-brand-primary/10' : ''}`} />
+              <span className="text-[9px] font-black uppercase tracking-widest">{item.label}</span>
+              {isActive && <div className="w-1 h-1 rounded-full bg-brand-primary shadow-[0_0_8px_rgba(255,87,34,0.8)]" />}
             </Link>
           );
         })}
         <button
           onClick={onMenuClick}
-          className="flex flex-col items-center justify-center flex-1 h-full gap-1 text-gray-500 dark:text-gray-400"
+          className="flex flex-col items-center justify-center flex-1 h-full gap-1.5 text-gray-500"
         >
-          <Menu className="w-5 h-5" />
-          <span className="text-[10px] font-bold uppercase tracking-tight">Plus</span>
+          <Menu className="w-6 h-6" />
+          <span className="text-[9px] font-black uppercase tracking-widest">Menu</span>
         </button>
       </div>
     </div>

@@ -1,29 +1,29 @@
 :root {
   /* --- Chromatic Language (Functional Color Zones) --- */
   
-  /* Brand - Northern Ivorian (Senufo) Palette */
-  --chromatic-brand-900: #2d1b0d; /* Ebony Brown */
-  --chromatic-brand-800: #3e2723;
-  --chromatic-brand-700: #5d4037;
-  --chromatic-brand-primary: #a0522d; /* Sienna / Ochre */
-  --chromatic-brand-accent: #daa520; /* Goldenrod / Savanna Gold */
+  /* Brand - Northern Ivorian (Senufo) Premium Palette */
+  --chromatic-brand-900: #1a0f0a; /* Deep Ebony */
+  --chromatic-brand-800: #241611;
+  --chromatic-brand-700: #3e2723;
+  --chromatic-brand-primary: #ff5722; /* Vibrant Orange */
+  --chromatic-brand-accent: #d4a017; /* Savanna Gold */
 
-  /* Surface - Natural & Warm */
-  --chromatic-surface-base: #fdfaf6; /* Warm Cream */
-  --chromatic-surface-panel: #ffffff;
-  --chromatic-surface-tonal: #f5eee6;
-  --chromatic-surface-border: #e8dccb;
+  /* Surface - Deep & Premium */
+  --chromatic-surface-base: #1a0f0a; /* Deep Ebony */
+  --chromatic-surface-panel: rgba(36, 22, 17, 0.7); /* Glass Dark Chocolate */
+  --chromatic-surface-tonal: rgba(62, 39, 35, 0.4);
+  --chromatic-surface-border: rgba(255, 255, 255, 0.08);
   
-  /* Text - High contrast against warm tones */
-  --chromatic-text-primary: #2d1b0d;
-  --chromatic-text-secondary: #5d4037;
+  /* Text - High contrast against deep tones */
+  --chromatic-text-primary: #fdfaf6;
+  --chromatic-text-secondary: #e8dccb;
   --chromatic-text-tertiary: #a1887f;
   --chromatic-text-on-brand: #ffffff;
 
   /* Status */
-  --chromatic-success: #2e7d32;
-  --chromatic-warning: #ffa000;
-  --chromatic-error: #c62828;
+  --chromatic-success: #4caf50;
+  --chromatic-warning: #ff9800;
+  --chromatic-error: #f44336;
 
   /* --- Geometric Precision (Spacing & Layout) --- */
   
@@ -43,18 +43,14 @@
   --font-normal: 0;
   --font-wide: 0.02em;
   
-  --line-height-heading: 1.2;
+  --line-height-heading: 1.1;
   --line-height-body: 1.6;
 }
 
-/* Dark Mode Overrides - Deep Indigo & Ebony */
+/* Dark Mode - Same as Root for this premium theme, or subtle adjustments */
 .dark {
-  --chromatic-surface-base: #1a120b; /* Deep Ebony */
-  --chromatic-surface-panel: #2d1b0d;
-  --chromatic-surface-tonal: #3e2723;
-  --chromatic-surface-border: #5d4037;
-  
-  --chromatic-text-primary: #fdfaf6;
-  --chromatic-text-secondary: #e8dccb;
-  --chromatic-text-tertiary: #a1887f;
+  --chromatic-surface-base: #120a07;
+  --chromatic-surface-panel: rgba(26, 15, 10, 0.8);
+  --chromatic-surface-tonal: rgba(36, 22, 17, 0.6);
+  --chromatic-surface-border: rgba(255, 255, 255, 0.05);
 }

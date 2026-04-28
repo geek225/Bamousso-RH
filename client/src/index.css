@@ -48,17 +48,39 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Bamousso Custom Pattern Background */
+  /* Bamousso Custom Pattern Background - Premium Implementation */
   .bg-senufo {
-    background-image: linear-gradient(rgba(253, 250, 246, 0.96), rgba(253, 250, 246, 0.96)), url("/bg-pattern.jpg");
-    background-size: 300px;
+    background-color: #1a0f0a;
+    background-image: url("/bg-pattern.jpg");
+    background-size: 600px;
     background-repeat: repeat;
+    background-blend-mode: multiply;
+    opacity: 0.8;
   }
 
-  .dark .bg-senufo {
-    background-image: linear-gradient(rgba(26, 18, 11, 0.97), rgba(26, 18, 11, 0.97)), url("/bg-pattern.jpg");
-    background-size: 300px;
-    background-repeat: repeat;
+  .glass-card {
+    background: var(--chromatic-surface-panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--chromatic-surface-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .premium-glow {
+    position: relative;
+  }
+  .premium-glow::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(45deg, var(--chromatic-brand-primary), var(--chromatic-brand-accent), transparent);
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0.2;
+    transition: opacity 0.3s ease;
+  }
+  .premium-glow:hover::after {
+    opacity: 0.5;
   }
 
   /* Information-First Headings */

@@ -75,56 +75,56 @@ const NotificationCenter = () => {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+        className="relative p-2.5 rounded-2xl hover:bg-white/10 transition-all duration-300 group"
       >
-        <Bell className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+        <Bell className="w-6 h-6 text-gray-400 group-hover:text-white" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/4 -translate-y-1/4 bg-red-600 rounded-full">
+          <span className="absolute top-1 right-1 inline-flex items-center justify-center w-5 h-5 text-[10px] font-black leading-none text-white bg-brand-primary rounded-full shadow-[0_0_8px_rgba(255,87,34,0.6)]">
             {unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-50 border border-gray-200 dark:border-gray-700">
-          <div className="py-2 px-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-white">Notifications</h3>
-            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                <X className="w-4 h-4" />
+        <div className="absolute right-0 mt-4 w-96 glass-card rounded-[2rem] overflow-hidden z-50 border-white/10 shadow-2xl animate-in fade-in zoom-in duration-300">
+          <div className="py-4 px-6 bg-white/5 border-b border-white/10 flex justify-between items-center">
+            <h3 className="text-sm font-black text-white uppercase tracking-widest">Notifications</h3>
+            <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
             </button>
           </div>
           
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[32rem] overflow-y-auto custom-scrollbar">
             {notifications.length === 0 ? (
-              <div className="py-4 text-center text-gray-500 dark:text-gray-400 text-sm">Aucune notification</div>
+              <div className="py-12 text-center text-gray-500 font-bold text-sm">Aucune notification pour le moment</div>
             ) : (
-              <ul>
+              <ul className="divide-y divide-white/5">
                 {notifications.map((notification) => (
                   <li 
                     key={notification.id} 
-                    className={`border-b border-gray-100 dark:border-gray-700 last:border-0 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition cursor-pointer ${!notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                    className={`p-6 hover:bg-white/5 transition cursor-pointer relative group ${!notification.read ? 'bg-brand-primary/5' : ''}`}
                     onClick={() => !notification.read && markAsRead(notification.id)}
                   >
-                    <div className="flex justify-between items-start mb-1">
-                        <span className={`font-medium text-sm ${!notification.read ? 'text-blue-800 dark:text-blue-300' : 'text-gray-800 dark:text-gray-200'}`}>
+                    {!notification.read && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-primary shadow-[0_0_8px_rgba(255,87,34,0.8)]" />
+                    )}
+                    <div className="flex justify-between items-start mb-2">
+                        <span className={`font-black text-sm tracking-tight ${!notification.read ? 'text-white' : 'text-gray-400 group-hover:text-white transition-colors'}`}>
                             {notification.title}
                         </span>
-                        <div className="flex items-center gap-1">
-                            {!notification.read && (
-                                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            )}
+                        <div className="flex items-center gap-2">
                             <button 
                                 onClick={(e) => deleteNotification(notification.id, e)}
-                                className="text-gray-400 hover:text-red-500 p-1"
+                                className="text-gray-600 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-all"
                                 title="Supprimer"
                             >
-                                <Trash2 className="w-3 h-3" />
+                                <Trash2 className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-3">{notification.message}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500">
-                        {new Date(notification.createdAt).toLocaleDateString()} {new Date(notification.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    <p className="text-xs text-gray-500 mb-3 line-clamp-2 font-medium leading-relaxed">{notification.message}</p>
+                    <p className="text-[10px] text-brand-accent font-black uppercase tracking-wider">
+                        {new Date(notification.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })} • {new Date(notification.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </p>
                   </li>
                 ))}

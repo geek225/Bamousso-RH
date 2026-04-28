@@ -3,7 +3,7 @@ import api from '../utils/api';
 import { 
   Building2, CheckCircle, Ban, 
   X, Search, Filter, ShieldCheck, UserPlus, 
-  Wallet, Zap, MoreVertical
+  Wallet, MoreVertical
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -132,21 +132,21 @@ const DashboardSuperAdmin = () => {
     <div className="space-y-8 max-w-7xl mx-auto pb-20">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-orange-400/20 to-transparent rounded-bl-full pointer-events-none" />
+        className="glass-card rounded-[2.5rem] p-10 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-brand-primary/20 to-transparent rounded-bl-full pointer-events-none transition-transform group-hover:scale-110 duration-700" />
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-700 text-white flex items-center justify-center shadow-lg">
-              <ShieldCheck className="w-8 h-8" />
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-brand-primary to-brand-accent text-white flex items-center justify-center shadow-2xl shadow-brand-primary/30">
+              <ShieldCheck className="w-10 h-10" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-1">Super-Admin Panel</h1>
-              <p className="text-gray-500 dark:text-gray-400 font-medium">Gestion globale de Bamousso RH</p>
+              <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Super-Admin Panel</h1>
+              <p className="text-brand-accent font-bold uppercase tracking-[0.3em] text-xs">Gestion globale • Bamousso RH</p>
             </div>
           </div>
           <button 
             onClick={() => setIsAdminModalOpen(true)}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95"
+            className="bg-brand-primary hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 shadow-xl shadow-brand-primary/20 transition-all active:scale-95 premium-glow"
           >
             <UserPlus className="w-5 h-5" /> Ajouter un Admin
           </button>
@@ -155,95 +155,91 @@ const DashboardSuperAdmin = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-blue-500 p-6 rounded-3xl shadow-lg text-white">
-          <Building2 className="w-10 h-10 opacity-20 mb-4" />
-          <p className="text-blue-100 text-sm font-bold uppercase">Entreprises</p>
-          <p className="text-4xl font-black">{companies.length}</p>
-        </div>
-        <div className="bg-green-500 p-6 rounded-3xl shadow-lg text-white">
-          <CheckCircle className="w-10 h-10 opacity-20 mb-4" />
-          <p className="text-green-100 text-sm font-bold uppercase">Abonnements Actifs</p>
-          <p className="text-4xl font-black">{companies.filter(c => c.subscriptionStatus === 'ACTIVE').length}</p>
-        </div>
-        <div className="bg-purple-500 p-6 rounded-3xl shadow-lg text-white">
-          <Wallet className="w-10 h-10 opacity-20 mb-4" />
-          <p className="text-purple-100 text-sm font-bold uppercase">Revenu Mensuel</p>
-          <p className="text-4xl font-black">{totalRevenue.toLocaleString()} FCFA</p>
-        </div>
-        <div className="bg-red-500 p-6 rounded-3xl shadow-lg text-white">
-          <Ban className="w-10 h-10 opacity-20 mb-4" />
-          <p className="text-red-100 text-sm font-bold uppercase">Suspendus</p>
-          <p className="text-4xl font-black">{companies.filter(c => c.isLocked).length}</p>
-        </div>
+        {[
+          { label: 'Entreprises', value: companies.length, icon: Building2, color: 'from-blue-600 to-blue-800' },
+          { label: 'Abonnements Actifs', value: companies.filter(c => c.subscriptionStatus === 'ACTIVE').length, icon: CheckCircle, color: 'from-emerald-600 to-emerald-800' },
+          { label: 'Revenu Mensuel', value: `${totalRevenue.toLocaleString()} FCFA`, icon: Wallet, color: 'from-amber-600 to-amber-800' },
+          { label: 'Suspendus', value: companies.filter(c => c.isLocked).length, icon: Ban, color: 'from-rose-600 to-rose-800' }
+        ].map((stat, i) => (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+            key={stat.label} className={`glass-card p-8 rounded-[2rem] relative overflow-hidden group`}
+          >
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-10 rounded-bl-[3rem] transition-transform group-hover:scale-125 duration-500`} />
+            <stat.icon className="w-8 h-8 text-white/20 mb-6" />
+            <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+            <p className="text-3xl font-black text-white tracking-tighter">{stat.value}</p>
+          </motion.div>
+        ))}
       </div>
 
       {/* Main Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white">Gestion des Entreprises</h2>
-          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+      <div className="glass-card rounded-[2.5rem] p-10">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
+          <h2 className="text-3xl font-black text-white tracking-tight">Gestion des Entreprises</h2>
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
               <input 
                 type="text" placeholder="Rechercher..."
                 value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                className="pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-700 border-none rounded-2xl w-full md:w-64 focus:ring-2 focus:ring-orange-500"
+                className="pl-12 pr-6 py-4 bg-white/5 border border-white/10 rounded-2xl w-full md:w-72 focus:ring-2 focus:ring-brand-primary text-white font-bold placeholder:text-gray-600"
               />
             </div>
             <div className="relative">
-              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
               <select 
                 value={filterPlan} onChange={e => setFilterPlan(e.target.value)}
-                className="pl-12 pr-8 py-3 bg-gray-50 dark:bg-gray-700 border-none rounded-2xl focus:ring-2 focus:ring-orange-500 appearance-none font-bold text-gray-700 dark:text-gray-200"
+                className="pl-12 pr-10 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-primary appearance-none font-bold text-white cursor-pointer"
               >
-                <option value="ALL">Tous les plans</option>
-                <option value="PIKIN">Pikin</option>
-                <option value="BAMOUSSO">Bamousso</option>
-                <option value="KORO">Koro</option>
+                <option value="ALL" className="bg-brand-900">Tous les plans</option>
+                <option value="PIKIN" className="bg-brand-900">Pikin</option>
+                <option value="BAMOUSSO" className="bg-brand-900">Bamousso</option>
+                <option value="KORO" className="bg-brand-900">Koro</option>
               </select>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <AnimatePresence>
             {filteredCompanies.map(company => (
               <motion.div 
-                layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-                key={company.id} className={`p-6 rounded-3xl border transition-all ${company.isLocked ? 'bg-red-50/50 border-red-100' : 'bg-gray-50 dark:bg-gray-700/30 border-gray-100 dark:border-gray-700'}`}
+                layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                key={company.id} className={`p-8 rounded-[2rem] border transition-all duration-300 group hover:shadow-2xl ${company.isLocked ? 'bg-rose-500/10 border-rose-500/20' : 'bg-white/5 border-white/10 hover:border-brand-primary/30'}`}
               >
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-6">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{company.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Zap className="w-3 h-3 text-orange-500" />
-                      <span className="text-xs font-black text-orange-600 uppercase tracking-wider">{PLAN_LABELS[company.plan]}</span>
+                    <h3 className="text-2xl font-black text-white leading-tight group-hover:text-brand-primary transition-colors">{company.name}</h3>
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-2 h-2 rounded-full bg-brand-primary shadow-[0_0_8px_rgba(255,87,34,0.8)]" />
+                      <span className="text-[10px] font-black text-brand-accent uppercase tracking-[0.2em]">{PLAN_LABELS[company.plan]}</span>
                     </div>
                   </div>
-                  <button onClick={() => { setSelectedCompany(company); setIsPlanModalOpen(true); }} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
-                    <MoreVertical className="w-5 h-5 text-gray-400" />
+                  <button onClick={() => { setSelectedCompany(company); setIsPlanModalOpen(true); }} className="p-3 hover:bg-white/10 rounded-2xl transition-colors">
+                    <MoreVertical className="w-5 h-5 text-gray-500" />
                   </button>
                 </div>
 
-                <div className="space-y-2 mb-6">
-                  <div className="flex justify-between text-xs font-bold text-gray-500 uppercase">
-                    <span>Admin</span>
-                    <span className="text-gray-900 dark:text-gray-300">{company.manager?.firstName} {company.manager?.lastName}</span>
+                <div className="space-y-4 mb-8">
+                  <div className="flex justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                    <span>Administrateur</span>
+                    <span className="text-gray-300">{company.manager?.firstName} {company.manager?.lastName}</span>
                   </div>
-                  <div className="flex justify-between text-xs font-bold text-gray-500 uppercase">
-                    <span>Employés</span>
-                    <span className="text-gray-900 dark:text-gray-300">{company._count?.users || 0}</span>
+                  <div className="flex justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                    <span>Effectif</span>
+                    <span className="text-gray-300 font-black">{company._count?.users || 0} membres</span>
                   </div>
-                  <div className="flex justify-between text-xs font-bold text-gray-500 uppercase">
-                    <span>Expire le</span>
-                    <span className="text-gray-900 dark:text-gray-300">{formatDate(company.subscriptionEndsAt)}</span>
+                  <div className="flex justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                    <span>Échéance</span>
+                    <span className="text-brand-accent">{formatDate(company.subscriptionEndsAt)}</span>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button 
                     onClick={() => handleToggleLock(company)}
-                    className={`flex-1 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${company.isLocked ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-red-600 text-white shadow-lg shadow-red-600/20'}`}
+                    className={`flex-1 py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all ${company.isLocked ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-rose-600 text-white shadow-lg shadow-rose-600/20 active:scale-95'}`}
                   >
                     {company.isLocked ? 'Réactiver' : 'Suspendre'}
                   </button>
@@ -257,21 +253,21 @@ const DashboardSuperAdmin = () => {
       {/* Plan Update Modal */}
       <AnimatePresence>
         {isPlanModalOpen && selectedCompany && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl">
-              <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-6">Changer le plan</h3>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card rounded-[3rem] p-10 max-w-sm w-full shadow-2xl border-white/20">
+              <h3 className="text-3xl font-black text-white mb-8 tracking-tight">Changer le plan</h3>
               <div className="space-y-4">
                 {Object.keys(PLAN_LABELS).map(p => (
                   <button 
                     key={p} onClick={() => handleUpdatePlan(p)}
-                    className={`w-full p-4 rounded-2xl border-2 text-left transition-all ${selectedCompany.plan === p ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : 'border-gray-100 dark:border-gray-700 hover:border-orange-200'}`}
+                    className={`w-full p-6 rounded-[2rem] border-2 text-left transition-all duration-300 ${selectedCompany.plan === p ? 'border-brand-primary bg-brand-primary/10' : 'border-white/5 hover:border-white/20 bg-white/5'}`}
                   >
-                    <p className="font-black text-gray-900 dark:text-white">{PLAN_LABELS[p]}</p>
-                    <p className="text-sm text-gray-500">{PLAN_PRICES[p]} FCFA / mois</p>
+                    <p className="font-black text-white text-lg">{PLAN_LABELS[p]}</p>
+                    <p className="text-sm text-brand-accent font-bold mt-1">{PLAN_PRICES[p]} FCFA / mois</p>
                   </button>
                 ))}
               </div>
-              <button onClick={() => setIsPlanModalOpen(false)} className="w-full mt-6 py-4 text-gray-400 font-bold hover:text-gray-600">Annuler</button>
+              <button onClick={() => setIsPlanModalOpen(false)} className="w-full mt-8 py-4 text-gray-500 font-black hover:text-white transition-colors uppercase tracking-widest text-xs">Annuler</button>
             </motion.div>
           </div>
         )}
@@ -280,24 +276,24 @@ const DashboardSuperAdmin = () => {
       {/* Admin Creation Modal */}
       <AnimatePresence>
         {isAdminModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white">Nouveau Super-Admin</h3>
-                <button onClick={() => setIsAdminModalOpen(false)}><X className="w-6 h-6 text-gray-400" /></button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card rounded-[3rem] p-10 max-w-md w-full shadow-2xl border-white/20">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-3xl font-black text-white tracking-tight">Nouvel Admin</h3>
+                <button onClick={() => setIsAdminModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X className="w-6 h-6 text-gray-500" /></button>
               </div>
-              <form onSubmit={handleCreateAdmin} className="space-y-4">
+              <form onSubmit={handleCreateAdmin} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <input required placeholder="Prénom" className="p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 w-full"
+                  <input required placeholder="Prénom" className="p-5 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-primary w-full text-white font-bold"
                     value={newAdmin.firstName} onChange={e => setNewAdmin({...newAdmin, firstName: e.target.value})} />
-                  <input required placeholder="Nom" className="p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 w-full"
+                  <input required placeholder="Nom" className="p-5 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-primary w-full text-white font-bold"
                     value={newAdmin.lastName} onChange={e => setNewAdmin({...newAdmin, lastName: e.target.value})} />
                 </div>
-                <input required type="email" placeholder="Email" className="p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 w-full"
+                <input required type="email" placeholder="Email professionnel" className="p-5 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-primary w-full text-white font-bold"
                   value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} />
-                <input required type="password" placeholder="Mot de passe" className="p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl border-none focus:ring-2 focus:ring-orange-500 w-full"
+                <input required type="password" placeholder="Mot de passe" className="p-5 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-primary w-full text-white font-bold"
                   value={newAdmin.password} onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} />
-                <button disabled={adminLoading} className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black shadow-lg shadow-orange-500/20 active:scale-95 transition-all">
+                <button disabled={adminLoading} className="w-full py-5 bg-brand-primary hover:bg-orange-600 text-white rounded-2xl font-black shadow-xl shadow-brand-primary/20 active:scale-95 transition-all premium-glow uppercase tracking-widest">
                   {adminLoading ? 'Création...' : 'Créer le compte'}
                 </button>
               </form>
