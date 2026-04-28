@@ -25,6 +25,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancelled from './pages/PaymentCancelled';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Analytics from './pages/Analytics';
 
 function App() {
   return (
@@ -79,6 +80,7 @@ function App() {
                 <Route path="/attendance" element={<Attendance />} />
                 <Route path="/documents" element={<Documents />} />
                 <Route path="/announcements" element={<Announcements />} />
+                <Route path="/analytics" element={<Analytics />} />
               </Route>
             </Route>
 

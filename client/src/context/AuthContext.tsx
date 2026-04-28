@@ -28,6 +28,7 @@ interface Company {
   isLocked: boolean;
   isActive?: boolean;
   logoUrl?: string | null;
+  plan?: 'PIKIN' | 'BAMOUSSO' | 'KORO';
 }
 
 // Définition du type de contexte

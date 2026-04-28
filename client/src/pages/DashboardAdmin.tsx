@@ -1,12 +1,20 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Users, Layers, Calendar, Clock, FileText, Megaphone, TrendingUp, Building2 } from 'lucide-react';
+import { Users, Layers, Calendar, Clock, FileText, Megaphone, TrendingUp, Building2, MessageSquare, Lock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
+import { usePlan, PLAN_MAX_EMPLOYEES } from '../hooks/usePlan';
+
+const PLAN_BADGE: Record<string, { label: string; color: string }> = {
+  PIKIN:    { label: 'Pikin · Débutant',   color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' },
+  BAMOUSSO: { label: 'Bamousso · Maman',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  KORO:     { label: 'Koro · Ancien',       color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+};
 
 const DashboardAdmin = () => {
   const { company, user } = useAuth();
+  const { plan, canUse } = usePlan();
   const [stats, setStats] = useState({ employees: 0, departments: 0 });
 
   useEffect(() => {
@@ -16,10 +24,7 @@ const DashboardAdmin = () => {
           api.get('/employees'),
           api.get('/departments')
         ]);
-        setStats({
-          employees: empRes.data.length,
-          departments: depRes.data.length
-        });
+        setStats({ employees: empRes.data.length, departments: depRes.data.length });
       } catch (error) {
         console.error("Erreur lors du chargement des statistiques", error);
       }
@@ -27,37 +32,29 @@ const DashboardAdmin = () => {
     void fetchStats();
   }, []);
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
+  const maxEmp = PLAN_MAX_EMPLOYEES[plan];
+  const badge = PLAN_BADGE[plan] || PLAN_BADGE['PIKIN'];
 
   const modules = [
-    { name: 'Annuaire', desc: 'Gérer les employés', icon: Users, path: '/employees', color: 'bg-blue-500', stat: `${stats.employees} employés` },
-    { name: 'Départements', desc: 'Structure de l\'entreprise', icon: Layers, path: '/departments', color: 'bg-indigo-500', stat: `${stats.departments} départements` },
-    { name: 'Pointage', desc: 'Suivi du temps', icon: Clock, path: '/attendance', color: 'bg-green-500' },
-    { name: 'Congés', desc: 'Demandes & Absences', icon: Calendar, path: '/leaves', color: 'bg-yellow-500' },
-    { name: 'Documents', desc: 'Fiches de paie & Contrats', icon: FileText, path: '/documents', color: 'bg-purple-500' },
-    { name: 'Annonces', desc: 'Communication interne', icon: Megaphone, path: '/announcements', color: 'bg-orange-500' },
+    { name: 'Annuaire',      desc: 'Gérer les employés',           icon: Users,         path: '/employees',    color: 'bg-blue-500',   feature: 'employees',   stat: `${stats.employees}${maxEmp ? ' / ' + maxEmp : ''} employés` },
+    { name: 'Départements',  desc: 'Structure de l\'entreprise',   icon: Layers,        path: '/departments',  color: 'bg-indigo-500', feature: 'departments', stat: `${stats.departments} départements` },
+    { name: 'Pointage',      desc: 'Suivi du temps',               icon: Clock,         path: '/attendance',   color: 'bg-green-500',  feature: 'attendance' },
+    { name: 'Congés',        desc: 'Demandes & Absences',          icon: Calendar,      path: '/leaves',       color: 'bg-yellow-500', feature: 'leaves' },
+    { name: 'Documents',     desc: 'Fiches de paie & Contrats',    icon: FileText,      path: '/documents',    color: 'bg-purple-500', feature: 'documents' },
+    { name: 'Annonces',      desc: 'Communication interne',        icon: Megaphone,     path: '/announcements',color: 'bg-orange-500', feature: 'announcements' },
+    { name: 'Messagerie',    desc: 'Chat d\'équipe',               icon: MessageSquare, path: '/announcements',color: 'bg-teal-500',   feature: 'messaging',   locked: !canUse('messaging'), minPlan: 'BAMOUSSO' },
+    { name: 'Analytique RH', desc: 'Graphiques & Indicateurs',    icon: TrendingUp,    path: '/analytics',    color: 'bg-pink-500',   feature: 'analytics',   locked: !canUse('analytics'),  minPlan: 'BAMOUSSO' },
   ];
+
+  const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+  const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header animé */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden"
-      >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-orange-400/20 to-transparent rounded-bl-full pointer-events-none"></div>
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+        className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-orange-400/20 to-transparent rounded-bl-full pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3 mb-2">
@@ -67,31 +64,62 @@ const DashboardAdmin = () => {
               <Building2 className="w-4 h-4" /> {company?.name || 'Bamousso'} • Espace Administrateur
             </p>
           </div>
-          <div className="bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-6 py-3 rounded-2xl flex items-center gap-3 font-semibold shadow-inner">
-            <TrendingUp className="w-5 h-5" />
-            Tout est opérationnel
+          <div className="flex items-center gap-3">
+            {/* Badge Plan */}
+            <span className={`px-4 py-2 rounded-xl text-sm font-bold ${badge.color}`}>
+              {badge.label}
+            </span>
+            {/* Compteur employés */}
+            {maxEmp && (
+              <span className={`px-4 py-2 rounded-xl text-sm font-bold ${stats.employees >= maxEmp ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'}`}>
+                {stats.employees} / {maxEmp} employés
+              </span>
+            )}
           </div>
         </div>
       </motion.div>
 
       {/* Grille de modules */}
-      <motion.div 
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-      >
-        {modules.map((mod, index) => (
-          <motion.div key={index} variants={item}>
-            <Link
-              to={mod.path}
-              className="group block bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:-translate-y-2 relative overflow-hidden"
-            >
-              <div className={`absolute top-0 right-0 w-32 h-32 ${mod.color} opacity-5 rounded-full -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150`}></div>
-              
-              <div className="flex items-start justify-between relative z-10">
-                <div className="flex items-start gap-4">
-                  <div className={`w-14 h-14 rounded-2xl ${mod.color} flex items-center justify-center text-white shadow-lg shadow-${mod.color.replace('bg-', '')}/30 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+      <motion.div variants={container} initial="hidden" animate="show"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {modules.map((mod, index) => {
+          const isLocked = (mod as any).locked;
+          const minPlan = (mod as any).minPlan;
+
+          if (isLocked) {
+            return (
+              <motion.div key={index} variants={item}>
+                <div className="relative group block bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700 opacity-70 cursor-not-allowed">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-14 h-14 rounded-2xl ${mod.color} opacity-40 flex items-center justify-center text-white shadow-lg`}>
+                        <mod.icon className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-500 dark:text-gray-500 flex items-center gap-2">
+                          {mod.name} <Lock className="w-4 h-4" />
+                        </h3>
+                        <p className="text-sm text-gray-400 mt-1">{mod.desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <span className="inline-flex items-center gap-1.5 bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-3 py-1.5 rounded-xl text-xs font-bold">
+                      <Zap className="w-3 h-3" /> Formule {minPlan}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          }
+
+          return (
+            <motion.div key={index} variants={item}>
+              <Link to={mod.path}
+                className="group block bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
+                <div className={`absolute top-0 right-0 w-32 h-32 ${mod.color} opacity-5 rounded-full -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150`} />
+                <div className="flex items-start gap-4 relative z-10">
+                  <div className={`w-14 h-14 rounded-2xl ${mod.color} flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-3`}>
                     <mod.icon className="w-7 h-7" />
                   </div>
                   <div>
@@ -99,21 +127,20 @@ const DashboardAdmin = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{mod.desc}</p>
                   </div>
                 </div>
-              </div>
-              
-              <div className="mt-6 flex justify-between items-center relative z-10">
-                {mod.stat ? (
-                  <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 text-xs font-bold rounded-lg">
-                    {mod.stat}
+                <div className="mt-6 flex justify-between items-center relative z-10">
+                  {(mod as any).stat ? (
+                    <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 text-xs font-bold rounded-lg">
+                      {(mod as any).stat}
+                    </span>
+                  ) : <span />}
+                  <span className="text-orange-500 text-sm font-semibold opacity-0 -translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
+                    Ouvrir →
                   </span>
-                ) : <span />}
-                <div className="text-orange-500 text-sm font-semibold opacity-0 -translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
-                  Ouvrir &rarr;
                 </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
+              </Link>
+            </motion.div>
+          );
+        })}
       </motion.div>
     </div>
   );
