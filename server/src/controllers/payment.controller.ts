@@ -23,7 +23,6 @@ export const initiatePayment = async (req: Request, res: Response) => {
     }
 
     // Appel à l'API GeniusPay pour créer une transaction
-    // Note: L'URL peut varier selon la version de l'API (v1, v2)
     const response = await axios.post('https://pay.genius.ci/api/v1/merchant/payments', {
       amount: parseInt(amount),
       description: description || "Abonnement Bamousso RH",
@@ -32,10 +31,9 @@ export const initiatePayment = async (req: Request, res: Response) => {
         companyId: companyId,
         plan: plan
       },
-      // URLs de retour
+      // URLs de retour (noms exacts de la doc)
       success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}`,
-      cancel_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
-      webhook_url: `${process.env.BACKEND_URL}/payments/webhook`
+      error_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
     }, {
       headers: {
         'X-API-Key': apiKey,
@@ -73,7 +71,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
 
     // TODO: Vérifier la signature pour la sécurité si GeniusPay le supporte
 
-    if (event === 'payment.captured' || data.status === 'SUCCESS') {
+    if (event === 'payment.success' || data.status === 'completed' || data.status === 'SUCCESS') {
       const companyId = data.metadata?.companyId;
       const plan = data.metadata?.plan;
 
