@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { 
-  Building2, CheckCircle, Ban, Lock, Unlock, Calendar, 
-  Send, X, Search, Filter, ShieldCheck, UserPlus, 
-  TrendingUp, Wallet, Zap, MoreVertical
+  Building2, CheckCircle, Ban, 
+  X, Search, Filter, ShieldCheck, UserPlus, 
+  Wallet, Zap, MoreVertical
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -48,23 +48,17 @@ const PLAN_PRICES: Record<string, number> = {
 
 const DashboardSuperAdmin = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
+  // @ts-ignore - Reserved for future list of admins
   const [superAdmins, setSuperAdmins] = useState<SuperAdmin[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPlan, setFilterPlan] = useState('ALL');
 
   // Modal States
-  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   // Forms
-  const [subMonths, setSubMonths] = useState(1);
-  const [subLoading, setSubLoading] = useState(false);
-  const [notifMessage, setNotifMessage] = useState('');
-  const [notifLoading, setNotifLoading] = useState(false);
   const [newAdmin, setNewAdmin] = useState({ email: '', password: '', firstName: '', lastName: '' });
   const [adminLoading, setAdminLoading] = useState(false);
 
@@ -78,8 +72,6 @@ const DashboardSuperAdmin = () => {
       setSuperAdmins(statsRes.data.superAdmins);
     } catch (error) {
       console.error('Error fetching data', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
