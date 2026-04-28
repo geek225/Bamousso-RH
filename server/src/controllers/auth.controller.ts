@@ -9,6 +9,7 @@ import crypto from "crypto";
 import { Prisma } from "@prisma/client";
 import prisma from "../utils/prisma.js";
 import { z } from "zod";
+import { sendResetPasswordEmail } from "../utils/mailer";
 
 // Schéma de validation pour l'inscription d'un utilisateur
 const registerSchema = z.object({
@@ -175,8 +176,15 @@ export const forgotPassword = async (req: Request, res: Response) => {
       data: { passwordResetToken: tokenHash, passwordResetExpiresAt: expiresAt },
     });
 
-    // TODO: envoyer email avec lien: `${FRONTEND_URL}/reset-password?token=${rawToken}`
-    // En dev, on renvoie le token pour tester rapidement.
+    // Envoi de l'email réel via Resend
+    const { success, error: mailError } = await sendResetPasswordEmail(email, rawToken);
+
+    if (!success) {
+      console.error("Erreur d'envoi email:", mailError);
+      // On continue quand même pour ne pas bloquer l'UX, 
+      // mais en production l'admin verra l'erreur dans les logs.
+    }
+
     const isProd = process.env.NODE_ENV === "production";
 
     return res.json({
