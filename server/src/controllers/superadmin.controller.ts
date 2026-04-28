@@ -198,14 +198,32 @@ export const deleteCompany = async (req: AuthRequest, res: Response): Promise<an
         data: { managerId: null }
       });
 
+      // Récupérer les IDs des départements
+      const departments = await tx.department.findMany({
+        where: { companyId: id },
+        select: { id: true }
+      });
+      const deptIds = departments.map(d => d.id);
+
       // Supprimer les données liées aux utilisateurs
       if (userIds.length > 0) {
         await tx.attendance.deleteMany({ where: { employeeId: { in: userIds } } });
         await tx.leaveRequest.deleteMany({ where: { employeeId: { in: userIds } } });
         await tx.document.deleteMany({ where: { employeeId: { in: userIds } } });
-        await tx.message.deleteMany({ where: { OR: [{ senderId: { in: userIds } }, { recipientId: { in: userIds } }] } });
+        await tx.notification.deleteMany({ where: { userId: { in: userIds } } });
         await tx.forumComment.deleteMany({ where: { authorId: { in: userIds } } });
         await tx.forumPost.deleteMany({ where: { authorId: { in: userIds } } });
+        
+        // Supprimer TOUS les messages liés aux utilisateurs ou aux départements de l'entreprise
+        await tx.message.deleteMany({ 
+          where: { 
+            OR: [
+              { senderId: { in: userIds } }, 
+              { recipientId: { in: userIds } },
+              { departmentId: { in: deptIds } }
+            ] 
+          } 
+        });
       }
 
       // Supprimer les départements
@@ -219,6 +237,8 @@ export const deleteCompany = async (req: AuthRequest, res: Response): Promise<an
 
       // Enfin supprimer l'entreprise
       await tx.company.delete({ where: { id } });
+    }, {
+      timeout: 10000 // Augmenter le timeout pour les grosses entreprises
     });
 
     res.json({ message: "Entreprise et toutes ses données supprimées avec succès." });
