@@ -9,7 +9,7 @@ import crypto from "crypto";
 import { Prisma } from "@prisma/client";
 import prisma from "../utils/prisma.js";
 import { z } from "zod";
-import { sendResetPasswordEmail } from "../utils/mailer";
+import { sendResetPasswordEmail } from "../utils/mailer.js";
 
 // Schéma de validation pour l'inscription d'un utilisateur
 const registerSchema = z.object({
