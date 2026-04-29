@@ -167,15 +167,27 @@ const Register = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Email Professionnel</label>
-                <input
-                  {...register('email', { required: "L'email est requis", pattern: { value: /\S+@\S+\.\S+/, message: "Email invalide" } })}
-                  type="email"
-                  className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white"
-                  placeholder="admin@entreprise.com"
-                />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Email Professionnel</label>
+                  <input
+                    {...register('email', { required: "L'email est requis", pattern: { value: /\S+@\S+\.\S+/, message: "Email invalide" } })}
+                    type="email"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white"
+                    placeholder="admin@entreprise.com"
+                  />
+                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Téléphone / WhatsApp</label>
+                  <input
+                    {...register('phone', { required: "Le numéro est requis" })}
+                    type="tel"
+                    className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all text-gray-900 dark:text-white"
+                    placeholder="+225 00 00 00 00 00"
+                  />
+                  {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message as string}</p>}
+                </div>
               </div>
 
               <div>
