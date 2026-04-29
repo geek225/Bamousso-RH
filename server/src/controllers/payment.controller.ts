@@ -42,10 +42,24 @@ export const initiatePayment = async (req: Request, res: Response) => {
     });
 
     if (response.data && response.data.data && response.data.data.checkout_url) {
+      const transactionId = response.data.data.transaction_id;
+
+      // Sauvegarde de la transaction en attente dans la DB
+      await prisma.payment.create({
+        data: {
+          amount: parseFloat(amount),
+          reference: `BAM-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          externalId: transactionId,
+          status: "PENDING",
+          companyId: companyId,
+          description: description || `Abonnement Bamousso - ${plan}`,
+        }
+      });
+
       return res.json({
         success: true,
         url: response.data.data.checkout_url,
-        transactionId: response.data.data.transaction_id
+        transactionId: transactionId
       });
     }
 
@@ -98,6 +112,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
       const extraEmployees = parseInt(data.metadata?.extraEmployees || '0');
 
       if (companyId) {
+        // 1. Mettre à jour l'entreprise
         const company = await (prisma.company.update({
           where: { id: companyId },
           data: {
@@ -109,6 +124,12 @@ export const handleWebhook = async (req: Request, res: Response) => {
           } as any,
           include: { users: { where: { role: 'COMPANY_ADMIN' }, take: 1 } }
         }) as any);
+
+        // 2. Mettre à jour le record de paiement
+        await prisma.payment.updateMany({
+          where: { externalId: data.transaction_id || data.id },
+          data: { status: "SUCCESS" }
+        });
 
         const adminEmail = company.users[0]?.email;
         const amount = data.amount || 0;
@@ -136,5 +157,46 @@ export const handleWebhook = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Webhook Error:", error);
     res.status(500).send('Webhook Error');
+  }
+};
+
+/**
+ * Vérifie l'état d'un paiement (appelé par le frontend après redirection)
+ */
+export const confirmPayment = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params; // Le token est l'externalId (transaction_id)
+
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Token requis." });
+    }
+
+    // On cherche le paiement dans notre DB
+    const payment = await prisma.payment.findFirst({
+      where: { externalId: token as string },
+      include: { company: true }
+    });
+
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Paiement introuvable." });
+    }
+
+    // Si le webhook a déjà fonctionné, le statut est SUCCESS
+    if (payment.status === "SUCCESS") {
+      return res.json({ success: true, status: "SUCCESS" });
+    }
+
+    // Sinon, on peut tenter une vérification directe auprès de GeniusPay (Optionnel mais recommandé)
+    // Pour l'instant, on se base sur notre DB qui sera mise à jour par le webhook.
+    // Si le statut est toujours PENDING, on renvoie false pour que le client réessaie ou attende.
+    
+    return res.json({ 
+      success: payment.status === "SUCCESS", 
+      status: payment.status 
+    });
+
+  } catch (error: any) {
+    console.error("Confirm Payment Error:", error);
+    res.status(500).json({ success: false, message: "Erreur lors de la confirmation." });
   }
 };

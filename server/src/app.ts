@@ -68,7 +68,7 @@ app.use("/api/leaves", leaveRoutes);            // Gestion des congés
 app.use("/api/attendances", attendanceRoutes);  // Pointage
 app.use("/api/documents", documentRoutes);      // Fiches de paie / Contrats
 app.use("/api/announcements", announcementRoutes); // Communications internes
-app.use("/api/payment", paymentRoutes);           // Paiements et Webhooks
+app.use("/api/payments", paymentRoutes);           // Paiements et Webhooks
 app.use("/api/admin", superAdminRoutes);               // SUPER_ADMIN & changement de mot de passe
 app.use("/api/analytics", analyticsRoutes);            // Analytics RH (Bamousso+)
 app.use("/api/cron", cronRoutes);                      // Tâches planifiées (Subscription check)
