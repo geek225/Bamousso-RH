@@ -133,9 +133,9 @@ const DashboardSuperAdmin = () => {
     const doc = new jsPDF();
     const tableData = filteredCompanies.map(c => [
       c.name,
-      `${c.manager?.firstName} ${c.manager?.lastName}`,
+      `${c.manager?.firstName ?? ''} ${c.manager?.lastName ?? ''}`.trim() || 'N/A',
       c.manager?.phone || 'N/A',
-      c.manager?.email,
+      c.manager?.email || 'N/A',
       PLAN_LABELS[c.plan] || c.plan,
       c.isLocked ? 'Suspendu' : 'Actif',
       new Date(c.createdAt).toLocaleDateString('fr-FR')

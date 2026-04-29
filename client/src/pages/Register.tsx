@@ -7,8 +7,8 @@ import { Eye, EyeOff, Building2, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const plans = [
-  { id: 'FITINI', name: 'FITINI', price: '3.800 FCFA', rawPrice: 3800, maxBase: 3 },
-  { id: 'LOUBA', name: 'LOUBA', price: '4.900 FCFA', rawPrice: 4900, maxBase: 5 },
+  { id: 'FITINI', name: 'FITINI', price: '3.800 FCFA', rawPrice: 3800, maxBase: 5 },
+  { id: 'LOUBA', name: 'LOUBA', price: '4.900 FCFA', rawPrice: 4900, maxBase: 20 },
   { id: 'KORO', name: 'Kôrô', price: '14.700 FCFA', rawPrice: 14700, maxBase: Infinity }
 ];
 
@@ -19,7 +19,7 @@ const Register = () => {
   const location = useLocation();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState(location.state?.selectedPlanId || 'LOUBA');
+  const [selectedPlan, setSelectedPlan] = useState(location.state?.selectedPlanId || 'FITINI');
   const [extraEmployees, setExtraEmployees] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
