@@ -294,7 +294,7 @@ export const toggleCompanyLock = async (req: AuthRequest, res: Response): Promis
  */
 export const getSystemLogs = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const logs = await prisma.systemLog.findMany({
+    const logs = await (prisma as any).systemLog.findMany({
       orderBy: { createdAt: 'desc' },
       take: 100, // Limite aux 100 derniers logs
     });

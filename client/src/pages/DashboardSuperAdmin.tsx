@@ -234,6 +234,7 @@ const DashboardSuperAdmin = () => {
               <p className="text-brand-accent font-bold uppercase tracking-[0.3em] text-xs">Gestion globale • Bamousso RH</p>
             </div>
           </div>
+          <div className="flex gap-4">
             <button 
               onClick={fetchLogs}
               disabled={logsLoading}
