@@ -132,9 +132,9 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
     const whereClause: any = {};
 
     // Filter by role if provided
-    if (role) whereClause.role = role;
+    if (role && typeof role === 'string') whereClause.role = role;
     // Filter by companyId si SUPER_ADMIN
-    if (companyId) whereClause.companyId = companyId;
+    if (companyId && typeof companyId === 'string') whereClause.companyId = companyId;
 
     // RBAC: filtrage multi-entreprise
     if (currentUser?.role !== "SUPER_ADMIN") {

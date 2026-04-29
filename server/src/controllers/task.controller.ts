@@ -31,8 +31,8 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
     if (user.role !== "SUPER_ADMIN") {
       whereClause.companyId = user.companyId;
     }
-    if (req.query.companyId && user.role === "SUPER_ADMIN") {
-      whereClause.companyId = String(req.query.companyId);
+    if (req.query.companyId && typeof req.query.companyId === 'string') {
+      whereClause.companyId = req.query.companyId;
     }
 
     // Filtrer par statut si fourni
@@ -90,6 +90,12 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 export const updateTask = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    if (typeof id !== 'string') {
+      return res.status(400).json({ message: "ID de tâche invalide." });
+    }
+    if (typeof id !== 'string') {
+      return res.status(400).json({ message: "ID de tâche invalide." });
+    }
     const { title, description, status, dueDate, assignedToId } = updateTaskSchema.parse(req.body);
     const user = req.user;
     if (!user) return res.status(401).json({ message: "Non authentifié." });
