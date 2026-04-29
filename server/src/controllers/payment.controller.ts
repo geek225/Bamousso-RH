@@ -68,6 +68,10 @@ import { generateSubscriptionPDF } from '../utils/pdfGenerator.js';
  * Webhook pour confirmer le paiement avec vérification de signature
  */
 export const handleWebhook = async (req: Request, res: Response) => {
+  console.log("--- GENIUSPAY WEBHOOK RECEIVED ---");
+  console.log("Headers:", JSON.stringify(req.headers, null, 2));
+  console.log("Body:", JSON.stringify(req.body, null, 2));
+
   try {
     const signature = req.headers['x-webhook-signature'] as string;
     const timestamp = req.headers['x-webhook-timestamp'] as string;
