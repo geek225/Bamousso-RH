@@ -126,24 +126,40 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
 export const getUsers = async (req: AuthRequest, res: Response) => {
   try {
-    const { role, companyId } = req.query;
+    const { role, companyId, departmentId } = req.query;
     const currentUser = req.user;
+
+    if (!currentUser) {
+      return res.status(401).json({ message: "Non authentifié." });
+    }
 
     const whereClause: any = {};
 
-    // Filter by role if provided
-    if (role && typeof role === 'string') whereClause.role = role;
-    // Filter by companyId si SUPER_ADMIN
-    if (companyId && typeof companyId === 'string') whereClause.companyId = companyId;
+    // Filter by role if provided and is a string
+    if (role && typeof role === 'string') {
+      whereClause.role = role;
+    }
 
-    // RBAC: filtrage multi-entreprise
-    if (currentUser?.role !== "SUPER_ADMIN") {
-      if (!currentUser?.companyId) {
-        return res.status(400).json({ message: "Compte sans entreprise associée" });
+    // Filter by departmentId if provided and is a string
+    if (departmentId && typeof departmentId === 'string') {
+      whereClause.departmentId = departmentId;
+    }
+
+    // SUPER_ADMIN can filter by companyId
+    if (currentUser.role === "SUPER_ADMIN") {
+      if (companyId && typeof companyId === 'string') {
+        whereClause.companyId = companyId;
+      }
+    } else {
+      // Other roles are restricted to their own company
+      if (!currentUser.companyId) {
+        return res.status(400).json({ message: "Compte utilisateur sans entreprise associée." });
       }
       whereClause.companyId = currentUser.companyId;
-      // Exclure SUPER_ADMIN des listes entreprise
-      whereClause.role = { not: "SUPER_ADMIN" };
+      // Exclude SUPER_ADMIN from company user lists
+      if (whereClause.role !== "SUPER_ADMIN") {
+         whereClause.NOT = { role: "SUPER_ADMIN" };
+      }
     }
 
     const users = await prisma.user.findMany({
