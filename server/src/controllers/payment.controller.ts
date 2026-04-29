@@ -78,18 +78,18 @@ export const handleWebhook = async (req: Request, res: Response) => {
     const webhookSecret = process.env.GENIUSPAY_WEBHOOK_SECRET;
 
     // --- DEBUG: Temporarily disabled signature verification ---
-    // if (webhookSecret && signature && timestamp) {
-    //   const payload = JSON.stringify(req.body);
-    //   const expectedSignature = crypto
-    //     .createHmac('sha256', webhookSecret)
-    //     .update(`${timestamp}.${payload}`)
-    //     .digest('hex');
+    if (webhookSecret && signature && timestamp) {
+      const payload = JSON.stringify(req.body);
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(`${timestamp}.${payload}`)
+        .digest('hex');
 
-    //   if (signature !== expectedSignature) {
-    //     console.error("Signature Webhook invalide !");
-    //     return res.status(401).send('Invalid signature');
-    //   }
-    // }
+      if (signature !== expectedSignature) {
+        console.error("Signature Webhook invalide !");
+        return res.status(401).send('Invalid signature');
+      }
+    }
 
     const { event, data } = req.body;
 
