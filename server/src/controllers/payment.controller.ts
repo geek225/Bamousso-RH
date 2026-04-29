@@ -44,6 +44,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
       headers: {
         'X-API-Key': apiKey,
         'X-API-Secret': apiSecret,
+        'Authorization': `Bearer ${apiSecret}`,
         'Content-Type': 'application/json'
       }
     });
