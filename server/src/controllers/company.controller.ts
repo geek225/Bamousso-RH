@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import prisma from "../utils/prisma.js";
 import { z } from "zod";
+import { uploadToSupabase } from "../utils/supabase.js";
 
 const createCompanySchema = z.object({
   name: z.string().min(3),
@@ -250,9 +251,21 @@ export const unlockCompany = async (req: Request, res: Response) => {
 export const updateLogo = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
-    const { logoUrl } = req.body;
+    const file = (req as any).file;
 
-    if (!id || !logoUrl) return res.status(400).json({ message: "ID et logoUrl requis" });
+    if (!id) return res.status(400).json({ message: "ID de l'entreprise requis" });
+
+    let logoUrl: string | undefined;
+
+    if (file) {
+      // Upload vers Supabase Storage
+      logoUrl = await uploadToSupabase(file);
+      if (!logoUrl) {
+        return res.status(500).json({ message: "Erreur lors de l'upload du fichier vers Supabase." });
+      }
+    } else {
+      return res.status(400).json({ message: "Aucun fichier de logo fourni." });
+    }
 
     const company = await prisma.company.update({
       where: { id: String(id) },

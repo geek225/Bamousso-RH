@@ -8,6 +8,6 @@ const router = Router();
 router.use(authenticate);
 
 router.get("/", getDocuments);
-router.post("/", authorize(["COMPANY_ADMIN", "HR_MANAGER", "HR_ASSISTANT"]), upload.single('file'), uploadDocument);
+router.post("/", authorize(["COMPANY_ADMIN", "HR_MANAGER", "HR_ASSISTANT"]), upload.single('document'), uploadDocument);
 
 export default router;

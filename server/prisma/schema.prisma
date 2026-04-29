@@ -35,6 +35,7 @@ model Company {
   users         User[] @relation("CompanyUsers")
   departments   Department[]
   payments      Payment[]
+  tasks         Task[]
 }
 
 /// Modèle Paiement (Payment)
@@ -104,6 +105,8 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  assignedTasks   Task[] @relation("AssignedTasks")
+  createdTasks    Task[] @relation("CreatedTasks")
 }
 
 /// Modèle Département (Department)
@@ -189,6 +192,23 @@ model Notification {
   userId    String?  
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+/// Modèle Tâche (Task)
+model Task {
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  status       String    @default("A_FAIRE") // A_FAIRE, EN_COURS, TERMINEE
+  dueDate      DateTime?
+  companyId    String
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  assignedToId String?
+  assignedTo   User?     @relation("AssignedTasks", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy    String
+  creator      User      @relation("CreatedTasks", fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 /// Modèles Annonces / Forum d'entreprise
