@@ -24,6 +24,9 @@ export const initiatePayment = async (req: Request, res: Response) => {
       return res.status(500).json({ success: false, message: errorMsg });
     }
 
+    // Log diagnostic (affiche juste le début pour vérification)
+    await logger.info(`Diagnostic Clés: KEY=${apiKey.substring(0, 10)}... SECRET=${apiSecret.substring(0, 10)}...`, null, "PaymentController");
+
     await logger.info("Initiating payment request", { amount, companyId, plan }, "PaymentController");
 
     const response = await axios.post('https://pay.genius.ci/api/v1/merchant/payments', {
