@@ -3,9 +3,11 @@ import api from '../utils/api';
 import { 
   Building2, CheckCircle, Ban, 
   X, Search, Filter, ShieldCheck, UserPlus, 
-  Wallet, MoreVertical
+  Wallet, MoreVertical, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface Company {
   id: string;
@@ -19,6 +21,7 @@ interface Company {
     firstName: string;
     lastName: string;
     email: string;
+    phone?: string;
   };
   _count?: {
     users: number;
@@ -38,12 +41,16 @@ const PLAN_LABELS: Record<string, string> = {
   FITINI: 'FITINI',
   LOUBA: 'LOUBA',
   KORO: 'Kôrô',
+  PIKIN: 'PIKIN',
+  BAMOUSSO: 'BAMOUSSO'
 };
 
 const PLAN_PRICES: Record<string, number> = {
   FITINI: 3800,
   LOUBA: 4900,
   KORO: 14700,
+  PIKIN: 3800,
+  BAMOUSSO: 4900
 };
 
 const DashboardSuperAdmin = () => {
@@ -126,8 +133,40 @@ const DashboardSuperAdmin = () => {
     }
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const tableData = filteredCompanies.map(c => [
+      c.name,
+      `${c.manager?.firstName} ${c.manager?.lastName}`,
+      c.manager?.phone || 'N/A',
+      c.manager?.email,
+      PLAN_LABELS[c.plan] || c.plan,
+      c.isLocked ? 'Suspendu' : 'Actif',
+      new Date(c.createdAt).toLocaleDateString('fr-FR')
+    ]);
+
+    doc.setFontSize(18);
+    doc.text('Liste des Entreprises Inscrites - Bamousso RH', 14, 20);
+    doc.setFontSize(11);
+    doc.text(`Généré le : ${new Date().toLocaleString()}`, 14, 30);
+
+    autoTable(doc, {
+      startY: 35,
+      head: [['Entreprise', 'Admin', 'Téléphone', 'Email', 'Plan', 'Statut', 'Inscription']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [255, 87, 34], textColor: 255 },
+      styles: { fontSize: 8 }
+    });
+
+    doc.save(`Bamousso_Entreprises_${new Date().getTime()}.pdf`);
+  };
+
   const filteredCompanies = companies.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         c.manager?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         c.manager?.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         c.manager?.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterPlan === 'ALL' || c.plan === filterPlan;
     return matchesSearch && matchesFilter;
   });
@@ -167,12 +206,20 @@ const DashboardSuperAdmin = () => {
               <p className="text-brand-accent font-bold uppercase tracking-[0.3em] text-xs">Gestion globale • Bamousso RH</p>
             </div>
           </div>
-          <button 
-            onClick={() => setIsAdminModalOpen(true)}
-            className="bg-brand-primary hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 shadow-xl shadow-brand-primary/20 transition-all active:scale-95 premium-glow"
-          >
-            <UserPlus className="w-5 h-5" /> Ajouter un Admin
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={exportToPDF}
+              className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 border border-white/10 transition-all active:scale-95"
+            >
+              <FileText className="w-5 h-5 text-brand-accent" /> Exporter PDF
+            </button>
+            <button 
+              onClick={() => setIsAdminModalOpen(true)}
+              className="bg-brand-primary hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 shadow-xl shadow-brand-primary/20 transition-all active:scale-95 premium-glow"
+            >
+              <UserPlus className="w-5 h-5" /> Ajouter un Admin
+            </button>
+          </div>
         </div>
       </motion.div>
 
@@ -248,6 +295,10 @@ const DashboardSuperAdmin = () => {
                   <div className="flex justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
                     <span>Administrateur</span>
                     <span className="text-gray-300">{company.manager?.firstName} {company.manager?.lastName}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                    <span>Contact / WhatsApp</span>
+                    <span className="text-brand-accent font-bold">{company.manager?.phone || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between text-[10px] font-black text-gray-500 uppercase tracking-widest">
                     <span>Effectif</span>

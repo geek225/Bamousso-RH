@@ -45,7 +45,7 @@ export const getAllCompanies = async (req: AuthRequest, res: Response): Promise<
           select: { users: true }
         },
         manager: {
-          select: { email: true, firstName: true, lastName: true }
+          select: { email: true, firstName: true, lastName: true, phone: true }
         }
       },
       orderBy: { createdAt: 'desc' }
