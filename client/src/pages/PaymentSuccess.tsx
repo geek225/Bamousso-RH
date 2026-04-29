@@ -13,15 +13,20 @@ const PaymentSuccess = () => {
   useEffect(() => {
     const verifyPayment = async () => {
       const token = searchParams.get('token');
+      const companyId = searchParams.get('companyId');
       
-      if (!token) {
-        // Si pas de token, c'est peut-être une redirection directe (simulation)
-        setStatus('success');
+      if (!token && !companyId) {
+        setStatus('error');
+        setMessage("Paramètres de confirmation manquants.");
         return;
       }
 
       try {
-        const response = await api.get(`/payment/confirm/${token}`);
+        const url = token 
+          ? `/payment/confirm/${token}` 
+          : `/payment/confirm/by-company/${companyId}`;
+          
+        const response = await api.get(url);
         if (response.data.success) {
           setStatus('success');
         } else {

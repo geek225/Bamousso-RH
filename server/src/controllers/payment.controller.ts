@@ -38,7 +38,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
         plan: plan,
         extraEmployees: req.body.extraEmployees || 0
       },
-      success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}`,
+      success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}&token={transaction_id}`,
       error_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
     }, {
       headers: {
@@ -184,21 +184,27 @@ export const handleWebhook = async (req: Request, res: Response) => {
  */
 export const confirmPayment = async (req: Request, res: Response) => {
   try {
-    const { token } = req.params; 
+    const { token, companyId } = req.params; 
 
-    if (!token) {
-      return res.status(400).json({ success: false, message: "Token requis." });
+    let payment;
+    if (token) {
+      payment = await prisma.payment.findFirst({
+        where: { externalId: token as string },
+        include: { company: true }
+      });
+    } else if (companyId) {
+      payment = await prisma.payment.findFirst({
+        where: { companyId: companyId as string },
+        orderBy: { createdAt: 'desc' },
+        include: { company: true }
+      });
     }
-
-    // On cherche le paiement
-    const payment = await prisma.payment.findFirst({
-      where: { externalId: token as string },
-      include: { company: true }
-    });
 
     if (!payment) {
       return res.status(404).json({ success: false, message: "Paiement introuvable." });
     }
+
+    const currentToken = payment.externalId;
 
     if (payment.status === "SUCCESS") {
       return res.json({ success: true, status: "SUCCESS" });
@@ -206,10 +212,12 @@ export const confirmPayment = async (req: Request, res: Response) => {
 
     // --- VÉRIFICATION DIRECTE AUPRÈS DE GENIUSPAY ---
     try {
+      if (!currentToken) throw new Error("ID transaction externe manquant.");
+
       const apiKey = process.env.GENIUSPAY_KEY;
       const apiSecret = process.env.GENIUSPAY_SECRET;
       
-      const response = await axios.get(`https://pay.genius.ci/api/v1/merchant/payments/${token}`, {
+      const response = await axios.get(`https://pay.genius.ci/api/v1/merchant/payments/${currentToken}`, {
         headers: {
           'X-API-Key': apiKey,
           'X-API-Secret': apiSecret

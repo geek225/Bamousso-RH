@@ -6,5 +6,6 @@ const router = Router();
 router.post('/initiate', initiatePayment);
 router.post('/webhook', handleWebhook);
 router.get('/confirm/:token', confirmPayment);
+router.get('/confirm/by-company/:companyId', confirmPayment);
 
 export default router;

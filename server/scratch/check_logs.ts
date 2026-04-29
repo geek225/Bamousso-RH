@@ -6,7 +6,7 @@ async function main() {
   console.log("Fetching latest system logs...");
   const logs = await prisma.systemLog.findMany({
     orderBy: { createdAt: 'desc' },
-    take: 10,
+    take: 50,
   });
 
   if (logs.length === 0) {
