@@ -33,7 +33,7 @@ const Payment = () => {
     setStatus('PROCESSING');
 
     try {
-      const response = await api.post('/payments/initiate', {
+      const response = await api.post('/payment/initiate', {
         amount: plan.finalPrice.toString(),
         description: `Abonnement Bamousso - Formule ${plan.name}`,
         companyId: companyId,

@@ -21,7 +21,7 @@ const PaymentSuccess = () => {
       }
 
       try {
-        const response = await api.get(`/payments/confirm/${token}`);
+        const response = await api.get(`/payment/confirm/${token}`);
         if (response.data.success) {
           setStatus('success');
         } else {
