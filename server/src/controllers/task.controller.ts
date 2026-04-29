@@ -116,7 +116,7 @@ import { Response } from "express";
      if (error instanceof z.ZodError) { 
        return res.status(400).json({ 
          message: "Données invalides", 
-         errors: error.errors, 
+         errors: error.issues, 
        }); 
      } 
  
@@ -166,7 +166,7 @@ import { Response } from "express";
      } 
  
      const updatedTask = await prisma.task.update({ 
-       where: { id }, 
+       where: { id: id as string }, 
        data: { 
          ...(title !== undefined && { title }), 
          ...(description !== undefined && { description }), 
@@ -181,7 +181,7 @@ import { Response } from "express";
      if (error instanceof z.ZodError) { 
        return res.status(400).json({ 
          message: "Données invalides", 
-         errors: error.errors, 
+         errors: error.issues, 
        }); 
      } 
  
@@ -199,7 +199,7 @@ import { Response } from "express";
      const user = req.user; 
      if (!user) return res.status(401).json({ message: "Non authentifié." }); 
  
-     const existingTask = await prisma.task.findUnique({ where: { id } }); 
+     const existingTask = await prisma.task.findUnique({ where: { id: id as string } }); 
      if (!existingTask) 
        return res.status(404).json({ message: "Tâche non trouvée." }); 
  
@@ -223,7 +223,7 @@ import { Response } from "express";
        }); 
      } 
  
-     await prisma.task.delete({ where: { id } }); 
+     await prisma.task.delete({ where: { id: id as string } }); 
  
      res.status(200).json({ message: "Tâche supprimée avec succès." }); 
    } catch (error: any) { 

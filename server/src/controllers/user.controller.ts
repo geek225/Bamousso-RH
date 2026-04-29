@@ -93,18 +93,7 @@ import { Response } from "express";
        }); 
  
        if (company) { 
-         const currentCount = company._count.users; 
-         const plan = company.plan || "FITINI"; 
- 
-         let limit = Infinity; 
-         if (plan === "FITINI") limit = 5; 
-         else if (plan === "LOUBA") limit = 20; 
- 
-         if (currentCount >= limit) { 
-           return res.status(403).json({ 
-             message: `Limite atteinte (${plan} - ${limit} utilisateurs max)`, 
-           }); 
-         } 
+         // La limite d'employés est déjà gérée par le middleware checkEmployeeLimit dans user.routes.ts
        } 
      } 
  
@@ -128,7 +117,7 @@ import { Response } from "express";
      res.status(201).json({ id: user.id, email: user.email }); 
    } catch (error: any) { 
      if (error instanceof z.ZodError) { 
-       return res.status(400).json({ message: "Données invalides", errors: error.errors }); 
+       return res.status(400).json({ message: "Données invalides", errors: error.issues }); 
      } 
  
      res.status(500).json({ message: "Erreur création utilisateur", error: error.message }); 
@@ -144,36 +133,38 @@ import { Response } from "express";
      const currentUser = req.user; 
      if (!currentUser) return res.status(401).json({ message: "Non authentifié." }); 
  
-     const { role, companyId, departmentId } = req.query; 
+     const role = req.query.role as string;
+     const companyId = req.query.companyId as string;
+     const departmentId = req.query.departmentId as string;
  
-     const validRoles = [ 
-       "SUPER_ADMIN", 
-       "COMPANY_ADMIN", 
-       "HR_MANAGER", 
-       "HR_ASSISTANT", 
-       "EMPLOYEE", 
-     ]; 
+     const validRoles = [
+       "SUPER_ADMIN",
+       "COMPANY_ADMIN",
+       "HR_MANAGER",
+       "HR_ASSISTANT",
+       "EMPLOYEE",
+     ];
  
-     const whereClause: Record<string, any> = {}; 
+     const whereClause: Record<string, any> = {};
  
-     if (role && typeof role === "string" && validRoles.includes(role)) { 
-       whereClause.role = role; 
-     } 
+     if (role && validRoles.includes(role)) {
+       whereClause.role = role as string;
+     }
  
-     if (departmentId && typeof departmentId === "string") { 
-       whereClause.departmentId = departmentId; 
-     } 
+     if (departmentId) {
+       whereClause.departmentId = departmentId as string;
+     }
  
-     if (currentUser.role === "SUPER_ADMIN") { 
-       if (companyId && typeof companyId === "string") { 
-         whereClause.companyId = companyId; 
+     if (currentUser.role === "SUPER_ADMIN") {
+       if (companyId) {
+         whereClause.companyId = companyId as string;
        } 
      } else { 
        if (!currentUser.companyId) { 
          return res.status(400).json({ message: "Pas d'entreprise liée." }); 
        } 
  
-       whereClause.companyId = currentUser.companyId; 
+       whereClause.companyId = currentUser.companyId as string; 
        whereClause.NOT = { role: "SUPER_ADMIN" }; 
      } 
  
@@ -214,7 +205,7 @@ import { Response } from "express";
  
      const data = updateUserSchema.parse(req.body); 
  
-     const targetUser = await prisma.user.findUnique({ where: { id } }); 
+     const targetUser = await prisma.user.findUnique({ where: { id: id as string } }); 
      if (!targetUser) return res.status(404).json({ message: "Utilisateur non trouvé" }); 
  
      const updateData: Record<string, any> = { 
@@ -236,17 +227,68 @@ import { Response } from "express";
      } 
  
      const updatedUser = await prisma.user.update({ 
-       where: { id }, 
+       where: { id: id as string }, 
        data: updateData, 
      }); 
  
      res.json(updatedUser); 
    } catch (error: any) { 
      if (error instanceof z.ZodError) { 
-       return res.status(400).json({ message: "Données invalides", errors: error.errors }); 
+       return res.status(400).json({ message: "Données invalides", errors: error.issues }); 
      } 
  
      res.status(500).json({ message: "Erreur update utilisateur", error: error.message }); 
+   } 
+ }; 
+ 
+ // ======================= 
+ // UPDATE PASSWORD 
+ // ======================= 
+ 
+ export const updateUserPassword = async (req: AuthRequest, res: Response) => { 
+   try { 
+     const { id } = req.params; 
+     const { password } = z.object({ password: z.string().min(6) }).parse(req.body); 
+ 
+     const hashedPassword = await bcrypt.hash(password, 10); 
+     await prisma.user.update({ 
+       where: { id: id as string }, 
+       data: { password: hashedPassword }, 
+     }); 
+ 
+     res.json({ message: "Mot de passe mis à jour" }); 
+   } catch (error: any) { 
+     res.status(500).json({ message: "Erreur mise à jour mot de passe", error: error.message }); 
+   } 
+ }; 
+ 
+ // ======================= 
+ // SUSPEND / ACTIVATE 
+ // ======================= 
+ 
+ export const suspendUser = async (req: AuthRequest, res: Response) => { 
+   try { 
+     const { id } = req.params; 
+     await prisma.user.update({ 
+       where: { id: id as string }, 
+       data: { status: "INACTIVE" }, 
+     }); 
+     res.json({ message: "Utilisateur suspendu" }); 
+   } catch (error: any) { 
+     res.status(500).json({ message: "Erreur suspension", error: error.message }); 
+   } 
+ }; 
+ 
+ export const activateUser = async (req: AuthRequest, res: Response) => { 
+   try { 
+     const { id } = req.params; 
+     await prisma.user.update({ 
+       where: { id: id as string }, 
+       data: { status: "ACTIVE" }, 
+     }); 
+     res.json({ message: "Utilisateur activé" }); 
+   } catch (error: any) { 
+     res.status(500).json({ message: "Erreur activation", error: error.message }); 
    } 
  }; 
  
@@ -266,7 +308,7 @@ import { Response } from "express";
        return res.status(403).json({ message: "Auto-suppression interdite" }); 
      } 
  
-     await prisma.user.delete({ where: { id } }); 
+     await prisma.user.delete({ where: { id: id as string } }); 
  
      res.json({ message: "Utilisateur supprimé" }); 
    } catch (error: any) { 
