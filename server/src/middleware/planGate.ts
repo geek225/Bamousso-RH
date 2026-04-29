@@ -17,7 +17,7 @@ const PLAN_HIERARCHY: Record<string, number> = {
 export const PLAN_LIMITS: Record<string, number> = {
   FITINI: 3,
   LOUBA: 5,
-  KORO: 100,
+  KORO: Infinity,
 };
 
 /**

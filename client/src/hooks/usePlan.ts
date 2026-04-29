@@ -15,7 +15,7 @@ const PLAN_LEVEL: Record<string, number> = {
 export const PLAN_MAX_EMPLOYEES: Record<string, number | null> = {
   FITINI: 3,
   LOUBA: 5,
-  KORO: 100, // ou Illimité selon votre choix
+  KORO: null, // Illimité
 };
 
 // Fonctionnalités disponibles par plan minimum requis

@@ -52,7 +52,7 @@ const PLAN_PRICES: Record<string, number> = {
 const PLAN_MAX_EMPLOYEES: Record<string, number> = {
   FITINI: 3,
   LOUBA: 5,
-  KORO: 100
+  KORO: 9999
 };
 
 const DashboardSuperAdmin = () => {

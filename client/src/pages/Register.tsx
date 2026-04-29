@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 const plans = [
   { id: 'FITINI', name: 'FITINI', price: '3.800 FCFA', rawPrice: 3800, maxBase: 3 },
   { id: 'LOUBA', name: 'LOUBA', price: '4.900 FCFA', rawPrice: 4900, maxBase: 5 },
-  { id: 'KORO', name: 'Kôrô', price: '14.700 FCFA', rawPrice: 14700, maxBase: 100 }
+  { id: 'KORO', name: 'Kôrô', price: '14.700 FCFA', rawPrice: 14700, maxBase: Infinity }
 ];
 
 const Register = () => {
