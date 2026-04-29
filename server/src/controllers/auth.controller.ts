@@ -115,7 +115,7 @@ export const registerCompany = async (req: Request, res: Response) => {
           subscriptionEndsAt: null,
           plan: plan || "FITINI",
           extraEmployees: extraEmployees || 0,
-          isLocked: true, // Verrouillé jusqu'au paiement
+          isLocked: false, // Changé de true à false pour éviter le message "suspendu" au départ
           lockedAt: null,
         },
       });
