@@ -31,7 +31,7 @@ const changePasswordSchema = z.object({
  */
 export const getAllCompanies = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-    const companies = await prisma.company.findMany({
+  const companies = await prisma.company.findMany({
       select: {
         id: true,
         name: true,
@@ -46,12 +46,24 @@ export const getAllCompanies = async (req: AuthRequest, res: Response): Promise<
         },
         manager: {
           select: { email: true, firstName: true, lastName: true, phone: true }
+        },
+        users: {
+          where: { role: 'COMPANY_ADMIN' },
+          take: 1,
+          select: { email: true, firstName: true, lastName: true, phone: true }
         }
       },
       orderBy: { createdAt: 'desc' }
     });
 
-    res.json(companies);
+    // Si manager est null, on utilise le premier COMPANY_ADMIN comme contact
+    const formatted = companies.map((c: any) => ({
+      ...c,
+      manager: c.manager || c.users?.[0] || null,
+      users: undefined
+    }));
+
+    res.json(formatted);
   } catch (error: any) {
     res.status(500).json({ message: "Erreur lors de la récupération des entreprises.", error: error.message });
   }
@@ -161,13 +173,19 @@ export const updateCompanyPlan = async (req: AuthRequest, res: Response): Promis
     const id = String(req.params.id);
     const { plan } = req.body;
 
-    if (!['FITINI', 'LOUBA', 'KORO', 'PIKIN', 'BAMOUSSO'].includes(plan)) {
-      return res.status(400).json({ message: "Plan invalide." });
+    if (!['FITINI', 'LOUBA', 'KORO'].includes(plan)) {
+      return res.status(400).json({ message: "Plan invalide. Utilisez FITINI, LOUBA ou KORO." });
     }
 
     const updated = await prisma.company.update({
       where: { id },
-      data: { plan, subscriptionStatus: 'ACTIVE', isLocked: false }
+      data: { 
+        plan, 
+        subscriptionStatus: 'ACTIVE', 
+        isActive: true,
+        isLocked: false,
+        subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // Donne 30 jours auto
+      }
     });
 
     res.json({ message: `Plan mis à jour : ${plan}`, company: updated });

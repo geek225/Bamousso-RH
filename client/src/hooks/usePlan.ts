@@ -7,18 +7,14 @@ import { useAuth } from '../context/AuthContext';
 // Hiérarchie des plans
 const PLAN_LEVEL: Record<string, number> = {
   FITINI: 1,
-  PIKIN: 1, // Backward compatibility
   LOUBA: 2,
-  BAMOUSSO: 2, // Backward compatibility
   KORO: 3,
 };
 
 // Limites d'employés
 export const PLAN_MAX_EMPLOYEES: Record<string, number | null> = {
   FITINI: 5,
-  PIKIN: 5,
   LOUBA: 20,
-  BAMOUSSO: 20,
   KORO: null, // Illimité
 };
 

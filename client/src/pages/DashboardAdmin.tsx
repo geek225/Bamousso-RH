@@ -7,11 +7,9 @@ import api from '../utils/api';
 import { usePlan, PLAN_MAX_EMPLOYEES } from '../hooks/usePlan';
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  FITINI:   { label: 'FITINI (Petit)',   color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  PIKIN:    { label: 'FITINI (Petit)',   color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  LOUBA:    { label: 'LOUBA (Moyen)',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  BAMOUSSO: { label: 'LOUBA (Moyen)',   color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
-  KORO:     { label: 'Kôrô (Grand)',    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  FITINI: { label: 'FITINI',    color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  LOUBA:  { label: 'LOUBA',    color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  KORO:   { label: 'Kôrô',     color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
 };
 
 const DashboardAdmin = () => {

@@ -6,17 +6,17 @@ import type { Response, NextFunction } from "express";
 import type { AuthRequest } from "./auth.js";
 import prisma from "../utils/prisma.js";
 
-// Hiérarchie des plans : PIKIN < BAMOUSSO < KORO
+// Hiérarchie des plans : FITINI < LOUBA < KORO
 const PLAN_HIERARCHY: Record<string, number> = {
-  PIKIN: 1,
-  BAMOUSSO: 2,
+  FITINI: 1,
+  LOUBA: 2,
   KORO: 3,
 };
 
 // Limites d'employés par plan
 export const PLAN_LIMITS: Record<string, number> = {
-  PIKIN: 20,
-  BAMOUSSO: 100,
+  FITINI: 5,
+  LOUBA: 20,
   KORO: Infinity,
 };
 
@@ -24,7 +24,7 @@ export const PLAN_LIMITS: Record<string, number> = {
  * Middleware vérifiant que le plan de l'entreprise est suffisant.
  * @param minPlan Plan minimum requis ("PIKIN" | "BAMOUSSO" | "KORO")
  */
-export const requirePlan = (minPlan: "PIKIN" | "BAMOUSSO" | "KORO") => {
+export const requirePlan = (minPlan: "FITINI" | "LOUBA" | "KORO") => {
   return async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
       const user = req.user;

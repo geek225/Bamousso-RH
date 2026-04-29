@@ -12,7 +12,7 @@ import autoTable from 'jspdf-autotable';
 interface Company {
   id: string;
   name: string;
-  plan: 'FITINI' | 'LOUBA' | 'KORO' | 'PIKIN' | 'BAMOUSSO';
+  plan: 'FITINI' | 'LOUBA' | 'KORO';
   subscriptionStatus: string;
   subscriptionEndsAt?: string | null;
   createdAt: string;
@@ -41,16 +41,12 @@ const PLAN_LABELS: Record<string, string> = {
   FITINI: 'FITINI',
   LOUBA: 'LOUBA',
   KORO: 'Kôrô',
-  PIKIN: 'PIKIN',
-  BAMOUSSO: 'BAMOUSSO'
 };
 
 const PLAN_PRICES: Record<string, number> = {
   FITINI: 3800,
   LOUBA: 4900,
   KORO: 14700,
-  PIKIN: 3800,
-  BAMOUSSO: 4900
 };
 
 const DashboardSuperAdmin = () => {

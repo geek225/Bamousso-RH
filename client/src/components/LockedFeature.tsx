@@ -8,14 +8,14 @@ interface LockedFeatureProps {
 }
 
 const PLAN_COLORS: Record<string, string> = {
-  BAMOUSSO: 'from-orange-400 to-amber-500',
+  LOUBA: 'from-orange-400 to-amber-500',
   KORO: 'from-purple-500 to-indigo-600',
 };
 
 const PLAN_LABELS: Record<string, string> = {
-  PIKIN: 'Pikin (Débutant)',
-  BAMOUSSO: 'Bamousso (Maman)',
-  KORO: 'Koro (Ancien)',
+  FITINI: 'FITINI',
+  LOUBA: 'LOUBA',
+  KORO: 'Kôrô',
 };
 
 const LockedFeature = ({ featureName, requiredPlan, onUpgrade }: LockedFeatureProps) => {

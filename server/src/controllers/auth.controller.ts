@@ -256,8 +256,12 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Identifiants invalides" });
     }
 
-    // Vérification si l'entreprise est active (sauf pour le Super Admin)
-    if (user.company && !user.company.isActive && user.role !== "SUPER_ADMIN") {
+    // Vérification si l'entreprise est active
+    // Les COMPANY_ADMIN peuvent toujours se connecter (même si l'entreprise est suspendue)
+    // pour accéder à la page de paiement ou voir leur statut.
+    // Seuls les simples employés/RH sont bloqués si l'entreprise est suspendue.
+    const blockedRoles = ['EMPLOYEE', 'HR_MANAGER', 'HR_ASSISTANT'];
+    if (user.company && !user.company.isActive && blockedRoles.includes(user.role)) {
       return res.status(403).json({ 
         message: "L'accès à cette entreprise a été suspendu. Veuillez contacter l'administrateur." 
       });
