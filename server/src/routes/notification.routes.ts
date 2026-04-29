@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../middleware/auth.js";
+import { requirePlan } from "../middleware/planGate.js";
 import {
   getNotifications,
   markAsRead,

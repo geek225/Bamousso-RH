@@ -19,6 +19,7 @@ import documentRoutes from "./routes/document.routes.js";
 import announcementRoutes from "./routes/announcement.routes.js";
 import departmentRoutes from "./routes/department.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+
 import paymentRoutes from "./routes/payment.routes.js";
 import superAdminRoutes from "./routes/superadmin.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
@@ -61,6 +62,7 @@ app.use("/api/companies", companyRoutes);     // Gestion des entreprises
 app.use("/api/employees", userRoutes);         // Annuaire employés (CRUD)
 app.use("/api/departments", departmentRoutes);       // Départements
 app.use("/api/notifications", notificationRoutes); // Notifications et annonces
+
 app.use("/api/leaves", leaveRoutes);            // Gestion des congés
 app.use("/api/attendances", attendanceRoutes);  // Pointage
 app.use("/api/documents", documentRoutes);      // Fiches de paie / Contrats
