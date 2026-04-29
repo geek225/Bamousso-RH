@@ -13,11 +13,11 @@ const PLAN_HIERARCHY: Record<string, number> = {
   KORO: 3,
 };
 
-// Limites d'employés par plan
+// Limites d'employés de BASE par plan
 export const PLAN_LIMITS: Record<string, number> = {
-  FITINI: 5,
-  LOUBA: 20,
-  KORO: Infinity,
+  FITINI: 3,
+  LOUBA: 5,
+  KORO: 100,
 };
 
 /**
@@ -78,19 +78,21 @@ export const checkEmployeeLimit = async (req: AuthRequest, res: Response, next: 
 
     const company = await prisma.company.findUnique({
       where: { id: user.companyId },
-      select: { plan: true, _count: { select: { users: true } } }
+      select: { plan: true, extraEmployees: true, _count: { select: { users: true } } }
     });
 
     if (!company) return next();
 
-    const limit = PLAN_LIMITS[company.plan] || 20;
+    const baseLimit = PLAN_LIMITS[company.plan] || 3;
+    const extraLimit = company.extraEmployees || 0;
+    const totalLimit = baseLimit + extraLimit;
     const currentCount = company._count.users;
 
-    if (currentCount >= limit) {
+    if (currentCount >= totalLimit) {
       return res.status(403).json({
-        message: `Limite d'employés atteinte (${currentCount}/${limit === Infinity ? '∞' : limit}). Passez à une formule supérieure.`,
+        message: `Limite d'employés atteinte (${currentCount}/${totalLimit}). Veuillez upgrader votre plan ou ajouter des employés supplémentaires.`,
         currentCount,
-        limit: limit === Infinity ? null : limit,
+        limit: totalLimit,
         currentPlan: company.plan,
         upgradeRequired: true,
       });

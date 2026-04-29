@@ -11,11 +11,11 @@ const PLAN_LEVEL: Record<string, number> = {
   KORO: 3,
 };
 
-// Limites d'employés
+// Limites d'employés (BASE INCLUSE)
 export const PLAN_MAX_EMPLOYEES: Record<string, number | null> = {
-  FITINI: 5,
-  LOUBA: 20,
-  KORO: null, // Illimité
+  FITINI: 3,
+  LOUBA: 5,
+  KORO: 100, // ou Illimité selon votre choix
 };
 
 // Fonctionnalités disponibles par plan minimum requis
@@ -59,7 +59,9 @@ export const usePlan = () => {
    */
   const maxEmployees = (): number | null => {
     if (isSuperAdmin) return null;
-    return PLAN_MAX_EMPLOYEES[plan] ?? 20;
+    const base = PLAN_MAX_EMPLOYEES[plan] || 3;
+    const extra = (company as any)?.extraEmployees || 0;
+    return base + extra;
   };
 
   /**
