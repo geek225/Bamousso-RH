@@ -3,7 +3,7 @@ import api from '../utils/api';
 import { 
   Building2, CheckCircle, Ban, 
   X, Search, Filter, ShieldCheck, UserPlus, 
-  Wallet, MoreVertical, FileText
+  Wallet, MoreVertical, FileText, Terminal
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import jsPDF from 'jspdf';
@@ -37,6 +37,15 @@ interface SuperAdmin {
   createdAt: string;
 }
 
+interface SystemLog {
+  id: string;
+  level: 'INFO' | 'WARN' | 'ERROR';
+  message: string;
+  details: any;
+  source: string;
+  createdAt: string;
+}
+
 const PLAN_LABELS: Record<string, string> = {
   FITINI: 'FITINI',
   LOUBA: 'LOUBA',
@@ -66,6 +75,9 @@ const DashboardSuperAdmin = () => {
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [logs, setLogs] = useState<SystemLog[]>([]);
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const [logsLoading, setLogsLoading] = useState(false);
 
   // Forms
   const [newAdmin, setNewAdmin] = useState({ email: '', password: '', firstName: '', lastName: '' });
@@ -132,6 +144,20 @@ const DashboardSuperAdmin = () => {
       alert(error.response?.data?.message || 'Erreur lors de la création');
     } finally {
       setAdminLoading(false);
+    }
+  };
+
+  const fetchLogs = async () => {
+    setLogsLoading(true);
+    try {
+      const res = await api.get('/admin/logs');
+      setLogs(res.data);
+      setIsLogsModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching logs', error);
+      alert('Erreur lors de la récupération des logs');
+    } finally {
+      setLogsLoading(false);
     }
   };
 
@@ -208,7 +234,13 @@ const DashboardSuperAdmin = () => {
               <p className="text-brand-accent font-bold uppercase tracking-[0.3em] text-xs">Gestion globale • Bamousso RH</p>
             </div>
           </div>
-          <div className="flex gap-4">
+            <button 
+              onClick={fetchLogs}
+              disabled={logsLoading}
+              className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 border border-white/10 transition-all active:scale-95"
+            >
+              <Terminal className={`w-5 h-5 ${logsLoading ? 'animate-spin' : 'text-brand-accent'}`} /> {logsLoading ? 'Chargement...' : 'Logs Système'}
+            </button>
             <button 
               onClick={exportToPDF}
               className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-3 border border-white/10 transition-all active:scale-95"
@@ -383,6 +415,48 @@ const DashboardSuperAdmin = () => {
                   {adminLoading ? 'Création...' : 'Créer le compte'}
                 </button>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* Logs Modal */}
+      <AnimatePresence>
+        {isLogsModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card rounded-[3rem] p-10 max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl border-white/20">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-3xl font-black text-white tracking-tight">Logs Système (100 derniers)</h3>
+                <button onClick={() => setIsLogsModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X className="w-6 h-6 text-gray-500" /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto space-y-4 pr-4 custom-scrollbar">
+                {logs.length === 0 ? (
+                  <p className="text-gray-500 text-center py-10">Aucun log disponible.</p>
+                ) : (
+                  logs.map(log => (
+                    <div key={log.id} className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${
+                          log.level === 'ERROR' ? 'bg-rose-500/20 text-rose-500' :
+                          log.level === 'WARN' ? 'bg-amber-500/20 text-amber-500' :
+                          'bg-emerald-500/20 text-emerald-500'
+                        }`}>
+                          {log.level}
+                        </span>
+                        <span className="text-[10px] text-gray-500 font-mono">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-white font-bold text-sm mb-2">{log.message}</p>
+                      {log.source && <p className="text-[10px] text-brand-accent font-black uppercase mb-2">Source: {log.source}</p>}
+                      {log.details && (
+                        <pre className="text-[10px] bg-black/30 p-3 rounded-lg text-gray-400 overflow-x-auto font-mono">
+                          {JSON.stringify(log.details, null, 2)}
+                        </pre>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
             </motion.div>
           </div>
         )}

@@ -11,6 +11,7 @@ import {
   changePassword,
   updateCompanyPlan,
   deleteCompany,
+  getSystemLogs,
 } from "../controllers/superadmin.controller.js";
 
 const router = Router();
@@ -25,6 +26,7 @@ router.post("/super-admins", authorize(["SUPER_ADMIN"]), createSuperAdmin);
 router.patch("/companies/:id/toggle-lock", authorize(["SUPER_ADMIN"]), toggleCompanyLock);
 router.patch("/companies/:id/plan", authorize(["SUPER_ADMIN"]), updateCompanyPlan);
 router.delete("/companies/:id", authorize(["SUPER_ADMIN"]), deleteCompany);
+router.get("/logs", authorize(["SUPER_ADMIN"]), getSystemLogs);
 
 // ─── Route accessible à tous les rôles (changer son propre mot de passe) ─────
 router.patch("/change-password", changePassword);

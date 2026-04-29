@@ -288,3 +288,19 @@ export const toggleCompanyLock = async (req: AuthRequest, res: Response): Promis
     res.status(500).json({ message: "Erreur lors du verrouillage.", error: error.message });
   }
 };
+
+/**
+ * Récupère les logs système (pour le débogage).
+ */
+export const getSystemLogs = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    const logs = await prisma.systemLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100, // Limite aux 100 derniers logs
+    });
+
+    res.json(logs);
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors de la récupération des logs.", error: error.message });
+  }
+};

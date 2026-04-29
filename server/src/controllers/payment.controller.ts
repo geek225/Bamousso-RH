@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import axios from 'axios';
 import crypto from 'crypto';
 import prisma from '../utils/prisma.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Initialise un paiement avec GeniusPay
@@ -18,9 +19,12 @@ export const initiatePayment = async (req: Request, res: Response) => {
     const apiSecret = process.env.GENIUSPAY_SECRET;
 
     if (!apiKey || !apiSecret) {
-      console.error("Clés GeniusPay manquantes dans .env");
-      return res.status(500).json({ success: false, message: "Configuration de paiement incomplète sur le serveur." });
+      const errorMsg = "Clés GeniusPay manquantes dans .env";
+      await logger.error(errorMsg, { apiKey: !!apiKey, apiSecret: !!apiSecret }, "PaymentController");
+      return res.status(500).json({ success: false, message: errorMsg });
     }
+
+    await logger.info("Initiating payment request", { amount, companyId, plan }, "PaymentController");
 
     const response = await axios.post('https://pay.genius.ci/api/v1/merchant/payments', {
       amount: parseInt(amount),
@@ -66,11 +70,13 @@ export const initiatePayment = async (req: Request, res: Response) => {
     throw new Error(response.data.message || "Réponse invalide de GeniusPay");
 
   } catch (error: any) {
-    console.error("GeniusPay Initiation Error:", error.response?.data || error.message);
+    const errorDetails = error.response?.data || error.message;
+    await logger.error("GeniusPay Initiation Error", errorDetails, "PaymentController");
+    
     res.status(500).json({ 
       success: false, 
       message: "Erreur lors de l'initialisation du paiement.",
-      error: error.response?.data || error.message 
+      error: errorDetails
     });
   }
 };

@@ -48,7 +48,8 @@ const Payment = () => {
       }
     } catch (error: any) {
       console.error("Payment Error:", error);
-      alert("Erreur lors de l'initialisation du paiement. Vérifiez que le serveur est lancé.");
+      const errorMsg = error.response?.data?.message || error.response?.data?.error || "Erreur de connexion au serveur.";
+      alert(`Erreur: ${errorMsg}`);
       setStatus('IDLE');
     }
   };

@@ -241,3 +241,12 @@ model ForumComment {
   
   createdAt DateTime @default(now())
 }
+
+model SystemLog {
+  id        String   @id @default(uuid())
+  level     String   // INFO, WARN, ERROR
+  message   String
+  details   Json?
+  source    String?  // ex: "PaymentController"
+  createdAt DateTime @default(now())
+}
