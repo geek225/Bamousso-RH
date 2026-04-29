@@ -23,6 +23,8 @@ import paymentRoutes from "./routes/payment.routes.js";
 import superAdminRoutes from "./routes/superadmin.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 import cronRoutes from "./routes/cron.routes.js";
+import salariesRoutes from "./routes/salaries.routes.js";
+import conflictsRoutes from "./routes/conflicts.routes.js";
 
 // Chargement des variables d'environnement
 dotenv.config();
@@ -67,6 +69,8 @@ app.use("/api/payments", paymentRoutes);           // Paiements
 app.use("/api/admin", superAdminRoutes);               // SUPER_ADMIN & changement de mot de passe
 app.use("/api/analytics", analyticsRoutes);            // Analytics RH (Bamousso+)
 app.use("/api/cron", cronRoutes);                      // Tâches planifiées (Subscription check)
+app.use("/api/salaries", salariesRoutes);
+app.use("/api/conflicts", conflictsRoutes);
 
 // Route de test pour vérifier que l'API est en ligne
 app.get("/", (req, res) => {

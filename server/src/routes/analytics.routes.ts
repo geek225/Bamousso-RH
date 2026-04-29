@@ -11,7 +11,7 @@ import {
 const router = Router();
 
 router.use(authenticate);
-router.use(requirePlan("BAMOUSSO")); // Analytics : Bamousso et Koro uniquement
+router.use(requirePlan("LOUBA")); // Analytics : LOUBA et Koro uniquement
 
 router.get("/summary", getAnalyticsSummary);
 router.get("/leaves-per-month", getLeavesPerMonth);
