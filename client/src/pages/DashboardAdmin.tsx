@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { usePlan, PLAN_MAX_EMPLOYEES } from '../hooks/usePlan';
+import { supabase } from '../utils/supabase';
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
   FITINI: { label: 'FITINI',    color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
@@ -17,19 +18,30 @@ const DashboardAdmin = () => {
   const { plan, canUse } = usePlan();
   const [stats, setStats] = useState({ employees: 0, departments: 0 });
 
+  const fetchStats = async () => {
+    try {
+      const [empRes, depRes] = await Promise.all([
+        api.get('/employees'),
+        api.get('/departments')
+      ]);
+      setStats({ employees: empRes.data.length, departments: depRes.data.length });
+    } catch (error) {
+      console.error("Erreur lors du chargement des statistiques", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [empRes, depRes] = await Promise.all([
-          api.get('/employees'),
-          api.get('/departments')
-        ]);
-        setStats({ employees: empRes.data.length, departments: depRes.data.length });
-      } catch (error) {
-        console.error("Erreur lors du chargement des statistiques", error);
-      }
-    };
     void fetchStats();
+
+    const channel = supabase
+      .channel('dashboard-stats')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'User' }, () => void fetchStats())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'Department' }, () => void fetchStats())
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, []);
 
   const maxEmp = PLAN_MAX_EMPLOYEES[plan];

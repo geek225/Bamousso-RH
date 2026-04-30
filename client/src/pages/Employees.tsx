@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 // Force redeploy - 2026-04-30
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Lock, Unlock, Download } from 'lucide-react';
+import { Lock, Unlock, Download, Trash2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -124,6 +124,21 @@ const Employees = () => {
       console.error(err);
       alert('Erreur lors de la modification du statut.');
       void fetchEmployees(); // Revert on error
+    }
+  };
+
+  const handleDeleteEmployee = async (id: string, name: string) => {
+    if (!window.confirm(`ATTENTION : Êtes-vous sûr de vouloir supprimer définitivement l'employé ${name} ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      await api.delete(`/employees/${id}`);
+      setEmployees(prev => prev.filter(e => e.id !== id));
+      alert('Employé supprimé avec succès.');
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Erreur lors de la suppression.');
     }
   };
 
@@ -309,6 +324,16 @@ const Employees = () => {
                           }`}
                         >
                           {e.status === 'INACTIVE' || e.status === 'SUSPENDED' ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                        </button>
+                      )}
+
+                      {(user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER') && e.id !== user?.id && (
+                        <button
+                          onClick={() => handleDeleteEmployee(e.id, `${e.firstName} ${e.lastName}`)}
+                          title="Supprimer l'employé"
+                          className="p-2 bg-rose-500/10 text-rose-600 rounded hover:bg-rose-500/20 transition"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       )}
                     </div>

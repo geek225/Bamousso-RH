@@ -8,6 +8,7 @@ import { TrendingUp, Users, Calendar, Clock, AlertTriangle } from 'lucide-react'
 import api from '../utils/api';
 import LockedFeature from '../components/LockedFeature';
 import { usePlan } from '../hooks/usePlan';
+import { supabase } from '../utils/supabase';
 
 interface Summary {
   totalEmployees: number;
@@ -27,29 +28,42 @@ const Analytics = () => {
   const [workforceData, setWorkforceData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchAll = async () => {
+    try {
+      const [s, l, a, w] = await Promise.all([
+        api.get('/analytics/summary'),
+        api.get('/analytics/leaves-per-month'),
+        api.get('/analytics/attendance-trend'),
+        api.get('/analytics/workforce-evolution'),
+      ]);
+      setSummary(s.data);
+      setLeavesData(l.data);
+      setAttendanceData(a.data);
+      setWorkforceData(w.data);
+    } catch (e) {
+      console.error('Erreur analytics:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!canUse('analytics')) { setLoading(false); return; }
 
-    const fetchAll = async () => {
-      try {
-        const [s, l, a, w] = await Promise.all([
-          api.get('/analytics/summary'),
-          api.get('/analytics/leaves-per-month'),
-          api.get('/analytics/attendance-trend'),
-          api.get('/analytics/workforce-evolution'),
-        ]);
-        setSummary(s.data);
-        setLeavesData(l.data);
-        setAttendanceData(a.data);
-        setWorkforceData(w.data);
-      } catch (e) {
-        console.error('Erreur analytics:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
     void fetchAll();
-  }, []);
+
+    // Real-time subscription pour mettre à jour les graphiques
+    const channel = supabase
+      .channel('analytics-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'User' }, () => void fetchAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'Attendance' }, () => void fetchAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'Leave' }, () => void fetchAll())
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [canUse]);
 
   if (!canUse('analytics')) {
     return <LockedFeature featureName="Analytique RH" requiredPlan={requiredPlanFor('analytics')} />;
