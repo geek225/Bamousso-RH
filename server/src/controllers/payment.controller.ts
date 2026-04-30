@@ -120,7 +120,18 @@ export const handleWebhook = async (req: Request, res: Response) => {
     if (isSuccess && data) {
       const companyId = data.metadata?.companyId;
       const extraEmployees = parseInt(data.metadata?.extraEmployees || '0');
-      let plan = data.metadata?.plan || 'FITINI';
+      let plan = data.metadata?.plan;
+
+      // Fallback: chercher le paiement correspondant pour retrouver le plan
+      if (!plan) {
+        const p = await prisma.payment.findFirst({
+          where: { externalId: (data.transaction_id || data.id || data.reference || '').toString() }
+        });
+        if (p && p.description && p.description.includes('- ')) {
+          plan = p.description.split('- ')[1];
+        }
+      }
+      if (!plan) plan = 'FITINI';
 
       // Normalisation du plan
       plan = plan.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -226,7 +237,14 @@ export const confirmPayment = async (req: Request, res: Response) => {
       const externalData = response.data.data;
       if (externalData.status === 'completed' || externalData.status === 'SUCCESS') {
         const companyId = payment.companyId;
-        let plan = externalData.metadata?.plan || 'FITINI';
+        
+        // On récupère le plan depuis les métadonnées OU depuis la description du paiement
+        let plan = externalData.metadata?.plan;
+        if (!plan && payment.description && payment.description.includes('- ')) {
+          plan = payment.description.split('- ')[1];
+        }
+        if (!plan) plan = 'FITINI';
+        
         plan = plan.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
         await prisma.company.update({
