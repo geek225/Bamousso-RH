@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
+const rawApiUrl = import.meta.env.VITE_API_URL || (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3001');
+// On enlève le /api à la fin s'il existe pour éviter le doublon car on le rajoute après
+export const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
