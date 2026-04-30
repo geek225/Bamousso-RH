@@ -25,6 +25,16 @@ export const createAnnouncement = async (req: Request, res: Response): Promise<a
         authorId,
         fileUrl: fileUrl || undefined,
         fileType: fileType || undefined,
+      },
+      include: { author: true }
+    });
+
+    // Créer une notification pour toute l'entreprise
+    await prisma.notification.create({
+      data: {
+        title: `Nouvelle annonce : ${title}`,
+        message: content.substring(0, 100) + (content.length > 100 ? "..." : ""),
+        companyId: post.author.companyId,
       }
     });
 

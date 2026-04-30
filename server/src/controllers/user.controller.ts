@@ -28,6 +28,7 @@ import { Response } from "express";
    departmentId: z.string().optional(), 
    managerId: z.string().optional(), 
    baseSalary: z.number().optional(),
+   salaryCurrency: z.string().optional(),
    bankDetails: z.string().optional(),
  }); 
  
@@ -187,6 +188,7 @@ import { Response } from "express";
          departmentId: true, 
          managerId: true, 
          baseSalary: true,
+         salaryCurrency: true,
          bankDetails: true,
        }, 
      }); 
@@ -227,6 +229,7 @@ import { Response } from "express";
        ...(data.departmentId !== undefined && { departmentId: data.departmentId }), 
        ...(data.managerId !== undefined && { managerId: data.managerId }), 
        ...(data.baseSalary !== undefined && { baseSalary: data.baseSalary }),
+       ...(req.body.salaryCurrency !== undefined && { salaryCurrency: req.body.salaryCurrency }),
        ...(data.bankDetails !== undefined && { bankDetails: data.bankDetails }),
      }; 
  

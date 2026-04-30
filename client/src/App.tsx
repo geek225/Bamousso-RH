@@ -32,71 +32,75 @@ import Conflicts from './pages/Conflicts';
 import Explanations from './pages/Explanations';
 import Salaries from './pages/Salaries';
 
+import { NotificationProvider } from './context/NotificationContext';
+
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/payment-cancelled" element={<PaymentCancelled />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+        <NotificationProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/payment" element={<Payment />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/locked" element={<Locked />} />
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/locked" element={<Locked />} />
 
-              <Route element={<MainLayout />}>
-                <Route path="/unauthorized" element={<Unauthorized />} />
-                <Route path="/dashboard" element={<DashboardRedirect />} />
+                <Route element={<MainLayout />}>
+                  <Route path="/unauthorized" element={<Unauthorized />} />
+                  <Route path="/dashboard" element={<DashboardRedirect />} />
 
-                {/* Super Admin Route */}
-                <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
-                  <Route path="/dashboard/super-admin" element={<DashboardSuperAdmin />} />
+                  {/* Super Admin Route */}
+                  <Route element={<ProtectedRoute allowedRoles={['SUPER_ADMIN']} />}>
+                    <Route path="/dashboard/super-admin" element={<DashboardSuperAdmin />} />
+                  </Route>
+
+                  {/* Modules protégés par rôle (RH/Admin) */}
+                  <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']} />}>
+                    <Route path="/dashboard/admin" element={<DashboardAdmin />} />
+                  </Route>
+
+                  <Route element={<ProtectedRoute allowedRoles={['HR_MANAGER', 'HR_ASSISTANT']} />}>
+                    <Route path="/dashboard/hr" element={<DashboardHR />} />
+                  </Route>
+
+                  <Route element={<ProtectedRoute allowedRoles={['EMPLOYEE']} />}>
+                    <Route path="/dashboard/employee" element={<DashboardEmployee />} />
+                  </Route>
+
+                  {/* Pages RH */}
+                  <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN', 'HR_MANAGER', 'HR_ASSISTANT']} />}>
+                    <Route path="/employees" element={<Employees />} />
+                    <Route path="/departments" element={<Departments />} />
+                    <Route path="/settings" element={<Settings />} />
+                  </Route>
+
+                  {/* Modules accessibles à tous selon forfait */}
+                  <Route path="/leaves" element={<Leaves />} />
+                  <Route path="/attendance" element={<Attendance />} />
+                  <Route path="/documents" element={<Documents />} />
+                  <Route path="/announcements" element={<Announcements />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/tasks" element={<Tasks />} />
+                  <Route path="/messaging" element={<Messaging />} />
+                  <Route path="/conflicts" element={<Conflicts />} />
+                  <Route path="/explanations" element={<Explanations />} />
+                  <Route path="/salaries" element={<Salaries />} />
                 </Route>
-
-                {/* Modules protégés par rôle (RH/Admin) */}
-                <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']} />}>
-                  <Route path="/dashboard/admin" element={<DashboardAdmin />} />
-                </Route>
-
-                <Route element={<ProtectedRoute allowedRoles={['HR_MANAGER', 'HR_ASSISTANT']} />}>
-                  <Route path="/dashboard/hr" element={<DashboardHR />} />
-                </Route>
-
-                <Route element={<ProtectedRoute allowedRoles={['EMPLOYEE']} />}>
-                  <Route path="/dashboard/employee" element={<DashboardEmployee />} />
-                </Route>
-
-                {/* Pages RH */}
-                <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN', 'HR_MANAGER', 'HR_ASSISTANT']} />}>
-                  <Route path="/employees" element={<Employees />} />
-                  <Route path="/departments" element={<Departments />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Route>
-
-                {/* Modules accessibles à tous selon forfait */}
-                <Route path="/leaves" element={<Leaves />} />
-                <Route path="/attendance" element={<Attendance />} />
-                <Route path="/documents" element={<Documents />} />
-                <Route path="/announcements" element={<Announcements />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="/messaging" element={<Messaging />} />
-                <Route path="/conflicts" element={<Conflicts />} />
-                <Route path="/explanations" element={<Explanations />} />
-                <Route path="/salaries" element={<Salaries />} />
               </Route>
-            </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );

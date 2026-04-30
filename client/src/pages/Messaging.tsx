@@ -31,7 +31,9 @@ const Messaging = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [search, setSearch] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,7 +69,7 @@ const Messaging = () => {
     if (selectedContact) {
       void fetchMessages(selectedContact.id);
 
-      // Real-time subscription
+      // Real-time subscription - Optimisé
       const channel = supabase
         .channel(`chat-${selectedContact.id}`)
         .on('postgres_changes', {
@@ -76,12 +78,10 @@ const Messaging = () => {
           table: 'Message',
         }, (payload) => {
           const msg = payload.new as Message;
-          // Si le message est entre moi et le contact sélectionné
           if ((msg.senderId === selectedContact.id && msg.recipientId === user?.id) ||
               (msg.senderId === user?.id && msg.recipientId === selectedContact.id)) {
             setMessages(prev => {
-              // Éviter les doublons si on vient d'envoyer le message
-              if (prev.find(m => m.id === msg.id)) return prev;
+              if (prev.some(m => m.id === msg.id)) return prev;
               return [...prev, msg];
             });
           }
@@ -94,19 +94,60 @@ const Messaging = () => {
     }
   }, [selectedContact, user?.id]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('documents') // On utilise le bucket existant 'documents'
+        .upload(`chat/${fileName}`, file);
+
+      if (error) throw error;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(data.path);
+        
+      return publicUrl;
+    } catch (error) {
+      console.error('Upload error', error);
+      return null;
+    }
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedContact) return;
+    if ((!newMessage.trim() && !selectedFile) || !selectedContact) return;
 
+    setIsUploading(true);
     try {
+      let attachmentUrl = undefined;
+      let attachmentType = undefined;
+
+      if (selectedFile) {
+        attachmentUrl = await uploadFile(selectedFile);
+        attachmentType = selectedFile.type;
+      }
+
       const res = await api.post('/messages', {
         recipientId: selectedContact.id,
-        content: newMessage
+        content: newMessage || (selectedFile ? `Fichier envoyé : ${selectedFile.name}` : ''),
+        attachmentUrl,
+        attachmentType
       });
+      
       setMessages(prev => [...prev, res.data]);
       setNewMessage('');
+      setSelectedFile(null);
     } catch (error) {
       console.error('Error sending message', error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -154,11 +195,6 @@ const Messaging = () => {
                 ) : null}
               </button>
             ))}
-            {filteredContacts.length === 0 && (
-              <div className="text-center py-10">
-                <p className="text-gray-500 text-sm font-bold italic">Aucun contact trouvé.</p>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -192,6 +228,17 @@ const Messaging = () => {
                     <div key={msg.id} className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
                       <div className={`p-4 rounded-2xl max-w-md shadow-lg ${msg.senderId === user?.id ? 'bg-brand-primary text-white rounded-br-none' : 'bg-white/5 border border-white/10 text-white rounded-bl-none'}`}>
                         <p className="text-sm font-medium leading-relaxed">{msg.content}</p>
+                        {msg.attachmentUrl && (
+                          <div className="mt-2 rounded-lg overflow-hidden border border-white/10">
+                            {msg.attachmentType?.startsWith('image/') ? (
+                              <img src={msg.attachmentUrl} alt="pj" className="max-w-full h-auto cursor-pointer" onClick={() => window.open(msg.attachmentUrl)} />
+                            ) : (
+                              <a href={msg.attachmentUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 p-2 bg-black/20 text-[10px] font-bold">
+                                <Paperclip className="w-4 h-4" /> Voir la pièce jointe
+                              </a>
+                            )}
+                          </div>
+                        )}
                         <p className={`text-[9px] font-black mt-2 uppercase tracking-widest ${msg.senderId === user?.id ? 'text-white/60' : 'text-gray-500'}`}>
                           {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
@@ -203,8 +250,27 @@ const Messaging = () => {
             </div>
 
             <div className="p-6 bg-white/5 border-t border-white/5 backdrop-blur-xl">
+              {selectedFile && (
+                <div className="mb-4 p-3 bg-brand-primary/10 border border-brand-primary/20 rounded-xl flex justify-between items-center animate-in slide-in-from-bottom-2">
+                  <div className="flex items-center gap-2">
+                    <Paperclip className="w-4 h-4 text-brand-primary" />
+                    <span className="text-xs text-white font-bold">{selectedFile.name}</span>
+                  </div>
+                  <button onClick={() => setSelectedFile(null)} className="p-1 hover:bg-white/10 rounded-full"><X className="w-4 h-4 text-gray-500" /></button>
+                </div>
+              )}
               <form onSubmit={handleSend} className="flex items-center gap-4">
-                <button type="button" className="p-4 hover:bg-white/10 rounded-2xl text-gray-500 transition-colors hover:text-white group">
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-4 hover:bg-white/10 rounded-2xl text-gray-500 transition-colors hover:text-white group"
+                >
                   <Paperclip className="w-6 h-6 transition-transform group-hover:scale-110" />
                 </button>
                 <div className="flex-1 relative">
@@ -218,10 +284,10 @@ const Messaging = () => {
                 </div>
                 <button 
                   type="submit"
-                  disabled={!newMessage.trim()}
+                  disabled={(!newMessage.trim() && !selectedFile) || isUploading}
                   className="bg-brand-primary text-white p-4 rounded-2xl shadow-lg shadow-brand-primary/20 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all"
                 >
-                  <Send className="w-6 h-6" />
+                  {isUploading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Send className="w-6 h-6" />}
                 </button>
               </form>
             </div>

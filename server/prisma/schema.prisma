@@ -73,6 +73,7 @@ model User {
   status    String   @default("ACTIVE") // INVITED | ACTIVE | INACTIVE
   
   baseSalary Float?    // Salaire de base pour la paie
+  salaryCurrency String @default("XOF") // Devise (FCFA, etc.)
   bankDetails String?   // Infos bancaires (RIB, etc.)
 
   passwordResetToken     String?
@@ -212,6 +213,7 @@ model Notification {
   title     String
   message   String
   userId    String?  
+  companyId String?  // Pour les annonces globales à l'entreprise
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }

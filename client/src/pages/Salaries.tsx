@@ -8,14 +8,23 @@ interface SalaryEmployee {
   firstName: string;
   lastName: string;
   baseSalary: number | null;
+  salaryCurrency: string;
   bankDetails: string | null;
   jobTitle: string | null;
 }
+
+const CURRENCIES = [
+  { code: 'XOF', label: 'FCFA' },
+  { code: 'EUR', label: 'Euro (€)' },
+  { code: 'USD', label: 'Dollar ($)' },
+  { code: 'GNF', label: 'FG (Guinée)' },
+];
 
 const Salaries = () => {
   const [employees, setEmployees] = useState<SalaryEmployee[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newSalary, setNewSalary] = useState<number>(0);
+  const [newCurrency, setNewCurrency] = useState<string>('XOF');
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchSalaries = async () => {
@@ -33,11 +42,15 @@ const Salaries = () => {
 
   const handleUpdateSalary = async (id: string) => {
     try {
-      await api.put(`/users/${id}`, { baseSalary: newSalary });
+      await api.put(`/employees/${id}`, { 
+        baseSalary: newSalary,
+        salaryCurrency: newCurrency 
+      });
       setEditingId(null);
       void fetchSalaries();
     } catch (error) {
       console.error('Error updating salary', error);
+      alert('Erreur lors de la mise à jour du salaire.');
     }
   };
 
@@ -88,7 +101,7 @@ const Salaries = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="glass-card p-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-emerald-600/10 to-emerald-900/10">
           <Wallet className="w-8 h-8 text-emerald-500 mb-6" />
-          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Masse Salariale / Mois</p>
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Masse Salariale Totale / Mois (FCFA)</p>
           <p className="text-3xl font-black text-white tracking-tighter">{totalMasse.toLocaleString()} FCFA</p>
         </div>
         <div className="glass-card p-8 rounded-[2rem] border border-white/5">
@@ -112,6 +125,7 @@ const Salaries = () => {
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Employé</th>
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Poste</th>
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Salaire de base</th>
+                <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Devise</th>
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Infos Bancaires</th>
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] text-right">Actions</th>
               </tr>
@@ -137,7 +151,20 @@ const Salaries = () => {
                         className="bg-white/5 border border-brand-primary/50 p-2 rounded-lg text-white font-bold w-32 outline-none"
                       />
                     ) : (
-                      <span className="text-white font-black">{(emp.baseSalary || 0).toLocaleString()} FCFA</span>
+                      <span className="text-white font-black">{(emp.baseSalary || 0).toLocaleString()}</span>
+                    )}
+                  </td>
+                  <td className="py-6">
+                    {editingId === emp.id ? (
+                      <select 
+                        value={newCurrency} 
+                        onChange={e => setNewCurrency(e.target.value)}
+                        className="bg-white/5 border border-white/10 p-2 rounded-lg text-white font-bold outline-none"
+                      >
+                        {CURRENCIES.map(c => <option key={c.code} value={c.code} className="bg-brand-900">{c.label}</option>)}
+                      </select>
+                    ) : (
+                      <span className="bg-brand-primary/10 text-brand-primary px-2 py-1 rounded text-[10px] font-black">{emp.salaryCurrency}</span>
                     )}
                   </td>
                   <td className="py-6 text-gray-500 text-xs font-mono">{emp.bankDetails || '--'}</td>
@@ -156,6 +183,7 @@ const Salaries = () => {
                         onClick={() => {
                           setEditingId(emp.id);
                           setNewSalary(emp.baseSalary || 0);
+                          setNewCurrency(emp.salaryCurrency || 'XOF');
                         }}
                         className="p-2 bg-white/5 text-gray-400 rounded-lg hover:text-white transition-all opacity-0 group-hover:opacity-100"
                       >
@@ -167,7 +195,7 @@ const Salaries = () => {
               ))}
               {employees.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-20 text-center">
+                  <td colSpan={6} className="py-20 text-center">
                     <div className="flex flex-col items-center gap-4">
                       <Banknote className="w-12 h-12 text-gray-800" />
                       <p className="text-gray-600 font-bold">Aucun employé trouvé.</p>
