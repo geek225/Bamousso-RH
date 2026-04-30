@@ -38,7 +38,7 @@ export const initiatePayment = async (req: Request, res: Response) => {
         plan: plan,
         extraEmployees: req.body.extraEmployees || 0
       },
-      success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}&token={transaction_id}`,
+      success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}`,
       error_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
     }, {
       headers: {
@@ -187,12 +187,16 @@ export const confirmPayment = async (req: Request, res: Response) => {
     const { token, companyId } = req.params; 
 
     let payment;
-    if (token) {
+    // On n'utilise le token que s'il est présent et qu'il n'est pas le placeholder {transaction_id}
+    if (token && token !== '{transaction_id}' && !token.includes('{')) {
       payment = await prisma.payment.findFirst({
         where: { externalId: token as string },
         include: { company: true }
       });
-    } else if (companyId) {
+    } 
+    
+    // Si on n'a pas trouvé par token, on cherche le dernier paiement de l'entreprise
+    if (!payment && companyId) {
       payment = await prisma.payment.findFirst({
         where: { companyId: companyId as string },
         orderBy: { createdAt: 'desc' },

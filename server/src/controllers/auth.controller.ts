@@ -280,6 +280,12 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: "1d" }
     );
 
+    // Mise à jour du statut en ligne
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { isOnline: true }
+    });
+
     // Retour des informations utilisateur et du token au client
     res.json({ 
       token, 
