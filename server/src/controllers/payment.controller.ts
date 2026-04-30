@@ -3,6 +3,8 @@ import axios from 'axios';
 import crypto from 'crypto';
 import prisma from '../utils/prisma.js';
 import { logger } from '../utils/logger.js';
+import { sendSubscriptionConfirmation, sendAdminSubscriptionNotification } from '../utils/mailer.js';
+import { generateSubscriptionPDF } from '../utils/pdfGenerator.js';
 
 /**
  * Initialise un paiement avec GeniusPay
@@ -53,14 +55,14 @@ export const initiatePayment = async (req: Request, res: Response) => {
     });
 
     if (response.data && response.data.data && response.data.data.checkout_url) {
-      const transactionId = response.data.data.transaction_id;
+      const transactionId = response.data.data.transaction_id || response.data.data.id || response.data.data.reference;
 
       // Sauvegarde de la transaction en attente dans la DB
       await prisma.payment.create({
         data: {
           amount: parseFloat(amount),
           reference: `BAM-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-          externalId: transactionId,
+          externalId: transactionId.toString(),
           status: "PENDING",
           companyId: companyId,
           description: description || `Abonnement Bamousso - ${plan}`,
@@ -88,9 +90,6 @@ export const initiatePayment = async (req: Request, res: Response) => {
   }
 };
 
-import { sendSubscriptionConfirmation, sendAdminSubscriptionNotification } from '../utils/mailer.js';
-import { generateSubscriptionPDF } from '../utils/pdfGenerator.js';
-
 /**
  * Webhook pour confirmer le paiement avec vérification de signature
  */
@@ -102,7 +101,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
     const timestamp = req.headers['x-webhook-timestamp'] as string;
     const webhookSecret = process.env.GENIUSPAY_WEBHOOK_SECRET;
 
-    // Signature verification logic...
+    // Signature verification logic
     if (webhookSecret && signature && timestamp) {
       const payload = JSON.stringify(req.body);
       const expectedSignature = crypto
@@ -112,7 +111,6 @@ export const handleWebhook = async (req: Request, res: Response) => {
 
       if (signature !== expectedSignature) {
         await logger.warn("Signature Webhook invalide", { received: signature, expected: expectedSignature }, "PaymentController");
-        // return res.status(401).send('Invalid signature'); // Temporairement permissif pour le debug
       }
     }
 
@@ -137,20 +135,20 @@ export const handleWebhook = async (req: Request, res: Response) => {
             isActive: true,
             isLocked: false,
             extraEmployees: extraEmployees,
-            subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // +30 jours
+            subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
           } as any,
           include: { users: { where: { role: 'COMPANY_ADMIN' }, take: 1 } }
         }) as any);
 
         // 2. Mettre à jour le record de paiement
         await prisma.payment.updateMany({
-          where: { externalId: data.transaction_id || data.id || data.reference },
+          where: { externalId: (data.transaction_id || data.id || data.reference || '').toString() },
           data: { status: "SUCCESS" }
         });
 
         await logger.info(`Compte activé via Webhook pour ${company.name}`, { plan }, "PaymentController");
 
-        // Envoi des emails et PDF...
+        // Envoi des emails et PDF
         try {
           const adminEmail = company.users[0]?.email;
           const amount = data.amount || 0;
@@ -159,7 +157,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
             plan: plan,
             amount: amount,
             date: new Date().toLocaleDateString(),
-            transactionId: data.transaction_id || data.id || 'GP-' + Date.now()
+            transactionId: (data.transaction_id || data.id || 'GP-' + Date.now()).toString()
           });
 
           if (adminEmail) {
@@ -187,7 +185,6 @@ export const confirmPayment = async (req: Request, res: Response) => {
     const { token, companyId } = req.params; 
 
     let payment;
-    // On n'utilise le token que s'il est présent et qu'il n'est pas le placeholder {transaction_id}
     if (token && token !== '{transaction_id}' && !token.includes('{')) {
       payment = await prisma.payment.findFirst({
         where: { externalId: token as string },
@@ -195,7 +192,6 @@ export const confirmPayment = async (req: Request, res: Response) => {
       });
     } 
     
-    // Si on n'a pas trouvé par token, on cherche le dernier paiement de l'entreprise
     if (!payment && companyId) {
       payment = await prisma.payment.findFirst({
         where: { companyId: companyId as string },
@@ -208,14 +204,13 @@ export const confirmPayment = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Paiement introuvable." });
     }
 
-    const currentToken = payment.externalId;
-
-    if (payment.status === "SUCCESS") {
+    if (payment.company.isActive || payment.status === "SUCCESS") {
       return res.json({ success: true, status: "SUCCESS" });
     }
 
     // --- VÉRIFICATION DIRECTE AUPRÈS DE GENIUSPAY ---
     try {
+      const currentToken = payment.externalId;
       if (!currentToken) throw new Error("ID transaction externe manquant.");
 
       const apiKey = process.env.GENIUSPAY_KEY;
@@ -230,8 +225,6 @@ export const confirmPayment = async (req: Request, res: Response) => {
 
       const externalData = response.data.data;
       if (externalData.status === 'completed' || externalData.status === 'SUCCESS') {
-        // Le paiement est réussi chez GeniusPay mais le webhook n'a pas encore fini
-        // On force l'activation ici aussi par sécurité
         const companyId = payment.companyId;
         let plan = externalData.metadata?.plan || 'FITINI';
         plan = plan.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -266,6 +259,6 @@ export const confirmPayment = async (req: Request, res: Response) => {
 
   } catch (error: any) {
     await logger.error("ConfirmPayment Error", error.message, "PaymentController");
-    res.status(500).json({ success: false, message: "Erreur lors de la confirmation." });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
