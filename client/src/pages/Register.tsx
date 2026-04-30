@@ -40,15 +40,19 @@ const Register = () => {
       // 2. Connexion automatique
       login(response.data.token, response.data.user, response.data.company);
       
-      // 3. Redirection vers la page de paiement avec les infos du forfait
-      navigate('/payment', { 
-        state: { 
-          plan: { ...planDetails, finalPrice: totalAmount }, // Paiement MENSUEL
-          extraEmployees,
-          companyName: data.companyName,
-          companyId: response.data.company?.id || response.data.user?.companyId
-        } 
-      });
+      // 3. Redirection : Dashboard si essai KORO, sinon paiement
+      if (selectedPlan === 'KORO') {
+        navigate('/dashboard-admin');
+      } else {
+        navigate('/payment', { 
+          state: { 
+            plan: { ...planDetails, finalPrice: totalAmount }, // Paiement MENSUEL
+            extraEmployees,
+            companyName: data.companyName,
+            companyId: response.data.company?.id || response.data.user?.companyId
+          } 
+        });
+      }
     } catch (err: any) {
       const message = err.response?.data?.message || 'Une erreur est survenue lors de l\'inscription.';
       setError(message);
@@ -217,9 +221,15 @@ const Register = () => {
                 {isLoading ? (
                   <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-6 h-6 border-2 border-white border-t-transparent rounded-full" />
                 ) : (
-                  "Valider et passer au paiement"
+                  selectedPlan === 'KORO' ? "Démarrer mon essai gratuit (7 jours)" : "Valider et passer au paiement"
                 )}
               </button>
+
+              {selectedPlan === 'KORO' && (
+                <p className="text-center text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-2">
+                  Aucune carte requise. Accès immédiat à toutes les fonctions.
+                </p>
+              )}
               
               <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
                 Vous avez déjà un compte ? <Link to="/login" className="text-orange-500 font-bold hover:underline">Connectez-vous</Link>

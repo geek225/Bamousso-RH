@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { usePlan, PLAN_MAX_EMPLOYEES } from '../hooks/usePlan';
 import { supabase } from '../utils/supabase';
+import TrialCountdown from '../components/TrialCountdown';
+import TrialExpiredOverlay from '../components/TrialExpiredOverlay';
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
   FITINI: { label: 'FITINI',    color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
@@ -64,8 +66,17 @@ const DashboardAdmin = () => {
   const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
   const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
 
+  const isTrialExpired = company?.trialEndsAt && new Date() > new Date(company.trialEndsAt);
+  const isTrialActive = company?.trialEndsAt && !isTrialExpired;
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {isTrialExpired && <TrialExpiredOverlay />}
+      
+      {isTrialActive && company?.trialEndsAt && (
+        <TrialCountdown trialEndsAt={company.trialEndsAt} />
+      )}
+
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-gray-700 relative overflow-hidden">

@@ -107,15 +107,19 @@ export const registerCompany = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await prisma.$transaction(async (tx) => {
+      const isKoroTrial = plan === "KORO";
+      const trialDuration = 7 * 24 * 60 * 60 * 1000; // 7 jours
+      
       const company = await tx.company.create({
         data: {
           name: companyName,
-          isActive: false, // Inactif jusqu'au paiement
-          subscriptionStatus: "PAST_DUE", // En attente de paiement
+          isActive: isKoroTrial ? true : false, // Actif immédiatement si essai Kôrô
+          subscriptionStatus: isKoroTrial ? "ACTIVE" : "PAST_DUE", 
           subscriptionEndsAt: null,
+          trialEndsAt: isKoroTrial ? new Date(Date.now() + trialDuration) : null,
           plan: plan || "FITINI",
           extraEmployees: extraEmployees || 0,
-          isLocked: false, // Changé de true à false pour éviter le message "suspendu" au départ
+          isLocked: false,
           lockedAt: null,
         },
       });
@@ -309,6 +313,7 @@ export const login = async (req: Request, res: Response) => {
             plan: (user.company as any).plan,
             isLocked: (user.company as any).isLocked,
             isActive: user.company.isActive,
+            trialEndsAt: (user.company as any).trialEndsAt,
           }
         : null,
     });
@@ -369,6 +374,7 @@ export const getCurrentUser = async (req: any, res: Response) => {
         plan: (user.company as any).plan,
         isActive: user.company.isActive,
         isLocked: (user.company as any).isLocked,
+        trialEndsAt: (user.company as any).trialEndsAt,
       } : null
     });
   } catch (error) {

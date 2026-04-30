@@ -22,6 +22,7 @@ model Company {
 
   subscriptionStatus String   @default("ACTIVE") // ACTIVE | PAST_DUE | SUSPENDED
   subscriptionEndsAt DateTime?
+  trialEndsAt        DateTime? // Fin de la période d'essai (7j)
   plan               String   @default("FITINI")  // FITINI | LOUBA | KORO
   extraEmployees     Int      @default(0)
   isLocked           Boolean  @default(false) 

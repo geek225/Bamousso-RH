@@ -29,11 +29,20 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
       const company = await prisma.company.findUnique({
         where: { id: req.user.companyId },
-        select: { isActive: true, isLocked: true },
+        select: { isActive: true, isLocked: true, trialEndsAt: true },
       });
 
       if (!company || !company.isActive) {
         return res.status(403).json({ message: "Entreprise inactive ou introuvable." });
+      }
+
+      // Vérification essai expiré
+      const isTrialExpired = company.trialEndsAt && new Date() > company.trialEndsAt;
+      if (isTrialExpired && req.user.role !== "COMPANY_ADMIN") {
+        return res.status(403).json({ 
+          code: "TRIAL_EXPIRED",
+          message: "La période d'essai de 7 jours est terminée. Veuillez contacter votre administrateur." 
+        });
       }
 
       if (company.isLocked) {

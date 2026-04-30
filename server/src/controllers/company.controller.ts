@@ -186,17 +186,14 @@ export const deleteCompany = async (req: Request, res: Response) => {
     
     if (!id) return res.status(400).json({ message: "ID required" });
 
-    await prisma.$transaction(async (prisma) => {
-        // Unlink all users from this company
-        await prisma.user.updateMany({
-            where: { companyId: String(id) },
-            data: { companyId: null }
+    await prisma.$transaction(async (tx) => {
+        // Supprimer tous les utilisateurs liés à cette entreprise
+        await tx.user.deleteMany({
+            where: { companyId: String(id) }
         });
 
-        // Delete related data (simplified for now, assuming cascade or empty)
-        // If foreign keys prevent deletion, we might need to delete children first
-        // But for this task, let's assume the company is relatively new/empty or try/catch
-        await prisma.company.delete({
+        // Supprimer l'entreprise (les autres relations comme Department, Task sont onDelete: Cascade)
+        await tx.company.delete({
             where: { id: String(id) },
         });
     });
