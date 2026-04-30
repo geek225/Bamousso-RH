@@ -41,6 +41,31 @@ const Departments = () => {
     }
   };
 
+  const updateDepartment = async (id: string, currentName: string) => {
+    const newName = window.prompt("Entrez le nouveau nom du département :", currentName);
+    if (!newName || newName === currentName) return;
+
+    try {
+      await api.patch(`/departments/${id}`, { name: newName });
+      await fetchDepartments();
+    } catch (e: any) {
+      alert("Erreur lors de la modification");
+    }
+  };
+
+  const deleteDepartment = async (id: string, name: string) => {
+    if (!window.confirm(`Voulez-vous vraiment supprimer le département "${name}" ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    try {
+      await api.delete(`/departments/${id}`);
+      await fetchDepartments();
+    } catch (e: any) {
+      alert(e?.response?.data?.message || "Erreur lors de la suppression");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -73,16 +98,40 @@ const Departments = () => {
         <div className="p-5 border-b border-gray-200 dark:border-gray-700 font-semibold text-gray-900 dark:text-white">
           Liste
         </div>
-        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {sorted.map((d) => (
-            <li key={d.id} className="p-4 text-gray-900 dark:text-white">
-              {d.name}
-            </li>
-          ))}
-          {sorted.length === 0 ? (
-            <li className="p-4 text-gray-600 dark:text-gray-300">Aucun département.</li>
-          ) : null}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900/40">
+              <tr>
+                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                <th className="p-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {sorted.map((d) => (
+                <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+                  <td className="p-4 text-gray-900 dark:text-white font-medium">{d.name}</td>
+                  <td className="p-4 text-right space-x-2">
+                    <button
+                      onClick={() => updateDepartment(d.id, d.name)}
+                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 font-medium text-sm"
+                    >
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => deleteDepartment(d.id, d.name)}
+                      className="text-red-600 hover:text-red-800 dark:text-red-400 font-medium text-sm"
+                    >
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {sorted.length === 0 && (
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">Aucun département.</div>
+          )}
+        </div>
       </div>
     </div>
   );

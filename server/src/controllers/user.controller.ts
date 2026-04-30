@@ -186,6 +186,9 @@ import { Response } from "express";
          hireDate: true, 
          status: true, 
          departmentId: true, 
+         department: {
+           select: { id: true, name: true }
+         },
          managerId: true, 
          baseSalary: true,
          salaryCurrency: true,

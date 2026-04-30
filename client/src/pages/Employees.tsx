@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 // Force redeploy - 2026-04-30
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Lock, Unlock, Download, Trash2 } from 'lucide-react';
+import { Lock, Unlock, Download, Trash2, Edit2, Check, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -40,6 +40,8 @@ const Employees = () => {
 
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
+  const [selectedNewDept, setSelectedNewDept] = useState<string>('');
   const { user } = useAuth();
 
   const fetchEmployees = async () => {
@@ -302,7 +304,50 @@ const Employees = () => {
                       {e.status || '-'}
                     </span>
                   </td>
-                  <td className="p-3 text-gray-700 dark:text-gray-300">{e.department?.name || '-'}</td>
+                  <td className="p-3 text-gray-700 dark:text-gray-300">
+                    {editingDeptId === e.id ? (
+                      <div className="flex items-center gap-1">
+                        <select 
+                          value={selectedNewDept}
+                          onChange={(e) => setSelectedNewDept(e.target.value)}
+                          className="text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-white"
+                        >
+                          <option value="">— Aucun —</option>
+                          {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                        <button 
+                          onClick={async () => {
+                            try {
+                              await api.put(`/employees/${e.id}`, { departmentId: selectedNewDept || null });
+                              setEditingDeptId(null);
+                              void fetchEmployees();
+                            } catch (err) { alert("Erreur"); }
+                          }}
+                          className="p-1 text-green-500 hover:bg-green-500/10 rounded"
+                        >
+                          <Check className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => setEditingDeptId(null)} className="p-1 text-red-500 hover:bg-red-500/10 rounded">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between group/dept">
+                        <span>{e.department?.name || '-'}</span>
+                        {(user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER') && (
+                          <button 
+                            onClick={() => {
+                              setEditingDeptId(e.id);
+                              setSelectedNewDept(e.department?.id || '');
+                            }}
+                            className="p-1 text-gray-400 hover:text-brand-primary opacity-0 group-hover/dept:opacity-100 transition-opacity"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </td>
                   <td className="p-3 text-right">
                     <div className="flex justify-end gap-2">
                       <button
