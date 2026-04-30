@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/dist/assets/$1"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/dist/favicon.ico"
+    },
+    {
+      "source": "/vite.svg",
+      "destination": "/dist/vite.svg"
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "destination": "/dist/manifest.webmanifest"
+    },
+    {
+      "source": "/registerSW.js",
+      "destination": "/dist/registerSW.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/dist/index.html"
+    }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "server/prisma/schema.prisma"
+    }
+  }
+}
