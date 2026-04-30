@@ -91,7 +91,14 @@ const Employees = () => {
       resetForm();
       await fetchEmployees();
     } catch (e: any) {
-      setError(e?.response?.data?.message || 'Erreur lors de la création');
+      const serverError = e?.response?.data;
+      if (serverError?.errors) {
+        // Concaténer les messages d'erreur de Zod
+        const details = serverError.errors.map((err: any) => `${err.path.join('.')}: ${err.message}`).join(', ');
+        setError(`Données invalides : ${details}`);
+      } else {
+        setError(serverError?.message || 'Erreur lors de la création');
+      }
     } finally {
       setIsCreating(false);
     }
@@ -198,7 +205,8 @@ const Employees = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="text"
-              placeholder="Ex: 123456"
+              minLength={6}
+              placeholder="Min. 6 caractères"
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white dark:bg-gray-700"
             />
           </div>
