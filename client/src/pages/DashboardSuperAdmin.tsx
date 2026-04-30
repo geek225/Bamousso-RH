@@ -59,12 +59,6 @@ const PLAN_PRICES: Record<string, number> = {
   KORO: 14700,
 };
 
-const PLAN_MAX_EMPLOYEES: Record<string, number> = {
-  FITINI: 3,
-  LOUBA: 5,
-  KORO: 9999
-};
-
 const DashboardSuperAdmin = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   // @ts-ignore - Reserved for future list of admins

@@ -31,7 +31,7 @@ const SubscriptionCountdown = ({ endsAt, title = "Accès Privilège Actif", butt
     calculateTimeLeft();
 
     return () => clearInterval(timer);
-  }, [trialEndsAt]);
+  }, [endsAt]);
 
   if (!timeLeft) return null;
 
