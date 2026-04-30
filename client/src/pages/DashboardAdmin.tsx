@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Users, Layers, Calendar, Clock, FileText, Megaphone, TrendingUp, Building2, MessageSquare, Lock, Zap, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { usePlan, PLAN_MAX_EMPLOYEES } from '../hooks/usePlan';
 import { supabase } from '../utils/supabase';
-import TrialCountdown from '../components/TrialCountdown';
+import SubscriptionCountdown from '../components/TrialCountdown';
 import TrialExpiredOverlay from '../components/TrialExpiredOverlay';
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
@@ -17,6 +17,7 @@ const PLAN_BADGE: Record<string, { label: string; color: string }> = {
 
 const DashboardAdmin = () => {
   const { company, user } = useAuth();
+  const navigate = useNavigate();
   const { plan, canUse } = usePlan();
   const [stats, setStats] = useState({ employees: 0, departments: 0 });
 
@@ -68,13 +69,28 @@ const DashboardAdmin = () => {
 
   const isTrialExpired = company?.trialEndsAt && new Date() > new Date(company.trialEndsAt);
   const isTrialActive = company?.trialEndsAt && !isTrialExpired;
+  const isSubscriptionActive = !isTrialActive && !isTrialExpired && company?.subscriptionEndsAt;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {isTrialExpired && <TrialExpiredOverlay />}
       
       {isTrialActive && company?.trialEndsAt && (
-        <TrialCountdown trialEndsAt={company.trialEndsAt} />
+        <SubscriptionCountdown 
+          endsAt={company.trialEndsAt} 
+          title="Accès Privilège Actif"
+          buttonText="Passer premium"
+          onButtonClick={() => navigate('/register', { state: { selectedPlanId: 'KORO' } })}
+        />
+      )}
+
+      {isSubscriptionActive && company?.subscriptionEndsAt && (
+        <SubscriptionCountdown 
+          endsAt={company.subscriptionEndsAt} 
+          title="Abonnement Actif"
+          buttonText="Mettre à jour / Changer de formule"
+          onButtonClick={() => navigate('/register', { state: { selectedPlanId: company.plan } })}
+        />
       )}
 
       {/* Header */}

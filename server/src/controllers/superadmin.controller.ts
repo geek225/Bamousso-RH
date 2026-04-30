@@ -79,7 +79,10 @@ export const getPlatformStats = async (req: AuthRequest, res: Response): Promise
       prisma.company.count({ where: { isActive: true, subscriptionStatus: 'ACTIVE' } }),
       prisma.company.count({ where: { isLocked: true } }),
       prisma.user.count({ where: { role: { not: 'SUPER_ADMIN' } } }),
-      prisma.user.findMany({ where: { role: 'SUPER_ADMIN' }, select: { id: true, email: true, firstName: true, lastName: true, createdAt: true } })
+      prisma.user.findMany({ 
+        where: { role: 'SUPER_ADMIN' }, 
+        select: { id: true, email: true, firstName: true, lastName: true, createdAt: true, isOnline: true } 
+      })
     ]);
 
     res.json({

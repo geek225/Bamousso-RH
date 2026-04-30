@@ -2,16 +2,19 @@ import { useEffect, useState } from 'react';
 import { Clock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-interface TrialCountdownProps {
-  trialEndsAt: string;
+interface SubscriptionCountdownProps {
+  endsAt: string;
+  title?: string;
+  buttonText?: string;
+  onButtonClick?: () => void;
 }
 
-const TrialCountdown = ({ trialEndsAt }: TrialCountdownProps) => {
+const SubscriptionCountdown = ({ endsAt, title = "Accès Privilège Actif", buttonText = "Passer premium", onButtonClick }: SubscriptionCountdownProps) => {
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const difference = +new Date(trialEndsAt) - +new Date();
+      const difference = +new Date(endsAt) - +new Date();
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -43,8 +46,8 @@ const TrialCountdown = ({ trialEndsAt }: TrialCountdownProps) => {
           <Clock className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">Accès Privilège Actif</p>
-          <p className="text-xs text-gray-500 font-bold">Découvrez la puissance de Bamousso Kôrô.</p>
+          <p className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">{title}</p>
+          <p className="text-xs text-gray-500 font-bold">Découvrez la puissance de Bamousso.</p>
         </div>
       </div>
 
@@ -70,11 +73,14 @@ const TrialCountdown = ({ trialEndsAt }: TrialCountdownProps) => {
         </div>
       </div>
 
-      <button className="bg-brand-primary text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-        <Zap className="w-4 h-4 fill-current" /> Passer premium
+      <button 
+        onClick={onButtonClick}
+        className="bg-brand-primary text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+      >
+        <Zap className="w-4 h-4 fill-current" /> {buttonText}
       </button>
     </motion.div>
   );
 };
 
-export default TrialCountdown;
+export default SubscriptionCountdown;

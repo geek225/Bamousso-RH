@@ -30,6 +30,7 @@ interface Company {
   logoUrl?: string | null;
   plan?: 'FITINI' | 'LOUBA' | 'KORO';
   trialEndsAt?: string | null;
+  subscriptionEndsAt?: string | null;
 }
 
 // Définition du type de contexte

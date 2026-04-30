@@ -55,6 +55,31 @@ export const getContacts = async (req: any, res: Response) => {
   try {
     const user = req.user;
 
+    // Si c'est un SUPER_ADMIN, il voit tous les COMPANY_ADMIN (les clients)
+    if (user.role === 'SUPER_ADMIN') {
+      const clients = await prisma.user.findMany({
+        where: { role: 'COMPANY_ADMIN' },
+        include: { company: true },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          company: { select: { name: true } }
+        }
+      } as any);
+
+      const contacts = clients.map((c: any) => ({
+        id: c.id,
+        name: `${c.firstName} ${c.lastName} (${c.company?.name || 'Inconnu'})`,
+        role: 'CLIENT',
+        isSupport: false
+      }));
+
+      return res.json(contacts);
+    }
+
+    // Comportement normal pour les autres utilisateurs
     // 1. Récupérer les employés de la même entreprise
     const employees = await prisma.user.findMany({
       where: {
