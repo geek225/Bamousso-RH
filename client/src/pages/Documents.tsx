@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../utils/api';
+import api, { getFileUrl } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { FileText, Upload, Download, FileType, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -91,6 +91,11 @@ const DocumentsPage = () => {
       case 'POLICY': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
       default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
     }
+  };
+
+  const handleDownload = (url: string) => {
+    const fullUrl = getFileUrl(url);
+    window.open(fullUrl, '_blank');
   };
 
   return (
@@ -202,6 +207,7 @@ const DocumentsPage = () => {
               <motion.button 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
+                onClick={() => handleDownload(doc.url)}
                 className="text-orange-500 hover:text-orange-600 bg-orange-50 dark:bg-gray-700 p-2 rounded-full"
               >
                 <Download className="w-4 h-4" />
