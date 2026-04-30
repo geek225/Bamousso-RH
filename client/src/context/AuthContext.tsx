@@ -4,7 +4,7 @@
  * et les fonctions de connexion/déconnexion.
  */
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 
 // Structure d'un utilisateur
 interface User {
@@ -63,12 +63,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
       if (storedCompany) setCompany(JSON.parse(storedCompany));
-      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       
       // OPTIMISATION : On demande au serveur les dernières infos pour être sûr du plan
       const fetchLatestInfo = async () => {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`);
+          // Utilisation de l'instance 'api' configurée
+          const response = await api.get('/auth/me');
           if (response.data.success) {
             const { user: latestUser, company: latestCompany } = response.data;
             setUser(latestUser);
@@ -99,7 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     else localStorage.removeItem('company');
     
     // Ajoute le token aux headers Axios pour les prochaines requêtes
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
   };
 
   /**
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('company');
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
   };
 
   return (
