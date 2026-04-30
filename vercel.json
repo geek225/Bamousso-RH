@@ -8,27 +8,27 @@
     },
     {
       "source": "/assets/(.*)",
-      "destination": "/dist/assets/$1"
+      "destination": "/assets/$1"
     },
     {
       "source": "/favicon.ico",
-      "destination": "/dist/favicon.ico"
+      "destination": "/favicon.ico"
     },
     {
       "source": "/vite.svg",
-      "destination": "/dist/vite.svg"
+      "destination": "/vite.svg"
     },
     {
       "source": "/manifest.webmanifest",
-      "destination": "/dist/manifest.webmanifest"
+      "destination": "/manifest.webmanifest"
     },
     {
       "source": "/registerSW.js",
-      "destination": "/dist/registerSW.js"
+      "destination": "/registerSW.js"
     },
     {
       "source": "/(.*)",
-      "destination": "/dist/index.html"
+      "destination": "/index.html"
     }
   ],
   "functions": {
