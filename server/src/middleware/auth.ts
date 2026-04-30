@@ -29,7 +29,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
       const company = await prisma.company.findUnique({
         where: { id: req.user.companyId },
-        select: { isActive: true, isLocked: true, trialEndsAt: true },
+        select: { isActive: true, isLocked: true, trialEndsAt: true } as any,
       });
 
       if (!company || !company.isActive) {
@@ -37,7 +37,7 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
       }
 
       // Vérification essai expiré
-      const isTrialExpired = company.trialEndsAt && new Date() > company.trialEndsAt;
+      const isTrialExpired = (company as any).trialEndsAt && new Date() > (company as any).trialEndsAt;
       if (isTrialExpired && req.user.role !== "COMPANY_ADMIN") {
         return res.status(403).json({ 
           code: "TRIAL_EXPIRED",

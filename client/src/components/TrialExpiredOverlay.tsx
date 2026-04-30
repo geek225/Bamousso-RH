@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Lock, XCircle, CheckCircle, Trash2, Building2 } from 'lucide-react';
+import { Lock, CheckCircle, Trash2, Building2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 

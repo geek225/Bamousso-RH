@@ -121,7 +121,7 @@ export const registerCompany = async (req: Request, res: Response) => {
           extraEmployees: extraEmployees || 0,
           isLocked: false,
           lockedAt: null,
-        },
+        } as any,
       });
 
       const user = await tx.user.create({
