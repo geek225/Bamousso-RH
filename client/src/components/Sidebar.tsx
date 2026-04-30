@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Building2, LayoutDashboard, LogOut, Moon, Sun, Users, Layers, X, 
   Calendar, Clock, FileText, Megaphone, Settings as SettingsIcon,
-  ListTodo, AlertTriangle, Banknote, MessageCircle, FileWarning, BarChart3
+  ListTodo, AlertTriangle, Banknote, MessageCircle, MessageSquare, FileWarning, BarChart3
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ConfirmationModal from './ConfirmationModal';
