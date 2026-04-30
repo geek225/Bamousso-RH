@@ -33,6 +33,7 @@ const Employees = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>('EMPLOYEE');
   const [departmentId, setDepartmentId] = useState<string>('');
 
@@ -69,6 +70,7 @@ const Employees = () => {
     setFirstName('');
     setLastName('');
     setEmail('');
+    setPassword('');
     setRole('EMPLOYEE');
     setDepartmentId('');
   };
@@ -81,6 +83,7 @@ const Employees = () => {
         firstName,
         lastName,
         email,
+        password,
         role,
         status: 'INVITED',
         ...(departmentId ? { departmentId } : {}),
@@ -190,6 +193,16 @@ const Employees = () => {
             />
           </div>
           <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Mot de passe (test)</label>
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="text"
+              placeholder="Ex: 123456"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white dark:bg-gray-700"
+            />
+          </div>
+          <div>
             <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Rôle</label>
             <select
               value={role}
@@ -230,7 +243,7 @@ const Employees = () => {
         </button>
 
         <div className="text-xs text-gray-500 dark:text-gray-400">
-          Astuce MVP : l’employé fera “Mot de passe oublié” pour choisir son mot de passe.
+          Astuce : Vous pouvez définir un mot de passe ici ou laisser l'employé utiliser "Mot de passe oublié".
         </div>
       </div>
 
