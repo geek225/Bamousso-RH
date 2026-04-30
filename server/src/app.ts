@@ -25,7 +25,8 @@ import superAdminRoutes from "./routes/superadmin.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 import cronRoutes from "./routes/cron.routes.js";
 import salariesRoutes from "./routes/salaries.routes.js";
-import conflictsRoutes from "./routes/conflicts.routes.js";
+import suggestionsRoutes from "./routes/suggestions.routes.js";
+import explanationRoutes from "./routes/explanation.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 
@@ -74,7 +75,8 @@ app.use("/api/admin", superAdminRoutes);               // SUPER_ADMIN & changeme
 app.use("/api/analytics", analyticsRoutes);            // Analytics RH (Bamousso+)
 app.use("/api/cron", cronRoutes);                      // Tâches planifiées (Subscription check)
 app.use("/api/salaries", salariesRoutes);
-app.use("/api/conflicts", conflictsRoutes);
+app.use("/api/suggestions", suggestionsRoutes);
+app.use("/api/explanations", explanationRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/messages", messageRoutes);
 

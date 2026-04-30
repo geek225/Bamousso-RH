@@ -2,6 +2,7 @@ import { Response } from "express";
  import prisma from "../utils/prisma.js"; 
  import { z } from "zod"; 
  import type { AuthRequest } from "../middleware/auth.js"; 
+ import { createNotification, notifyAdmins } from "../utils/notifications.js";
  
  const createTaskSchema = z.object({ 
    title: z.string().min(1, "Le titre de la tâche est requis"), 
@@ -156,6 +157,7 @@ import { Response } from "express";
  
      const canModify = 
        user.id === existingTask.createdBy || 
+       user.id === existingTask.assignedToId ||
        user.role === "COMPANY_ADMIN" || 
        user.role === "SUPER_ADMIN"; 
  

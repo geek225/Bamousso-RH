@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma.js";
 import { z } from "zod";
+import { createNotification, notifyAdmins } from "../utils/notifications.js";
 
 const createLeaveSchema = z.object({
   type: z.enum(["PAID", "UNPAID", "SICK", "MATERNITY"]),
@@ -31,6 +32,10 @@ export const requestLeave = async (req: Request, res: Response): Promise<any> =>
         employee: { connect: { id: userId } },
       },
     });
+
+    // Notifier les admins
+    const user = (req as any).user;
+    await notifyAdmins(user.companyId, "Demande de congés", `${user.firstName} ${user.lastName} a soumis une nouvelle demande de congés.`);
 
     res.status(201).json(leave);
   } catch (error: any) {
@@ -82,6 +87,13 @@ export const reviewLeave = async (req: Request, res: Response): Promise<any> => 
         status,
         approverId,
       },
+    });
+
+    // Notifier l'employé
+    await createNotification({
+      title: "Décision de congés",
+      message: `Votre demande de congés du ${new Date(leave.startDate).toLocaleDateString()} a été ${status === 'APPROVED' ? 'acceptée' : 'refusée'}.`,
+      userId: leave.employeeId
     });
 
     res.json(leave);

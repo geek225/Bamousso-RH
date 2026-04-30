@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, Trash2, X } from 'lucide-react';
 import api from '../utils/api';
+import { supabase } from '../utils/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface Notification {
   id: string;
@@ -11,6 +13,7 @@ interface Notification {
 }
 
 const NotificationCenter = () => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -26,12 +29,30 @@ const NotificationCenter = () => {
     }
   };
 
-  // Initial fetch and polling
+  // Initial fetch and Realtime subscription
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000); // Poll every minute
-    return () => clearInterval(interval);
-  }, []);
+
+    const channel = supabase
+      .channel('public:Notification')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'Notification',
+        filter: user?.id ? `userId=eq.${user.id}` : undefined
+      }, (payload) => {
+        setNotifications(prev => [payload.new as Notification, ...prev]);
+        setUnreadCount(prev => prev + 1);
+        
+        // Jouer un son (optionnel)
+        // new Audio('/notification.mp3').play().catch(() => {});
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

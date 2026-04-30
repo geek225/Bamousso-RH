@@ -13,6 +13,9 @@ interface SalaryEmployee {
   jobTitle: string | null;
 }
 
+import { useAuth } from '../context/AuthContext';
+import { Navigate } from 'react-router-dom';
+
 const CURRENCIES = [
   { code: 'XOF', label: 'FCFA' },
   { code: 'EUR', label: 'Euro (€)' },
@@ -21,11 +24,14 @@ const CURRENCIES = [
 ];
 
 const Salaries = () => {
+  const { user } = useAuth();
   const [employees, setEmployees] = useState<SalaryEmployee[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newSalary, setNewSalary] = useState<number>(0);
   const [newCurrency, setNewCurrency] = useState<string>('XOF');
   const [isLoading, setIsLoading] = useState(false);
+
+  const canManageHr = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'HR_ASSISTANT';
 
   const fetchSalaries = async () => {
     try {
@@ -37,8 +43,14 @@ const Salaries = () => {
   };
 
   useEffect(() => {
-    void fetchSalaries();
-  }, []);
+    if (canManageHr) {
+      void fetchSalaries();
+    }
+  }, [canManageHr]);
+
+  if (!canManageHr) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleUpdateSalary = async (id: string) => {
     try {

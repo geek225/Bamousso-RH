@@ -108,8 +108,12 @@ model User {
   forumPosts       ForumPost[]
   forumComments    ForumComment[]
 
-  // Conflits
-  reportedConflicts ConflictReport[] @relation("Reporter")
+  // Suggestions
+  reportedSuggestions Suggestion[] @relation("Reporter")
+
+  // Demandes d'explication
+  receivedExplanations ExplanationRequest[] @relation("TargetEmployee")
+  createdExplanations  ExplanationRequest[] @relation("CreatorEmployee")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,7 +121,7 @@ model User {
   createdTasks    Task[] @relation("CreatedTasks")
 }
 
-model ConflictReport {
+model Suggestion {
   id          String   @id @default(uuid())
   nature      String
   description String
@@ -126,6 +130,25 @@ model ConflictReport {
   
   reporterId  String
   reporter    User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  
+  companyId   String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ExplanationRequest {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  response    String?
+  status      String   @default("PENDING") // PENDING, RESPONDED, CLOSED
+  
+  employeeId  String
+  employee    User     @relation("TargetEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  createdBy   String
+  creator     User     @relation("CreatorEmployee", fields: [createdBy], references: [id], onDelete: Cascade)
   
   companyId   String
   

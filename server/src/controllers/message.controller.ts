@@ -1,6 +1,7 @@
 import { Response } from "express";
 import prisma from "../utils/prisma.js";
 import { z } from "zod";
+import { createNotification } from "../utils/notifications.js";
 
 const sendMessageSchema = z.object({
   recipientId: z.string().uuid(),
@@ -43,6 +44,16 @@ export const sendMessage = async (req: any, res: Response) => {
         attachmentUrl,
         attachmentType,
       },
+      include: {
+        sender: { select: { firstName: true, lastName: true } }
+      }
+    });
+
+    // Notifier le destinataire
+    await createNotification({
+      title: "Nouveau message",
+      message: `Vous avez reçu un message de ${message.sender.firstName} ${message.sender.lastName}`,
+      userId: recipientId
     });
 
     res.status(201).json(message);

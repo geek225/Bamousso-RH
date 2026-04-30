@@ -28,7 +28,7 @@ import ResetPassword from './pages/ResetPassword';
 import Analytics from './pages/Analytics';
 import Tasks from './pages/Tasks';
 import Messaging from './pages/Messaging';
-import Conflicts from './pages/Conflicts';
+import Suggestions from './pages/Suggestions';
 import Explanations from './pages/Explanations';
 import Salaries from './pages/Salaries';
 
@@ -91,7 +91,7 @@ function App() {
                   <Route path="/analytics" element={<Analytics />} />
                   <Route path="/tasks" element={<Tasks />} />
                   <Route path="/messaging" element={<Messaging />} />
-                  <Route path="/conflicts" element={<Conflicts />} />
+                  <Route path="/suggestions" element={<Suggestions />} />
                   <Route path="/explanations" element={<Explanations />} />
                   <Route path="/salaries" element={<Salaries />} />
                 </Route>
