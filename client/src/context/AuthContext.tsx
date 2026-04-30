@@ -63,8 +63,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
       if (storedCompany) setCompany(JSON.parse(storedCompany));
-      // Configure le header Authorization par défaut pour Axios
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      
+      // OPTIMISATION : On demande au serveur les dernières infos pour être sûr du plan
+      const fetchLatestInfo = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`);
+          if (response.data.success) {
+            const { user: latestUser, company: latestCompany } = response.data;
+            setUser(latestUser);
+            setCompany(latestCompany);
+            localStorage.setItem('user', JSON.stringify(latestUser));
+            if (latestCompany) localStorage.setItem('company', JSON.stringify(latestCompany));
+          }
+        } catch (error) {
+          console.error("Erreur lors de la mise à jour des infos auth:", error);
+        }
+      };
+      fetchLatestInfo();
     }
     
     setIsLoading(false);

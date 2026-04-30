@@ -9,9 +9,14 @@ import {
   registerCompany,
   forgotPassword,
   resetPassword,
+  getCurrentUser,
 } from "../controllers/auth.controller.js";
+import { authenticate } from "../middleware/auth.js";
 
 const router = Router();
+
+// Route pour l'utilisateur actuel (rafraîchissement)
+router.get("/me", authenticate, getCurrentUser);
 
 // Route pour l'inscription d'un nouvel utilisateur
 // POST /api/auth/register
