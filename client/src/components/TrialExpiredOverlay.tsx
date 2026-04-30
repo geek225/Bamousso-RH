@@ -37,8 +37,8 @@ const TrialExpiredOverlay = () => {
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8">
                 <Lock className="w-8 h-8" />
               </div>
-              <h2 className="text-4xl font-black tracking-tighter leading-none mb-4">ESSAI <br />TERMINÉ</h2>
-              <p className="text-white/80 font-medium">Vos 7 jours de découverte sont arrivés à terme.</p>
+              <h2 className="text-4xl font-black tracking-tighter leading-none mb-4">DÉCOUVERTE <br />TERMINÉE</h2>
+              <p className="text-white/80 font-medium">Votre accès privilège de 7 jours est arrivé à terme.</p>
             </div>
             
             <div className="mt-12 space-y-4">

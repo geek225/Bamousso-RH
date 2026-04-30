@@ -221,7 +221,7 @@ const Register = () => {
                 {isLoading ? (
                   <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-6 h-6 border-2 border-white border-t-transparent rounded-full" />
                 ) : (
-                  selectedPlan === 'KORO' ? "Démarrer mon essai gratuit (7 jours)" : "Valider et passer au paiement"
+                  selectedPlan === 'KORO' ? "Démarrer mon Accès Privilège (7 jours)" : "Valider et passer au paiement"
                 )}
               </button>
 

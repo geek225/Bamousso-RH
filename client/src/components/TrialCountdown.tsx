@@ -43,8 +43,8 @@ const TrialCountdown = ({ trialEndsAt }: TrialCountdownProps) => {
           <Clock className="w-6 h-6" />
         </div>
         <div>
-          <p className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">Période d'essai active</p>
-          <p className="text-xs text-gray-500 font-bold">Profitez de toutes les fonctionnalités gratuitement.</p>
+          <p className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">Accès Privilège Actif</p>
+          <p className="text-xs text-gray-500 font-bold">Découvrez la puissance de Bamousso Kôrô.</p>
         </div>
       </div>
 
