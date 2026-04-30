@@ -1,103 +1,243 @@
-import { Search, Send, Paperclip, MoreVertical, Phone, Video } from 'lucide-react';
+import { Search, Send, Paperclip, MoreVertical, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabase';
+
+interface Contact {
+  id: string;
+  name: string;
+  role: string;
+  isSupport: boolean;
+  lastMsg?: string;
+  time?: string;
+  unread?: number;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  senderId: string;
+  recipientId: string;
+  createdAt: string;
+  attachmentUrl?: string;
+  attachmentType?: string;
+}
 
 const Messaging = () => {
+  const { user } = useAuth();
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [search, setSearch] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const fetchContacts = async () => {
+    try {
+      const res = await api.get('/messages/contacts');
+      setContacts(res.data);
+    } catch (error) {
+      console.error('Error fetching contacts', error);
+    }
+  };
+
+  const fetchMessages = async (contactId: string) => {
+    try {
+      const res = await api.get(`/messages/${contactId}`);
+      setMessages(res.data);
+    } catch (error) {
+      console.error('Error fetching messages', error);
+    }
+  };
+
+  useEffect(() => {
+    void fetchContacts();
+  }, []);
+
+  useEffect(() => {
+    if (selectedContact) {
+      void fetchMessages(selectedContact.id);
+
+      // Real-time subscription
+      const channel = supabase
+        .channel(`chat-${selectedContact.id}`)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'Message',
+        }, (payload) => {
+          const msg = payload.new as Message;
+          // Si le message est entre moi et le contact sélectionné
+          if ((msg.senderId === selectedContact.id && msg.recipientId === user?.id) ||
+              (msg.senderId === user?.id && msg.recipientId === selectedContact.id)) {
+            setMessages(prev => {
+              // Éviter les doublons si on vient d'envoyer le message
+              if (prev.find(m => m.id === msg.id)) return prev;
+              return [...prev, msg];
+            });
+          }
+        })
+        .subscribe();
+
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    }
+  }, [selectedContact, user?.id]);
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedContact) return;
+
+    try {
+      const res = await api.post('/messages', {
+        recipientId: selectedContact.id,
+        content: newMessage
+      });
+      setMessages(prev => [...prev, res.data]);
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message', error);
+    }
+  };
+
+  const filteredContacts = contacts.filter(c => 
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="h-[calc(100vh-160px)] flex gap-8">
       {/* Sidebar de messagerie */}
       <div className="w-96 flex flex-col gap-6">
-        <div className="glass-card p-6 rounded-[2rem] border border-white/5 flex flex-col h-full">
+        <div className="glass-card p-6 rounded-[2rem] border border-white/5 flex flex-col h-full overflow-hidden">
           <div className="relative mb-6">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
             <input 
               type="text" 
               placeholder="Rechercher une discussion..."
-              className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold outline-none focus:ring-2 focus:ring-brand-primary placeholder:text-gray-600"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-12 pr-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold outline-none focus:ring-2 focus:ring-brand-primary placeholder:text-gray-600 transition-all"
             />
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2">
-            {[
-              { name: 'Support Bamousso', lastMsg: 'Comment pouvons-nous vous aider ?', time: '10:30', active: true, unread: 1 },
-              { name: 'RH Manager', lastMsg: 'Le rapport est prêt.', time: 'Hier', active: false },
-              { name: 'Équipe Marketing', lastMsg: 'Réunion à 14h.', time: 'Lundi', active: false },
-            ].map((chat, i) => (
+            {filteredContacts.map((chat) => (
               <button 
-                key={i}
-                className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all ${chat.active ? 'bg-brand-primary/20 border border-brand-primary/30' : 'hover:bg-white/5 border border-transparent'}`}
+                key={chat.id}
+                onClick={() => setSelectedContact(chat)}
+                className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all group ${selectedContact?.id === chat.id ? 'bg-brand-primary/20 border border-brand-primary/30' : 'hover:bg-white/5 border border-transparent'}`}
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white font-black shrink-0">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-black shrink-0 shadow-lg transition-transform group-hover:scale-105 ${chat.isSupport ? 'bg-gradient-to-br from-brand-primary to-brand-accent' : 'bg-gray-700'}`}>
                   {chat.name[0]}
                 </div>
-                <div className="min-w-0 text-left">
+                <div className="min-w-0 text-left flex-1">
                   <div className="flex justify-between items-center mb-1">
                     <p className="text-sm font-black text-white truncate">{chat.name}</p>
-                    <p className="text-[10px] text-gray-500 font-bold">{chat.time}</p>
+                    {chat.time && <p className="text-[10px] text-gray-500 font-bold">{chat.time}</p>}
                   </div>
-                  <p className="text-xs text-gray-400 truncate font-medium">{chat.lastMsg}</p>
+                  <p className="text-xs text-gray-400 truncate font-medium">{chat.lastMsg || (chat.isSupport ? 'Comment pouvons-nous vous aider ?' : 'Démarrer une discussion')}</p>
                 </div>
-                {chat.unread && (
-                  <div className="w-5 h-5 bg-brand-primary rounded-full flex items-center justify-center text-[10px] font-black text-white">
+                {chat.unread ? (
+                  <div className="w-5 h-5 bg-brand-primary rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg animate-bounce">
                     {chat.unread}
                   </div>
-                )}
+                ) : null}
               </button>
             ))}
+            {filteredContacts.length === 0 && (
+              <div className="text-center py-10">
+                <p className="text-gray-500 text-sm font-bold italic">Aucun contact trouvé.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Zone de chat principale */}
-      <div className="flex-1 glass-card rounded-[2.5rem] border border-white/5 overflow-hidden flex flex-col relative">
-        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5 backdrop-blur-xl">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-accent flex items-center justify-center text-white font-black shadow-lg">
-              S
-            </div>
-            <div>
-              <p className="text-lg font-black text-white">Support Bamousso</p>
+      <div className="flex-1 glass-card rounded-[2.5rem] border border-white/5 overflow-hidden flex flex-col relative shadow-2xl">
+        {selectedContact ? (
+          <>
+            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5 backdrop-blur-xl z-10">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-black shadow-lg ${selectedContact.isSupport ? 'bg-gradient-to-br from-brand-primary to-brand-accent' : 'bg-gray-700'}`}>
+                  {selectedContact.name[0]}
+                </div>
+                <div>
+                  <p className="text-lg font-black text-white">{selectedContact.name}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{selectedContact.isSupport ? 'Support Actif' : 'En ligne'}</p>
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <p className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">En ligne</p>
+                <button className="p-3 hover:bg-white/10 rounded-xl text-gray-400 transition-colors"><MoreVertical className="w-5 h-5" /></button>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button className="p-3 hover:bg-white/10 rounded-xl text-gray-400 transition-colors"><Phone className="w-5 h-5" /></button>
-            <button className="p-3 hover:bg-white/10 rounded-xl text-gray-400 transition-colors"><Video className="w-5 h-5" /></button>
-            <button className="p-3 hover:bg-white/10 rounded-xl text-gray-400 transition-colors"><MoreVertical className="w-5 h-5" /></button>
-          </div>
-        </div>
 
-        <div className="flex-1 p-8 overflow-y-auto space-y-6 custom-scrollbar bg-senufo opacity-20" />
-        
-        <div className="absolute inset-0 p-8 flex flex-col justify-end pointer-events-none">
-          <div className="space-y-6 pointer-events-auto">
-            <div className="flex justify-start">
-              <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-bl-none max-w-md">
-                <p className="text-sm text-white font-medium">Bonjour ! Comment puis-je aider l'équipe Bamousso aujourd'hui ?</p>
-                <p className="text-[10px] text-gray-500 font-bold mt-2">10:30</p>
+            <div className="flex-1 p-8 overflow-y-auto space-y-4 custom-scrollbar bg-senufo relative">
+               <div className="absolute inset-0 bg-brand-900/40 pointer-events-none" />
+               <div className="relative z-10 space-y-4">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.senderId === user?.id ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`p-4 rounded-2xl max-w-md shadow-lg ${msg.senderId === user?.id ? 'bg-brand-primary text-white rounded-br-none' : 'bg-white/5 border border-white/10 text-white rounded-bl-none'}`}>
+                        <p className="text-sm font-medium leading-relaxed">{msg.content}</p>
+                        <p className={`text-[9px] font-black mt-2 uppercase tracking-widest ${msg.senderId === user?.id ? 'text-white/60' : 'text-gray-500'}`}>
+                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+               </div>
+            </div>
+
+            <div className="p-6 bg-white/5 border-t border-white/5 backdrop-blur-xl">
+              <form onSubmit={handleSend} className="flex items-center gap-4">
+                <button type="button" className="p-4 hover:bg-white/10 rounded-2xl text-gray-500 transition-colors hover:text-white group">
+                  <Paperclip className="w-6 h-6 transition-transform group-hover:scale-110" />
+                </button>
+                <div className="flex-1 relative">
+                  <input 
+                    type="text" 
+                    value={newMessage}
+                    onChange={e => setNewMessage(e.target.value)}
+                    placeholder="Votre message..."
+                    className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white font-medium outline-none focus:ring-2 focus:ring-brand-primary transition-all"
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  disabled={!newMessage.trim()}
+                  className="bg-brand-primary text-white p-4 rounded-2xl shadow-lg shadow-brand-primary/20 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 transition-all"
+                >
+                  <Send className="w-6 h-6" />
+                </button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-10 bg-senufo">
+            <div className="absolute inset-0 bg-brand-900/60" />
+            <div className="relative z-10">
+              <div className="w-24 h-24 bg-brand-primary/10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                <Send className="w-10 h-10 text-brand-primary animate-bounce" />
               </div>
+              <h3 className="text-2xl font-black text-white mb-2">Messagerie Bamousso</h3>
+              <p className="text-gray-400 max-w-xs font-medium">Sélectionnez une discussion pour commencer à échanger avec votre équipe ou le support.</p>
             </div>
           </div>
-        </div>
-
-        <div className="p-6 bg-white/5 border-t border-white/5">
-          <div className="flex items-center gap-4">
-            <button className="p-4 hover:bg-white/10 rounded-2xl text-gray-500 transition-colors">
-              <Paperclip className="w-6 h-6" />
-            </button>
-            <div className="flex-1 relative">
-              <input 
-                type="text" 
-                placeholder="Votre message..."
-                className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white font-medium outline-none focus:ring-2 focus:ring-brand-primary"
-              />
-            </div>
-            <button className="bg-brand-primary text-white p-4 rounded-2xl shadow-lg shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-all">
-              <Send className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

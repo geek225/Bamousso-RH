@@ -27,6 +27,7 @@ import cronRoutes from "./routes/cron.routes.js";
 import salariesRoutes from "./routes/salaries.routes.js";
 import conflictsRoutes from "./routes/conflicts.routes.js";
 import taskRoutes from "./routes/task.routes.js";
+import messageRoutes from "./routes/message.routes.js";
 
 // Chargement des variables d'environnement
 dotenv.config();
@@ -75,6 +76,7 @@ app.use("/api/cron", cronRoutes);                      // Tâches planifiées (S
 app.use("/api/salaries", salariesRoutes);
 app.use("/api/conflicts", conflictsRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Route de test pour vérifier que l'API est en ligne
 app.get("/", (req, res) => {

@@ -1,7 +1,65 @@
 import { motion } from 'framer-motion';
-import { Banknote, TrendingUp, Download, Wallet, History } from 'lucide-react';
+import { Banknote, TrendingUp, Download, Wallet, History, Edit2, Check, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import api from '../utils/api';
+
+interface SalaryEmployee {
+  id: string;
+  firstName: string;
+  lastName: string;
+  baseSalary: number | null;
+  bankDetails: string | null;
+  jobTitle: string | null;
+}
 
 const Salaries = () => {
+  const [employees, setEmployees] = useState<SalaryEmployee[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [newSalary, setNewSalary] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchSalaries = async () => {
+    try {
+      const res = await api.get('/salaries');
+      setEmployees(res.data);
+    } catch (error) {
+      console.error('Error fetching salaries', error);
+    }
+  };
+
+  useEffect(() => {
+    void fetchSalaries();
+  }, []);
+
+  const handleUpdateSalary = async (id: string) => {
+    try {
+      await api.put(`/users/${id}`, { baseSalary: newSalary });
+      setEditingId(null);
+      void fetchSalaries();
+    } catch (error) {
+      console.error('Error updating salary', error);
+    }
+  };
+
+  const handleGeneratePay = async () => {
+    if (!window.confirm('Voulez-vous générer les fiches de paie pour tous les employés pour le mois en cours ?')) return;
+    setIsLoading(true);
+    try {
+      const now = new Date();
+      const res = await api.post('/salaries/generate', { 
+        month: String(now.getMonth() + 1).padStart(2, '0'), 
+        year: String(now.getFullYear()) 
+      });
+      alert(res.data.message);
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Erreur lors de la génération');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const totalMasse = employees.reduce((acc, curr) => acc + (curr.baseSalary || 0), 0);
+
   return (
     <div className="space-y-8">
       <motion.div 
@@ -17,8 +75,12 @@ const Salaries = () => {
           <button className="glass-card px-6 py-3 rounded-xl font-bold text-sm text-white flex items-center gap-2 hover:border-brand-primary/50 transition-all">
             <Download className="w-4 h-4" /> Rapport global
           </button>
-          <button className="bg-brand-primary text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-primary/20">
-            Générer la paie
+          <button 
+            disabled={isLoading}
+            onClick={handleGeneratePay}
+            className="bg-brand-primary text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-brand-primary/20 flex items-center gap-2"
+          >
+            {isLoading ? 'Génération...' : 'Générer la paie'}
           </button>
         </div>
       </motion.div>
@@ -27,17 +89,17 @@ const Salaries = () => {
         <div className="glass-card p-8 rounded-[2rem] border border-white/5 bg-gradient-to-br from-emerald-600/10 to-emerald-900/10">
           <Wallet className="w-8 h-8 text-emerald-500 mb-6" />
           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Masse Salariale / Mois</p>
-          <p className="text-3xl font-black text-white tracking-tighter">0 FCFA</p>
+          <p className="text-3xl font-black text-white tracking-tighter">{totalMasse.toLocaleString()} FCFA</p>
         </div>
         <div className="glass-card p-8 rounded-[2rem] border border-white/5">
           <TrendingUp className="w-8 h-8 text-brand-primary mb-6" />
-          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Dernière Augmentation</p>
-          <p className="text-3xl font-black text-white tracking-tighter">Aucune</p>
+          <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Employés Rémunérés</p>
+          <p className="text-3xl font-black text-white tracking-tighter">{employees.filter(e => (e.baseSalary || 0) > 0).length}</p>
         </div>
         <div className="glass-card p-8 rounded-[2rem] border border-white/5">
           <History className="w-8 h-8 text-brand-accent mb-6" />
           <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Prochain Virement</p>
-          <p className="text-3xl font-black text-white tracking-tighter">-- / --</p>
+          <p className="text-3xl font-black text-white tracking-tighter">Fin de mois</p>
         </div>
       </div>
 
@@ -48,21 +110,71 @@ const Salaries = () => {
             <thead>
               <tr className="border-b border-white/5">
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Employé</th>
+                <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Poste</th>
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Salaire de base</th>
-                <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Dernière Paie</th>
-                <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Statut</th>
+                <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Infos Bancaires</th>
                 <th className="pb-6 text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              <tr>
-                <td colSpan={5} className="py-20 text-center">
-                  <div className="flex flex-col items-center gap-4">
-                    <Banknote className="w-12 h-12 text-gray-800" />
-                    <p className="text-gray-600 font-bold">Aucune donnée de paie disponible pour le moment.</p>
-                  </div>
-                </td>
-              </tr>
+              {employees.map(emp => (
+                <tr key={emp.id} className="group hover:bg-white/[0.02] transition-colors">
+                  <td className="py-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center font-bold text-brand-primary">
+                        {emp.firstName[0]}{emp.lastName[0]}
+                      </div>
+                      <span className="text-white font-bold">{emp.firstName} {emp.lastName}</span>
+                    </div>
+                  </td>
+                  <td className="py-6 text-gray-400 font-medium">{emp.jobTitle || 'Non défini'}</td>
+                  <td className="py-6">
+                    {editingId === emp.id ? (
+                      <input 
+                        type="number" 
+                        value={newSalary} 
+                        onChange={e => setNewSalary(Number(e.target.value))}
+                        className="bg-white/5 border border-brand-primary/50 p-2 rounded-lg text-white font-bold w-32 outline-none"
+                      />
+                    ) : (
+                      <span className="text-white font-black">{(emp.baseSalary || 0).toLocaleString()} FCFA</span>
+                    )}
+                  </td>
+                  <td className="py-6 text-gray-500 text-xs font-mono">{emp.bankDetails || '--'}</td>
+                  <td className="py-6 text-right">
+                    {editingId === emp.id ? (
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => handleUpdateSalary(emp.id)} className="p-2 bg-emerald-500/20 text-emerald-500 rounded-lg hover:bg-emerald-500/30 transition-all">
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setEditingId(null)} className="p-2 bg-rose-500/20 text-rose-500 rounded-lg hover:bg-rose-500/30 transition-all">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          setEditingId(emp.id);
+                          setNewSalary(emp.baseSalary || 0);
+                        }}
+                        className="p-2 bg-white/5 text-gray-400 rounded-lg hover:text-white transition-all opacity-0 group-hover:opacity-100"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {employees.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <Banknote className="w-12 h-12 text-gray-800" />
+                      <p className="text-gray-600 font-bold">Aucun employé trouvé.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

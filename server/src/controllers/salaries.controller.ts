@@ -1,10 +1,67 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import prisma from "../utils/prisma.js";
 
-export const getSalaries = async (req: Request, res: Response) => {
+export const getSalaries = async (req: any, res: Response) => {
   try {
-    // Logique future pour récupérer les salaires
-    res.json({ message: "Fonctionnalité Salaires (requiert plan LOUBA)", data: [] });
-  } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la récupération des salaires", error });
+    const user = req.user;
+    
+    // Récupérer les employés de l'entreprise avec leurs salaires
+    const employees = await prisma.user.findMany({
+      where: { 
+        companyId: user.companyId,
+        role: "EMPLOYEE"
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        baseSalary: true,
+        bankDetails: true,
+        jobTitle: true
+      }
+    });
+
+    res.json(employees);
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors de la récupération des salaires", error: error.message });
+  }
+};
+
+export const generatePayroll = async (req: any, res: Response) => {
+  try {
+    const user = req.user;
+    const { month, year } = req.body; // ex: 04, 2026
+
+    const employees = await prisma.user.findMany({
+      where: { 
+        companyId: user.companyId,
+        role: "EMPLOYEE",
+        baseSalary: { gt: 0 }
+      }
+    });
+
+    if (employees.length === 0) {
+      return res.status(400).json({ message: "Aucun employé avec un salaire défini n'a été trouvé." });
+    }
+
+    const payslips = [];
+
+    // Pour chaque employé, on crée un Document de type PAYSLIP
+    // Note: Dans une version réelle, on générerait un PDF ici.
+    for (const emp of employees) {
+      const doc = await prisma.document.create({
+        data: {
+          title: `Fiche de Paie - ${month}/${year} - ${emp.firstName} ${emp.lastName}`,
+          type: "PAYSLIP",
+          url: `https://bamrh-payslips.s3.amazonaws.com/mock-payslip-${emp.id}-${month}-${year}.pdf`, // URL fictive
+          employeeId: emp.id
+        }
+      });
+      payslips.push(doc);
+    }
+
+    res.status(201).json({ message: `${payslips.length} fiches de paie générées avec succès.`, data: payslips });
+  } catch (error: any) {
+    res.status(500).json({ message: "Erreur lors de la génération de la paie", error: error.message });
   }
 };

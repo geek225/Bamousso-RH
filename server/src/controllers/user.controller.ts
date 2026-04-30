@@ -27,6 +27,8 @@ import { Response } from "express";
    status: z.enum(["INVITED", "ACTIVE", "INACTIVE"]).optional(), 
    departmentId: z.string().optional(), 
    managerId: z.string().optional(), 
+   baseSalary: z.number().optional(),
+   bankDetails: z.string().optional(),
  }); 
  
  const updateUserSchema = createUserSchema.partial(); 
@@ -111,6 +113,8 @@ import { Response } from "express";
          status: data.status || "INVITED", 
          departmentId: data.departmentId || null, 
          managerId: data.managerId || null, 
+         baseSalary: data.baseSalary || null,
+         bankDetails: data.bankDetails || null,
        }, 
      }); 
  
@@ -182,6 +186,8 @@ import { Response } from "express";
          status: true, 
          departmentId: true, 
          managerId: true, 
+         baseSalary: true,
+         bankDetails: true,
        }, 
      }); 
  
@@ -220,6 +226,8 @@ import { Response } from "express";
        ...(data.status !== undefined && { status: data.status }), 
        ...(data.departmentId !== undefined && { departmentId: data.departmentId }), 
        ...(data.managerId !== undefined && { managerId: data.managerId }), 
+       ...(data.baseSalary !== undefined && { baseSalary: data.baseSalary }),
+       ...(data.bankDetails !== undefined && { bankDetails: data.bankDetails }),
      }; 
  
      if (data.password) { 

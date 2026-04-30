@@ -85,11 +85,11 @@ const AnnouncementsPage = () => {
           <form onSubmit={handleCreate} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Titre</label>
-              <input required value={title} onChange={e => setTitle(e.target.value)} type="text" className="w-full p-4 text-lg rounded-2xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition" placeholder="Un titre accrocheur..." />
+              <input required value={title} onChange={e => setTitle(e.target.value)} type="text" className="w-full p-4 text-lg rounded-2xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition" placeholder="Un titre accrocheur..." />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Contenu</label>
-              <textarea required value={content} onChange={e => setContent(e.target.value)} rows={5} className="w-full p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition resize-none" placeholder="Partagez la nouvelle avec l'équipe..."></textarea>
+              <textarea required value={content} onChange={e => setContent(e.target.value)} rows={5} className="w-full p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition resize-none" placeholder="Partagez la nouvelle avec l'équipe..."></textarea>
             </div>
             <div className="flex justify-end gap-3">
               <button type="button" onClick={() => setIsCreating(false)} className="px-6 py-3 font-semibold text-gray-500 hover:bg-gray-100 rounded-xl transition">Annuler</button>

@@ -144,7 +144,11 @@ export const registerCompany = async (req: Request, res: Response) => {
 
     res.status(201).json({
       token,
-      company: { id: result.company.id, name: result.company.name },
+      company: { 
+        id: result.company.id, 
+        name: result.company.name,
+        plan: result.company.plan
+      },
       user: {
         id: result.user.id,
         email: result.user.email,
@@ -302,6 +306,7 @@ export const login = async (req: Request, res: Response) => {
         ? {
             id: user.company.id,
             name: user.company.name,
+            plan: (user.company as any).plan,
             isLocked: (user.company as any).isLocked,
             isActive: user.company.isActive,
           }

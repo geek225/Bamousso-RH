@@ -25,6 +25,7 @@ const DocumentsPage = () => {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('PAYSLIP');
   const [employeeId, setEmployeeId] = useState('');
+  const [file, setFile] = useState<File | null>(null);
   
   const [employees, setEmployees] = useState<{id: string, firstName: string, lastName: string}[]>([]);
 
@@ -55,13 +56,29 @@ const DocumentsPage = () => {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!file) {
+      alert("Veuillez sélectionner un fichier.");
+      return;
+    }
+
     try {
-      await api.post('/documents', { title, type, employeeId });
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('type', type);
+      formData.append('employeeId', employeeId);
+      formData.append('document', file);
+
+      await api.post('/documents', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
       setIsUploading(false);
       setTitle('');
+      setFile(null);
       void fetchDocuments();
     } catch (error) {
       console.error('Error uploading document', error);
+      alert("Erreur lors de l'envoi du document.");
     }
   };
 
@@ -83,7 +100,7 @@ const DocumentsPage = () => {
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
             <FileText className="w-8 h-8 text-orange-500" /> Coffre-fort Documents
           </h1>
-          <p className="text-gray-500 mt-1">Retrouvez vos fiches de paie, contrats et documents internes.</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Retrouvez vos fiches de paie, contrats et documents internes.</p>
         </div>
         {canManage && (
           <motion.button
@@ -103,15 +120,15 @@ const DocumentsPage = () => {
           animate={{ opacity: 1, height: 'auto' }}
           className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700"
         >
-          <h2 className="text-xl font-bold mb-4">Uploader un nouveau document</h2>
-          <form onSubmit={handleUpload} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div>
+          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Uploader un nouveau document</h2>
+          <form onSubmit={handleUpload} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div className="md:col-span-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titre du document</label>
-              <input required value={title} onChange={e => setTitle(e.target.value)} type="text" className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-2 focus:ring-orange-500 outline-none" placeholder="ex: Fiche de Paie Janvier 2026" />
+              <input required value={title} onChange={e => setTitle(e.target.value)} type="text" className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none" placeholder="ex: Fiche de Paie Janvier 2026" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-              <select value={type} onChange={e => setType(e.target.value)} className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-2 focus:ring-orange-500 outline-none">
+              <select value={type} onChange={e => setType(e.target.value)} className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none">
                 <option value="PAYSLIP">Fiche de Paie</option>
                 <option value="CONTRACT">Contrat</option>
                 <option value="POLICY">Règlement / Politique</option>
@@ -120,12 +137,21 @@ const DocumentsPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employé cible</label>
-              <select required value={employeeId} onChange={e => setEmployeeId(e.target.value)} className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-2 focus:ring-orange-500 outline-none">
+              <select required value={employeeId} onChange={e => setEmployeeId(e.target.value)} className="w-full p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none">
                 <option value="">Sélectionner...</option>
                 {employees.map(emp => (
                   <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fichier (PDF, Image...)</label>
+              <input 
+                type="file" 
+                required
+                onChange={e => setFile(e.target.files?.[0] || null)}
+                className="w-full p-2 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-gray-500 text-xs focus:ring-2 focus:ring-orange-500 outline-none"
+              />
             </div>
             <div>
               <button type="submit" className="w-full bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 p-2.5 rounded-xl font-semibold hover:opacity-90 transition">
