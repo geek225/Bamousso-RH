@@ -33,23 +33,34 @@ const NotificationCenter = () => {
   useEffect(() => {
     fetchNotifications();
 
+    // Fallback Polling (toutes les 30 secondes au cas où le Realtime échoue)
+    const interval = setInterval(fetchNotifications, 30000);
+
     const channel = supabase
-      .channel('public:Notification')
+      .channel('db-changes')
       .on('postgres_changes', { 
         event: 'INSERT', 
         schema: 'public', 
-        table: 'Notification',
-        filter: user?.id ? `userId=eq.${user.id}` : undefined
+        table: 'Notification'
       }, (payload) => {
-        setNotifications(prev => [payload.new as Notification, ...prev]);
-        setUnreadCount(prev => prev + 1);
+        const newNotif = payload.new as any;
         
-        // Jouer un son (optionnel)
-        // new Audio('/notification.mp3').play().catch(() => {});
+        // On ne traite la notification que si elle est destinée à cet utilisateur spécifique
+        // ou si c'est une notification globale (userId null)
+        if (newNotif.userId === user?.id || !newNotif.userId) {
+          setNotifications(prev => [newNotif as Notification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+          
+          // Petit feedback visuel (optionnel)
+          console.log("Nouvelle notification reçue en temps réel !");
+        }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Statut de la connexion Realtime:", status);
+      });
 
     return () => {
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
