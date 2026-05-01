@@ -61,7 +61,12 @@ app.use(helmet({
 app.use(morgan("dev"));
 
 // Analyse du corps des requêtes en format JSON
-app.use(express.json());
+// On conserve le corps brut (rawBody) pour la vérification des signatures de Webhooks (GeniusPay)
+app.use(express.json({
+  verify: (req: any, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 
 // --- Gestion des fichiers statiques ---
 // Note : Pour Vercel, les fichiers locaux ne persistent pas. 

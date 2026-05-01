@@ -107,10 +107,12 @@ export const handleWebhook = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Unauthorized: Missing signature configuration" });
     }
 
-    const payload = JSON.stringify(req.body);
+    // IMPORTANT : Utiliser le Raw Body pour la signature, pas le JSON parsé
+    const rawPayload = (req as any).rawBody ? (req as any).rawBody.toString() : JSON.stringify(req.body);
+    
     const expectedSignature = crypto
       .createHmac('sha256', webhookSecret)
-      .update(`${timestamp}.${payload}`)
+      .update(`${timestamp}.${rawPayload}`)
       .digest('hex');
 
     if (signature !== expectedSignature) {
