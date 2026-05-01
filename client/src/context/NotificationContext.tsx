@@ -31,7 +31,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           schema: 'public',
           table: 'Notification',
           filter: `companyId=eq.${user.companyId}`,
-        }, (payload) => {
+        }, (payload: any) => {
           const newNotif = payload.new as Notification;
           setNotifications(prev => [newNotif, ...prev]);
           

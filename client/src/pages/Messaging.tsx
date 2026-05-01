@@ -79,7 +79,7 @@ const Messaging = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'Message',
-        }, (payload) => {
+        }, (payload: any) => {
           const msg = payload.new as Message;
           if ((msg.senderId === selectedContact.id && msg.recipientId === user?.id) ||
               (msg.senderId === user?.id && msg.recipientId === selectedContact.id)) {
