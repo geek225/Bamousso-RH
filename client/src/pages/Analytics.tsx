@@ -53,6 +53,8 @@ const Analytics = () => {
     void fetchAll();
 
     // Real-time subscription pour mettre à jour les graphiques
+    if (!supabase) return;
+
     const channel = supabase
       .channel('analytics-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'User' }, () => void fetchAll())

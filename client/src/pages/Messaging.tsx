@@ -71,6 +71,8 @@ const Messaging = () => {
       void fetchMessages(selectedContact.id);
 
       // Real-time subscription - Optimisé
+      if (!supabase) return;
+
       const channel = supabase
         .channel(`chat-${selectedContact.id}`)
         .on('postgres_changes', {

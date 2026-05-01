@@ -36,6 +36,8 @@ const NotificationCenter = () => {
     // Fallback Polling (toutes les 30 secondes au cas où le Realtime échoue)
     const interval = setInterval(fetchNotifications, 30000);
 
+    if (!supabase) return;
+
     const channel = supabase
       .channel('db-changes')
       .on('postgres_changes', { 

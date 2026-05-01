@@ -22,6 +22,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   useEffect(() => {
     if (user?.companyId) {
       // Écouter les nouvelles notifications pour cette entreprise
+      if (!supabase) return;
+
       const channel = supabase
         .channel(`notifications-${user.companyId}`)
         .on('postgres_changes', {

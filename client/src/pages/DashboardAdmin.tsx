@@ -36,6 +36,11 @@ const DashboardAdmin = () => {
   useEffect(() => {
     void fetchStats();
 
+    if (!supabase) {
+      console.warn("Supabase non initialisé. Le temps réel est désactivé.");
+      return;
+    }
+
     const channel = supabase
       .channel('dashboard-stats')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'User' }, () => void fetchStats())
