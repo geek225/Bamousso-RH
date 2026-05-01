@@ -38,6 +38,9 @@ dotenv.config();
 
 const app = express();
 
+// Nécessaire pour le rate limiting sur Vercel (détection correcte de l'IP derrière le proxy)
+app.set('trust proxy', 1);
+
 // --- Configuration des Middlewares ---
 
 // Configuration de CORS : Autorise les requêtes provenant du frontend uniquement
