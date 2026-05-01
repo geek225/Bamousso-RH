@@ -76,9 +76,10 @@ const DocumentsPage = () => {
       setTitle('');
       setFile(null);
       void fetchDocuments();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading document', error);
-      alert("Erreur lors de l'envoi du document.");
+      const msg = error.response?.data?.message || "Erreur lors de l'envoi du document.";
+      alert(msg);
     }
   };
 

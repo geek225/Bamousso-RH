@@ -31,7 +31,7 @@ const SettingsPage = () => {
     formData.append('logo', selectedFile);
 
     try {
-      const res = await api.post(`/companies/logo`, formData, {
+      const res = await api.put(`/companies/${company.id}/logo`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       // Mettre à jour le contexte avec le nouveau logo
@@ -39,9 +39,10 @@ const SettingsPage = () => {
         login(token, user, res.data.company);
       }
       setMessage('Logo mis à jour avec succès !');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating logo', error);
-      setMessage('Erreur lors de la mise à jour du logo.');
+      const msg = error.response?.data?.message || 'Erreur lors de la mise à jour du logo.';
+      setMessage(msg);
     } finally {
       setIsSaving(false);
     }
