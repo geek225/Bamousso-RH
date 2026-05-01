@@ -39,15 +39,16 @@ export const upload = multer({
  * Middleware de validation robuste du type de fichier via analyse binaire (Magic Numbers)
  */
 export const validateFileType = async (req: Request, res: Response, next: NextFunction) => {
-  if (!req.file) return next();
+  const file = (req as any).file;
+  if (!file) return next();
 
   try {
-    const type = await fileTypeFromBuffer(req.file.buffer);
+    const type = await fileTypeFromBuffer(file.buffer);
     
     // Si file-type ne reconnaît pas le fichier, on vérifie si c'est un format texte autorisé
     if (!type) {
       const allowedTextTypes = ['text/plain', 'text/csv'];
-      if (allowedTextTypes.includes(req.file.mimetype)) {
+      if (allowedTextTypes.includes(file.mimetype)) {
         return next();
       }
       return res.status(400).json({ message: "Contenu du fichier non reconnu ou potentiellement dangereux." });
