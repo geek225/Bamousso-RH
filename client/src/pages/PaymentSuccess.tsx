@@ -6,7 +6,7 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
-  const [message, setMessage] = useState('Vérification de votre paiement en cours...');
+  const message = 'Vérification de votre paiement en cours...';
 
   useEffect(() => {
     let retryCount = 0;
