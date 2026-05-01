@@ -35,7 +35,8 @@ export const requestLeave = async (req: Request, res: Response): Promise<any> =>
 
     // Notifier les admins
     const user = (req as any).user;
-    await notifyAdmins(user.companyId, "Demande de congés", `${user.firstName} ${user.lastName} a soumis une nouvelle demande de congés.`);
+    const userName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
+    await notifyAdmins(user.companyId, "Demande de congés", `${userName} a soumis une nouvelle demande de congés.`);
 
     res.status(201).json(leave);
   } catch (error: any) {

@@ -32,7 +32,8 @@ export const toggleClock = async (req: Request, res: Response): Promise<any> => 
 
       // Notifier les admins
       const user = (req as any).user;
-      await notifyAdmins(user.companyId, "Nouveau Pointage", `${user.firstName} ${user.lastName} vient de pointer son arrivée.`);
+      const userName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
+      await notifyAdmins(user.companyId, "Nouveau Pointage", `${userName} vient de pointer son arrivée.`);
 
       return res.status(201).json({ message: "Arrivée enregistrée avec succès", attendance });
     } else if (!attendance.checkOut) {
@@ -44,7 +45,8 @@ export const toggleClock = async (req: Request, res: Response): Promise<any> => 
 
       // Notifier les admins
       const user = (req as any).user;
-      await notifyAdmins(user.companyId, "Départ Pointage", `${user.firstName} ${user.lastName} vient de pointer son départ.`);
+      const userName = user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email;
+      await notifyAdmins(user.companyId, "Départ Pointage", `${userName} vient de pointer son départ.`);
 
       return res.json({ message: "Départ enregistré avec succès", attendance });
     } else {

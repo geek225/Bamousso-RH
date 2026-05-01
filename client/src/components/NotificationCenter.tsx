@@ -39,29 +39,23 @@ const NotificationCenter = () => {
     if (!supabase) return;
 
     const channel = supabase
-      .channel('db-changes')
+      .channel(`notifications-${user?.companyId}`)
       .on('postgres_changes', { 
         event: 'INSERT', 
         schema: 'public', 
-        table: 'Notification'
+        table: 'Notification',
+        filter: `companyId=eq.${user?.companyId}`
       }, (payload: { new: Notification }) => {
         const newNotif = payload.new;
         
         // On ne traite la notification que si elle est destinée à cet utilisateur spécifique
-        // ou si c'est une notification globale (userId null)
-        if (newNotif.userId === user?.id || !newNotif.userId) {
+        // ou si c'est une notification globale de l'entreprise (userId null)
+        if (!newNotif.userId || newNotif.userId === user?.id) {
           setNotifications(prev => [newNotif, ...prev]);
           setUnreadCount(prev => prev + 1);
-          
-          // Petit feedback visuel (optionnel)
-          console.log("Nouvelle notification reçue en temps réel !");
         }
       })
-      .subscribe((status: string) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Connecté à Supabase Realtime');
-        }
-      });
+      .subscribe();
 
     return () => {
       clearInterval(interval);

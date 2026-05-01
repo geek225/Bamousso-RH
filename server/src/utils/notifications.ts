@@ -7,12 +7,23 @@ export const createNotification = async (data: {
   companyId?: string;
 }) => {
   try {
+    let finalCompanyId = data.companyId;
+
+    // Si le companyId est absent mais qu'on a un userId, on va le chercher
+    if (!finalCompanyId && data.userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: data.userId },
+        select: { companyId: true }
+      });
+      if (user) finalCompanyId = user.companyId;
+    }
+
     const notification = await prisma.notification.create({
       data: {
         title: data.title,
         message: data.message,
         userId: data.userId,
-        companyId: data.companyId,
+        companyId: finalCompanyId,
       },
     });
     return notification;
