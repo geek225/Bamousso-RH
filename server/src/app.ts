@@ -53,16 +53,8 @@ app.use(cors({
 
 // Sécurisation des headers HTTP avec Helmet
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }, // Permet de charger des images/fichiers d'autres origines si nécessaire
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https://*.supabase.co", "https://*.genius.ci"],
-      connectSrc: ["'self'", "https://*.supabase.co", "https://*.genius.ci", "wss://*.supabase.co"],
-    },
-  },
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false, // Désactivé temporairement pour diagnostic
 }));
 
 // Journalisation des requêtes HTTP en mode développement
