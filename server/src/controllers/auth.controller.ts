@@ -290,7 +290,7 @@ export const login = async (req: Request, res: Response) => {
     });
 
     // Retour des informations utilisateur et du token au client
-    res.json({ 
+    const responseData = { 
       token, 
       user: { 
         id: user.id, 
@@ -311,25 +311,27 @@ export const login = async (req: Request, res: Response) => {
             trialEndsAt: (user.company as any).trialEndsAt,
           }
         : null,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
+    };
+
+    return res.json(responseData);
+  } catch (error: any) {
+    console.error("CRITICAL Login error:", error);
+    
+    // Log plus détaillé pour le debug
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ message: "Données de connexion invalides", errors: error.errors });
+    }
 
     if (error instanceof Prisma.PrismaClientInitializationError) {
       return res.status(500).json({
-        message:
-          "Connexion base de données impossible. Vérifie DATABASE_URL sur Vercel (idéalement 'Transaction pooler' Supabase + pgbouncer=true) et que le mot de passe DB est correct.",
+        message: "Connexion base de données impossible. Vérifiez les variables d'environnement.",
       });
     }
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return res.status(500).json({
-        message: "Erreur base de données (Prisma).",
-        code: error.code,
-      });
-    }
-
-    res.status(500).json({ message: "Erreur lors de la connexion" });
+    res.status(500).json({ 
+      message: "Erreur lors de la connexion", 
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 };
 
