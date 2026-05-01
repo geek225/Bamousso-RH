@@ -123,11 +123,19 @@ export const getCompanyById = async (req: Request, res: Response) => {
 
 export const updateCompany = async (req: Request, res: Response) => {
   try {
+    const currentUser = (req as any).user;
+    if (!currentUser) return res.status(401).json({ message: "Non authentifié" });
+
     const { id } = req.params;
     const { name, address, managerId, isActive, subscriptionStatus, subscriptionEndsAt, isLocked } =
       updateCompanySchema.parse(req.body);
 
     if (!id) return res.status(400).json({ message: "ID required" });
+
+    // Sécurité : Un COMPANY_ADMIN ne peut modifier que sa propre entreprise
+    if (currentUser.role !== "SUPER_ADMIN" && String(id) !== currentUser.companyId) {
+      return res.status(403).json({ message: "Accès refusé : vous ne pouvez modifier que votre propre entreprise." });
+    }
 
     const currentCompany = await prisma.company.findUnique({ where: { id: String(id) } });
     if (!currentCompany) return res.status(404).json({ message: "Company not found" });
@@ -135,14 +143,20 @@ export const updateCompany = async (req: Request, res: Response) => {
     const updateData: any = {};
     if (name) updateData.name = name;
     if (address !== undefined) updateData.address = address;
-    if (isActive !== undefined) updateData.isActive = isActive;
-    if (subscriptionStatus !== undefined) updateData.subscriptionStatus = subscriptionStatus;
-    if (subscriptionEndsAt !== undefined) updateData.subscriptionEndsAt = subscriptionEndsAt;
-    if (isLocked !== undefined) {
-      updateData.isLocked = isLocked;
-      updateData.lockedAt = isLocked ? new Date() : null;
-    }
     if (managerId !== undefined) updateData.managerId = managerId;
+
+    // Protection Mass Assignment : Seul SUPER_ADMIN peut modifier le statut, l'abonnement ou le verrouillage
+    if (currentUser.role === "SUPER_ADMIN") {
+      if (isActive !== undefined) updateData.isActive = isActive;
+      if (subscriptionStatus !== undefined) updateData.subscriptionStatus = subscriptionStatus;
+      if (subscriptionEndsAt !== undefined) updateData.subscriptionEndsAt = subscriptionEndsAt;
+      if (isLocked !== undefined) {
+        updateData.isLocked = isLocked;
+        updateData.lockedAt = isLocked ? new Date() : null;
+      }
+    } else if (isActive !== undefined || subscriptionStatus !== undefined || subscriptionEndsAt !== undefined || isLocked !== undefined) {
+        return res.status(403).json({ message: "Action non autorisée : seul le super administrateur peut modifier ces paramètres d'abonnement." });
+    }
 
     const company = await prisma.$transaction(async (prisma) => {
       // If manager changes, handle User relations
@@ -249,8 +263,14 @@ export const updateLogo = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
     const file = (req as any).file;
+    const currentUser = (req as any).user;
 
     if (!id) return res.status(400).json({ message: "ID de l'entreprise requis" });
+
+    // Sécurité IDOR
+    if (currentUser.role !== "SUPER_ADMIN" && String(id) !== currentUser.companyId) {
+      return res.status(403).json({ message: "Accès refusé : vous ne pouvez modifier que le logo de votre entreprise." });
+    }
 
     let logoUrl: string | undefined;
 

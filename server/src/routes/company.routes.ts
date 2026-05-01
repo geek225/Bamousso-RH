@@ -11,7 +11,7 @@ import {
   updateLogo,
   updateSubscription
 } from "../controllers/company.controller.js";
-import { upload } from "../middleware/upload.js";
+import { upload, validateFileType } from "../middleware/upload.js";
 
 const router = Router();
 
@@ -28,6 +28,6 @@ router.delete("/:id", authorize(["SUPER_ADMIN"]), deleteCompany);
 // Routes allowed for SUPER_ADMIN AND COMPANY_ADMIN
 router.get("/:id", authorize(["SUPER_ADMIN", "COMPANY_ADMIN"]), getCompanyById);
 router.put("/:id", authorize(["SUPER_ADMIN", "COMPANY_ADMIN"]), updateCompany);
-router.put("/:id/logo", authorize(["SUPER_ADMIN", "COMPANY_ADMIN"]), upload.single('logo'), updateLogo);
+router.put("/:id/logo", authorize(["SUPER_ADMIN", "COMPANY_ADMIN"]), upload.single('logo'), validateFileType, updateLogo);
 
 export default router;

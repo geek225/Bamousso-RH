@@ -8,7 +8,9 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
-import { rateLimit } from 'express-rate-limit';
+import { apiLimiter, authLimiter } from "./middleware/rateLimit.js";
+
+import { errorHandler } from "./middleware/error.js";
 
 // Importation des routes
 import authRoutes from "./routes/auth.routes.js";
@@ -37,23 +39,6 @@ dotenv.config();
 const app = express();
 
 // --- Configuration des Middlewares ---
-
-// Configuration de la limitation de débit (Anti brute-force)
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limite chaque IP à 100 requêtes par fenêtre
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: "Trop de requêtes effectuées depuis cette adresse IP, veuillez réessayer plus tard.",
-});
-
-const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 heure
-  max: 10, // 10 tentatives max pour les actions sensibles (login/register/forgot-password)
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: "Trop de tentatives de connexion, veuillez réessayer dans une heure.",
-});
 
 // Configuration de CORS : Autorise les requêtes provenant du frontend uniquement
 app.use(cors({
@@ -113,5 +98,8 @@ app.use("/api/messages", apiLimiter, messageRoutes);
 app.get("/", (req, res) => {
   res.json({ message: "API Bamousso is running" });
 });
+
+// Middleware global de gestion des erreurs (doit être après les routes)
+app.use(errorHandler);
 
 export default app;

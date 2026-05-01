@@ -79,7 +79,20 @@ export const reviewLeave = async (req: Request, res: Response): Promise<any> => 
   try {
     const id = String(req.params.id);
     const { status } = updateLeaveSchema.parse(req.body);
-    const approverId = (req as any).user.id;
+    const user = (req as any).user;
+    const approverId = user.id;
+
+    // Vérifier l'existence et l'appartenance du congé
+    const leaveExists = await prisma.leaveRequest.findFirst({
+      where: {
+        id,
+        employee: { companyId: user.companyId }
+      }
+    });
+
+    if (!leaveExists) {
+      return res.status(404).json({ message: "Demande de congés introuvable ou accès refusé." });
+    }
 
     const leave = await prisma.leaveRequest.update({
       where: { id },

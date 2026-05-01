@@ -33,6 +33,16 @@ api.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
     const code = error?.response?.data?.code;
+
+    if (status === 401) {
+      // Session expirée ou invalide -> Logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login?expired=true');
+      }
+    }
+
     if (status === 423 && code === 'COMPANY_LOCKED') {
       // Redirection simple (sans hook) vers l'écran "verrouillé"
       if (window.location.pathname !== '/locked') {

@@ -6,9 +6,22 @@ export const uploadDocument = async (req: Request, res: Response): Promise<any> 
   try {
     const { title, type, employeeId } = req.body;
     const file = (req as any).file;
+    const currentUser = (req as any).user;
 
     if (!file) {
       return res.status(400).json({ message: "Aucun fichier fourni." });
+    }
+
+    // Vérifier que l'employé appartient bien à l'entreprise de l'utilisateur connecté
+    const targetEmployee = await prisma.user.findFirst({
+      where: {
+        id: employeeId,
+        companyId: currentUser.companyId
+      }
+    });
+
+    if (!targetEmployee && currentUser.role !== "SUPER_ADMIN") {
+      return res.status(403).json({ message: "Action non autorisée : l'employé n'appartient pas à votre entreprise." });
     }
 
     // Upload vers Supabase Storage
