@@ -141,32 +141,15 @@ export const registerCompany = async (req: Request, res: Response) => {
       return { company, user };
     });
 
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET is not defined in environment variables");
-    }
-
-    const token = jwt.sign(
-      { id: result.user.id, role: result.user.role, companyId: result.user.companyId },
-      jwtSecret,
-      { expiresIn: "1d" }
-    );
-
+    // NOTE: On ne génère plus de token ici pour empêcher l'accès au dashboard 
+    // tant que le paiement n'est pas validé par le Webhook.
     res.status(201).json({
-      token,
+      message: "Entreprise créée. Veuillez procéder au paiement pour activer votre compte.",
       company: { 
         id: result.company.id, 
         name: result.company.name,
         plan: result.company.plan
-      },
-      user: {
-        id: result.user.id,
-        email: result.user.email,
-        role: result.user.role,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        companyId: result.user.companyId,
-      },
+      }
     });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la création de l'entreprise", error });

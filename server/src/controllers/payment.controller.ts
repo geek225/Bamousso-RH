@@ -107,17 +107,35 @@ export const handleWebhook = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Unauthorized: Missing signature configuration" });
     }
 
-    // IMPORTANT : Utiliser le Raw Body pour la signature, pas le JSON parsé
-    const rawPayload = (req as any).rawBody ? (req as any).rawBody.toString() : JSON.stringify(req.body);
+    // Diagnostic pour l'utilisateur (à vérifier dans les logs Vercel)
+    const secretSnippet = webhookSecret ? `${webhookSecret.substring(0, 8)}...` : "NON DEFINI";
     
-    const expectedSignature = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(`${timestamp}.${rawPayload}`)
-      .digest('hex');
+    // IMPORTANT : Utiliser le Raw Body (Buffer) pour une précision binaire totale
+    const rawBody = (req as any).rawBody;
+    let expectedSignature = "";
+
+    if (rawBody) {
+      const hmac = crypto.createHmac('sha256', webhookSecret);
+      hmac.update(`${timestamp}.`);
+      hmac.update(rawBody);
+      expectedSignature = hmac.digest('hex');
+    } else {
+      // Fallback si rawBody est absent (ne devrait pas arriver avec notre config app.ts)
+      const payload = JSON.stringify(req.body);
+      expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(`${timestamp}.${payload}`)
+        .digest('hex');
+    }
 
     if (signature !== expectedSignature) {
-      await logger.error("Signature Webhook invalide", { received: signature, expected: expectedSignature }, "PaymentController");
-      return res.status(401).json({ error: "Unauthorized: Invalid signature" });
+      await logger.error("Signature Webhook invalide", { 
+        expected: expectedSignature, 
+        received: signature,
+        webhookSecretUsed: secretSnippet,
+        hasRawBody: !!rawBody
+      }, "PaymentController");
+      return res.status(401).json({ error: "Invalid signature" });
     }
 
     const { event, data } = req.body;
