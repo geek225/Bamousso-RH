@@ -28,7 +28,7 @@ export const getCompanies = async (req: Request, res: Response): Promise<any> =>
 
 export const getCompanyById = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const company = await prisma.company.findUnique({
       where: { id },
       include: { users: { select: { id: true, firstName: true, lastName: true, email: true, role: true } } }
@@ -42,7 +42,7 @@ export const getCompanyById = async (req: Request, res: Response): Promise<any> 
 
 export const updateCompany = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { name, address, plan, extraEmployees, isActive } = req.body;
     const company = await prisma.company.update({
       where: { id },
@@ -56,7 +56,7 @@ export const updateCompany = async (req: Request, res: Response): Promise<any> =
 
 export const deleteCompany = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     await prisma.company.delete({ where: { id } });
     res.json({ message: "Entreprise supprimée avec succès." });
   } catch (error: any) {
@@ -66,7 +66,7 @@ export const deleteCompany = async (req: Request, res: Response): Promise<any> =
 
 export const lockCompany = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const company = await prisma.company.update({
       where: { id },
       data: { isLocked: true, lockedAt: new Date() }
@@ -79,7 +79,7 @@ export const lockCompany = async (req: Request, res: Response): Promise<any> => 
 
 export const unlockCompany = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const company = await prisma.company.update({
       where: { id },
       data: { isLocked: false, lockedAt: null }
@@ -92,7 +92,7 @@ export const unlockCompany = async (req: Request, res: Response): Promise<any> =
 
 export const updateSubscription = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { plan, extraEmployees, subscriptionStatus, subscriptionEndsAt } = req.body;
     const company = await prisma.company.update({
       where: { id },
@@ -106,7 +106,7 @@ export const updateSubscription = async (req: Request, res: Response): Promise<a
 
 export const updateStatus = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { isActive } = req.body;
     const company = await prisma.company.update({
       where: { id },
@@ -121,7 +121,7 @@ export const updateStatus = async (req: Request, res: Response): Promise<any> =>
 export const updateLogo = async (req: Request, res: Response): Promise<any> => {
   try {
     const file = (req as any).file;
-    const { id } = req.params;
+    const id = req.params.id as string;
     if (!file) return res.status(400).json({ message: "Aucun fichier fourni." });
     const logoUrl = await uploadToSupabase(file);
     if (!logoUrl) return res.status(500).json({ message: "Erreur lors de l'upload vers Supabase." });
