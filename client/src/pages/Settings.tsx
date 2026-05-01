@@ -9,15 +9,31 @@ const SettingsPage = () => {
   const [logoUrl, setLogoUrl] = useState(company?.logoUrl || '');
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      // Créer un aperçu
+      setLogoUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleSaveLogo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!company) return;
+    if (!selectedFile || !company) return;
 
     setIsSaving(true);
     setMessage('');
+    
+    const formData = new FormData();
+    formData.append('logo', selectedFile);
+
     try {
-      const res = await api.put(`/companies/${company.id}/logo`, { logoUrl });
+      const res = await api.post(`/companies/logo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       // Mettre à jour le contexte avec le nouveau logo
       if (token && user) {
         login(token, user, res.data.company);
@@ -51,25 +67,28 @@ const SettingsPage = () => {
         
         <form onSubmit={handleSaveLogo} className="space-y-6">
           <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-900 shrink-0 overflow-hidden relative">
+            <div className="w-40 h-40 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-50 dark:bg-gray-900 shrink-0 overflow-hidden relative group">
               {logoUrl ? (
                 <img src={logoUrl} alt="Aperçu du logo" className="w-full h-full object-contain p-2" />
               ) : (
                 <span className="text-sm text-gray-400 text-center px-4">Aucun logo</span>
               )}
+              <label className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs font-bold">
+                Changer le logo
+                <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+              </label>
             </div>
             
             <div className="flex-1 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">URL du Logo</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Fichier du Logo</label>
                 <input 
-                  type="url" 
-                  value={logoUrl} 
-                  onChange={e => setLogoUrl(e.target.value)} 
-                  className="w-full p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition" 
-                  placeholder="https://votre-site.com/logo.png" 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleFileChange} 
+                  className="w-full p-4 rounded-2xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" 
                 />
-                <p className="text-xs text-gray-500 mt-2">Pour l'instant, veuillez fournir un lien public vers votre logo (format PNG recommandé).</p>
+                <p className="text-xs text-gray-500 mt-2">Format recommandé : PNG ou SVG (fond transparent).</p>
               </div>
 
               {message && (
@@ -80,7 +99,7 @@ const SettingsPage = () => {
 
               <button 
                 type="submit" 
-                disabled={isSaving}
+                disabled={isSaving || !selectedFile}
                 className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-shadow disabled:opacity-50"
               >
                 {isSaving ? 'Enregistrement...' : <><Save className="w-5 h-5" /> Enregistrer le logo</>}

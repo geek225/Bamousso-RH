@@ -112,6 +112,15 @@ import { Response } from "express";
        }, 
      }); 
  
+     // Notifier l'employé assigné
+     if (assignedToId) {
+       await createNotification({
+         title: "Nouvelle tâche assignée",
+         message: `Vous avez reçu une nouvelle tâche : ${title}`,
+         userId: assignedToId
+       });
+     }
+ 
      res.status(201).json(newTask); 
    } catch (error: any) { 
      if (error instanceof z.ZodError) { 

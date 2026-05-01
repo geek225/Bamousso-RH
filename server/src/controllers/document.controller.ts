@@ -40,6 +40,13 @@ export const uploadDocument = async (req: Request, res: Response): Promise<any> 
       }
     });
 
+    // Notifier l'employé
+    await createNotification({
+      title: "Nouveau document",
+      message: `Un nouveau document (${title}) a été ajouté à votre espace.`,
+      userId: employeeId
+    });
+
     res.status(201).json(doc);
   } catch (error: any) {
     res.status(500).json({ message: "Erreur serveur.", error: error.message });
