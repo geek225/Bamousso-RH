@@ -6,36 +6,32 @@ import fs from 'fs';
 // Disk storage is not reliable in serverless functions as the filesystem is ephemeral and read-only
 const storage = multer.memoryStorage();
 
-// File filter (optional, to restrict file types)
+// File filter to restrict file types
 const fileFilter = (req: any, file: any, cb: any) => {
-  // Accept PDF, Word documents, Videos, Images, Excel
   const allowedTypes = [
     'application/pdf', 
     'application/msword', 
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'video/mp4',
-    'video/webm',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
     'image/jpeg',
     'image/png',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'audio/mpeg',
-    'audio/wav',
-    'audio/ogg',
-    'audio/webm',
-    'audio/mp3'
+    'image/webp',
+    'video/mp4',
+    'video/webm',
+    'text/plain',
+    'text/csv'
   ];
   
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    // Accepting all for now to avoid blocking user tests, ideally restrict.
-    // console.warn(`Warning: File type ${file.mimetype} not explicitly allowed but passed.`);
-    cb(null, true); 
+    cb(new Error(`Type de fichier non autorisé : ${file.mimetype}. Seuls les documents, images et vidéos sont acceptés.`), false);
   }
 };
 
 export const upload = multer({ 
   storage: storage,
+  fileFilter: fileFilter,
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });

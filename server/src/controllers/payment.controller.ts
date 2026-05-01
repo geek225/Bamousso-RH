@@ -102,16 +102,20 @@ export const handleWebhook = async (req: Request, res: Response) => {
     const webhookSecret = process.env.GENIUSPAY_WEBHOOK_SECRET;
 
     // Signature verification logic
-    if (webhookSecret && signature && timestamp) {
-      const payload = JSON.stringify(req.body);
-      const expectedSignature = crypto
-        .createHmac('sha256', webhookSecret)
-        .update(`${timestamp}.${payload}`)
-        .digest('hex');
+    if (!webhookSecret || !signature || !timestamp) {
+      await logger.error("Configuration Webhook manquante ou signature absente", { signature: !!signature, timestamp: !!timestamp, secret: !!webhookSecret }, "PaymentController");
+      return res.status(401).json({ error: "Unauthorized: Missing signature configuration" });
+    }
 
-      if (signature !== expectedSignature) {
-        await logger.warn("Signature Webhook invalide", { received: signature, expected: expectedSignature }, "PaymentController");
-      }
+    const payload = JSON.stringify(req.body);
+    const expectedSignature = crypto
+      .createHmac('sha256', webhookSecret)
+      .update(`${timestamp}.${payload}`)
+      .digest('hex');
+
+    if (signature !== expectedSignature) {
+      await logger.error("Signature Webhook invalide", { received: signature, expected: expectedSignature }, "PaymentController");
+      return res.status(401).json({ error: "Unauthorized: Invalid signature" });
     }
 
     const { event, data } = req.body;

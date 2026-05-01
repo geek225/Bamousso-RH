@@ -8,6 +8,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import { rateLimit } from 'express-rate-limit';
 
 // Importation des routes
 import authRoutes from "./routes/auth.routes.js";
@@ -37,16 +38,44 @@ const app = express();
 
 // --- Configuration des Middlewares ---
 
-// Configuration de CORS : Autorise les requêtes provenant du frontend
+// Configuration de la limitation de débit (Anti brute-force)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limite chaque IP à 100 requêtes par fenêtre
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Trop de requêtes effectuées depuis cette adresse IP, veuillez réessayer plus tard.",
+});
+
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 heure
+  max: 10, // 10 tentatives max pour les actions sensibles (login/register/forgot-password)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Trop de tentatives de connexion, veuillez réessayer dans une heure.",
+});
+
+// Configuration de CORS : Autorise les requêtes provenant du frontend uniquement
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [process.env.FRONTEND_URL || 'https://bamousso-client.vercel.app'] 
-    : true, // En développement, on autorise tout (ou strictement localhost)
+    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
   credentials: true
 }));
 
 // Sécurisation des headers HTTP avec Helmet
-app.use((helmet as any)({ crossOriginResourcePolicy: false }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Permet de charger des images/fichiers d'autres origines si nécessaire
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https://*.supabase.co", "https://*.genius.ci"],
+      connectSrc: ["'self'", "https://*.supabase.co", "https://*.genius.ci", "wss://*.supabase.co"],
+    },
+  },
+}));
 
 // Journalisation des requêtes HTTP en mode développement
 app.use(morgan("dev"));
@@ -60,25 +89,25 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // --- Définition des Routes API ---
-app.use("/api/auth", authRoutes);           // Authentification (Login, Register)
-app.use("/api/companies", companyRoutes);     // Gestion des entreprises
-app.use("/api/employees", userRoutes);         // Annuaire employés (CRUD)
-app.use("/api/departments", departmentRoutes);       // Départements
-app.use("/api/notifications", notificationRoutes); // Notifications et annonces
+app.use("/api/auth", authLimiter, authRoutes);           // Authentification (Login, Register) avec protection accrue
+app.use("/api/companies", apiLimiter, companyRoutes);     // Gestion des entreprises
+app.use("/api/employees", apiLimiter, userRoutes);         // Annuaire employés (CRUD)
+app.use("/api/departments", apiLimiter, departmentRoutes);       // Départements
+app.use("/api/notifications", apiLimiter, notificationRoutes); // Notifications et annonces
 
-app.use("/api/leaves", leaveRoutes);            // Gestion des congés
-app.use("/api/attendances", attendanceRoutes);  // Pointage
-app.use("/api/documents", documentRoutes);      // Fiches de paie / Contrats
-app.use("/api/announcements", announcementRoutes); // Communications internes
-app.use("/api/payment", paymentRoutes);           // Paiements et Webhooks
-app.use("/api/admin", superAdminRoutes);               // SUPER_ADMIN & changement de mot de passe
-app.use("/api/analytics", analyticsRoutes);            // Analytics RH (Bamousso+)
-app.use("/api/cron", cronRoutes);                      // Tâches planifiées (Subscription check)
-app.use("/api/salaries", salariesRoutes);
-app.use("/api/suggestions", suggestionsRoutes);
-app.use("/api/explanations", explanationRoutes);
-app.use("/api/tasks", taskRoutes);
-app.use("/api/messages", messageRoutes);
+app.use("/api/leaves", apiLimiter, leaveRoutes);            // Gestion des congés
+app.use("/api/attendances", apiLimiter, attendanceRoutes);  // Pointage
+app.use("/api/documents", apiLimiter, documentRoutes);      // Fiches de paie / Contrats
+app.use("/api/announcements", apiLimiter, announcementRoutes); // Communications internes
+app.use("/api/payment", authLimiter, paymentRoutes);           // Paiements et Webhooks (limité car sensible)
+app.use("/api/admin", apiLimiter, superAdminRoutes);               // SUPER_ADMIN & changement de mot de passe
+app.use("/api/analytics", apiLimiter, analyticsRoutes);            // Analytics RH (Bamousso+)
+app.use("/api/cron", apiLimiter, cronRoutes);                      // Tâches planifiées (Subscription check)
+app.use("/api/salaries", apiLimiter, salariesRoutes);
+app.use("/api/suggestions", apiLimiter, suggestionsRoutes);
+app.use("/api/explanations", apiLimiter, explanationRoutes);
+app.use("/api/tasks", apiLimiter, taskRoutes);
+app.use("/api/messages", apiLimiter, messageRoutes);
 
 // Route de test pour vérifier que l'API est en ligne
 app.get("/", (req, res) => {

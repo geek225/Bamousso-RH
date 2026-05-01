@@ -18,7 +18,12 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res.status(500).json({ message: "Internal server error: Security configuration missing." });
+    }
+
+    const decoded = jwt.verify(token, jwtSecret);
     req.user = decoded as any;
 
     // Verrouillage entreprise (blocage total) : bypass SUPER_ADMIN

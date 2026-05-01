@@ -53,7 +53,7 @@ export const generatePayroll = async (req: any, res: Response) => {
         data: {
           title: `Fiche de Paie - ${month}/${year} - ${emp.firstName} ${emp.lastName}`,
           type: "PAYSLIP",
-          url: `https://bamrh-payslips.s3.amazonaws.com/mock-payslip-${emp.id}-${month}-${year}.pdf`, // URL fictive
+          url: `https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf`, // URL de démonstration
           employeeId: emp.id
         }
       });

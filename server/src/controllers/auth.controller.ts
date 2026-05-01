@@ -10,6 +10,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "../utils/prisma.js";
 import { z } from "zod";
 import { sendResetPasswordEmail } from "../utils/mailer.js";
+import { logger } from "../utils/logger.js";
 
 // Schéma de validation pour l'inscription d'un utilisateur
 const registerSchema = z.object({
@@ -140,9 +141,14 @@ export const registerCompany = async (req: Request, res: Response) => {
       return { company, user };
     });
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET is not defined in environment variables");
+    }
+
     const token = jwt.sign(
       { id: result.user.id, role: result.user.role, companyId: result.user.companyId },
-      process.env.JWT_SECRET || "secret_par_defaut_a_changer",
+      jwtSecret,
       { expiresIn: "1d" }
     );
 
@@ -278,13 +284,19 @@ export const login = async (req: Request, res: Response) => {
     // Comparaison du mot de passe saisi avec le mot de passe crypté en base
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      await logger.warn(`Tentative de connexion échouée pour l'email: ${email}`, { ip: req.ip }, "AuthController");
       return res.status(400).json({ message: "Identifiants invalides" });
     }
 
     // Génération du token JWT (valable 1 jour)
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET is not defined in environment variables");
+    }
+
     const token = jwt.sign(
       { id: user.id, role: user.role, companyId: user.companyId },
-      process.env.JWT_SECRET || "secret_par_defaut_a_changer",
+      jwtSecret,
       { expiresIn: "1d" }
     );
 
