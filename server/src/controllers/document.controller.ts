@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma.js";
 import { uploadToSupabase } from "../utils/supabase.js";
+import { createNotification } from "../utils/notifications.js";
 
 export const uploadDocument = async (req: Request, res: Response): Promise<any> => {
   try {

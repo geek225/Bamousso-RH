@@ -9,7 +9,8 @@ import {
   lockCompany,
   unlockCompany,
   updateLogo,
-  updateSubscription
+  updateSubscription,
+  updateStatus
 } from "../controllers/company.controller.js";
 import { upload, validateFileType } from "../middleware/upload.js";
 
