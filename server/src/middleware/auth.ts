@@ -37,10 +37,13 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         select: { isActive: true, isLocked: true, trialEndsAt: true } as any,
       });
 
-      // Si l'entreprise est inactive, on bloque sauf pour le COMPANY_ADMIN 
-      // qui doit pouvoir accéder à son compte pour payer ou voir son statut.
-      if (!company || (!company.isActive && req.user.role !== "COMPANY_ADMIN")) {
-        return res.status(403).json({ message: "Entreprise inactive ou introuvable." });
+      // Blocage strict : Si l'entreprise est inactive, on refuse tout accès 
+      // SAUF pour la route /auth/me qui permet au frontend de vérifier si le paiement est validé.
+      if (!company || !company.isActive) {
+        const isAuthMe = req.path === '/me' || req.originalUrl.includes('/auth/me');
+        if (!isAuthMe || req.user.role !== "COMPANY_ADMIN") {
+          return res.status(403).json({ message: "Compte en attente d'activation. Veuillez finaliser votre paiement." });
+        }
       }
 
       // Vérification essai expiré
