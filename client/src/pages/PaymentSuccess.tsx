@@ -11,13 +11,24 @@ const PaymentSuccess = () => {
   const [message, setMessage] = useState('Vérification de votre paiement en cours...');
 
   useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 5;
+
     const verifyPayment = async () => {
-      const token = searchParams.get('token');
+      const token = searchParams.get('token') || searchParams.get('reference');
       const companyId = searchParams.get('companyId');
+      const urlStatus = searchParams.get('status');
       
+      // Si l'URL dit déjà que c'est fini, on montre un succès optimiste
+      if (urlStatus === 'completed' || urlStatus === 'success') {
+        setStatus('success');
+      }
+
       if (!token && !companyId) {
-        setStatus('error');
-        setMessage("Paramètres de confirmation manquants.");
+        if (urlStatus !== 'completed') {
+          setStatus('error');
+          setMessage("Paramètres de confirmation manquants.");
+        }
         return;
       }
 
@@ -27,16 +38,30 @@ const PaymentSuccess = () => {
           : `/payment/confirm/by-company/${companyId}`;
           
         const response = await api.get(url);
+        
         if (response.data.success) {
           setStatus('success');
+        } else if (retryCount < maxRetries) {
+          // On réessaie après 2 secondes pour laisser le temps au webhook
+          retryCount++;
+          setMessage(`Confirmation en cours (tentative ${retryCount}/${maxRetries})...`);
+          setTimeout(verifyPayment, 3000);
         } else {
-          setStatus('error');
-          setMessage("Nous n'avons pas pu confirmer votre paiement.");
+          // On ne met en erreur QUE si l'URL ne disait pas "completed"
+          if (urlStatus !== 'completed') {
+            setStatus('error');
+            setMessage("Nous n'avons pas pu confirmer votre paiement. Si vous avez été débité, contactez le support.");
+          }
         }
       } catch (error) {
         console.error("Verification error:", error);
-        setStatus('error');
-        setMessage("Une erreur est survenue lors de la vérification.");
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(verifyPayment, 3000);
+        } else if (urlStatus !== 'completed') {
+          setStatus('error');
+          setMessage("Une erreur est survenue lors de la vérification.");
+        }
       }
     };
 

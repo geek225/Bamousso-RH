@@ -141,6 +141,8 @@ export const handleWebhook = async (req: Request, res: Response) => {
       plan = plan.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
       if (companyId) {
+        await logger.info(`Traitement Webhook pour Company: ${companyId}`, { event, plan, extraEmployees }, "PaymentController");
+        
         // 1. Mettre à jour l'entreprise
         const company = await (prisma.company.update({
           where: { id: companyId },
@@ -230,6 +232,8 @@ export const confirmPayment = async (req: Request, res: Response) => {
 
       const apiKey = process.env.GENIUSPAY_KEY;
       const apiSecret = process.env.GENIUSPAY_SECRET;
+
+      await logger.info(`Vérification directe demandée pour ${currentToken}`, { companyId: payment.companyId }, "PaymentController");
       
       const response = await axios.get(`https://pay.genius.ci/api/v1/merchant/payments/${currentToken}`, {
         headers: {

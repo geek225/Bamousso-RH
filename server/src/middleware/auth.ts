@@ -37,7 +37,9 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
         select: { isActive: true, isLocked: true, trialEndsAt: true } as any,
       });
 
-      if (!company || !company.isActive) {
+      // Si l'entreprise est inactive, on bloque sauf pour le COMPANY_ADMIN 
+      // qui doit pouvoir accéder à son compte pour payer ou voir son statut.
+      if (!company || (!company.isActive && req.user.role !== "COMPANY_ADMIN")) {
         return res.status(403).json({ message: "Entreprise inactive ou introuvable." });
       }
 
