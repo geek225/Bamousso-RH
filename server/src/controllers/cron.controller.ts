@@ -84,3 +84,49 @@ export const checkSubscriptions = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+/**
+ * Nettoie les entreprises abandonnées (pas de paiement après 24h).
+ */
+export const cleanupAbandonedCompanies = async (req: Request, res: Response) => {
+  const cronSecret = req.headers['x-cron-auth'] || req.query.secret;
+  if (cronSecret !== process.env.CRON_SECRET) {
+    return res.status(401).json({ message: "Non autorisé" });
+  }
+
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    // Trouver les entreprises fantômes
+    const ghostCompanies = await prisma.company.findMany({
+      where: {
+        isActive: false,
+        subscriptionStatus: "PAST_DUE",
+        subscriptionEndsAt: null,
+        createdAt: { lte: twentyFourHoursAgo }
+      },
+      select: { id: true }
+    });
+
+    if (ghostCompanies.length === 0) {
+      return res.json({ success: true, message: "Aucune entreprise abandonnée à nettoyer." });
+    }
+
+    const ids = ghostCompanies.map(c => c.id);
+
+    // Suppression en cascade (utilisateurs, puis entreprise)
+    await prisma.$transaction([
+      prisma.user.deleteMany({ where: { companyId: { in: ids } } }),
+      prisma.company.deleteMany({ where: { id: { in: ids } } })
+    ]);
+
+    res.json({ 
+      success: true, 
+      cleaned: ids.length 
+    });
+
+  } catch (error) {
+    console.error("Cleanup Cron Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

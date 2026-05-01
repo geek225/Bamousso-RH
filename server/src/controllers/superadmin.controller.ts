@@ -31,7 +31,14 @@ const changePasswordSchema = z.object({
  */
 export const getAllCompanies = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
-  const companies = await prisma.company.findMany({
+    const companies = await prisma.company.findMany({
+      where: {
+        OR: [
+          { isActive: true },
+          { subscriptionStatus: 'ACTIVE' },
+          { subscriptionEndsAt: { not: null } }
+        ]
+      },
       select: {
         id: true,
         name: true,
@@ -75,7 +82,15 @@ export const getAllCompanies = async (req: AuthRequest, res: Response): Promise<
 export const getPlatformStats = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
     const [totalCompanies, activeCompanies, lockedCompanies, totalUsers, superAdmins] = await Promise.all([
-      prisma.company.count(),
+      prisma.company.count({
+        where: {
+          OR: [
+            { isActive: true },
+            { subscriptionStatus: 'ACTIVE' },
+            { subscriptionEndsAt: { not: null } }
+          ]
+        }
+      }),
       prisma.company.count({ where: { isActive: true, subscriptionStatus: 'ACTIVE' } }),
       prisma.company.count({ where: { isLocked: true } }),
       prisma.user.count({ where: { role: { not: 'SUPER_ADMIN' } } }),

@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { checkSubscriptions } from '../controllers/cron.controller.js';
+import { checkSubscriptions, cleanupAbandonedCompanies } from '../controllers/cron.controller.js';
 
 const router = Router();
 
-// Endpoint pour le Cron Job Vercel
+// Endpoints pour les Cron Jobs Vercel
 router.get('/subscriptions', checkSubscriptions);
+router.get('/cleanup', cleanupAbandonedCompanies);
 
 export default router;
