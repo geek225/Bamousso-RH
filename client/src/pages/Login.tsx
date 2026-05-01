@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +6,11 @@ import api from '../utils/api';
 import { Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
+  // Sécurité pour forcer l'affichage si l'écran est noir
+  useEffect(() => {
+    document.body.style.backgroundColor = '#f3f4f6'; // Gris clair par défaut
+    return () => { document.body.style.backgroundColor = ''; };
+  }, []);
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { login } = useAuth();
   const navigate = useNavigate();

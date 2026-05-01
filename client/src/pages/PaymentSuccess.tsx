@@ -19,6 +19,8 @@ const PaymentSuccess = () => {
       
       if (urlStatus === 'completed' || urlStatus === 'success') {
         setStatus('success');
+        // Nettoyage de la session pour repartir sur un login propre
+        localStorage.clear();
         // Redirection automatique après 3 secondes
         setTimeout(() => navigate('/login'), 3000);
       }
