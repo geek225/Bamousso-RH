@@ -10,6 +10,8 @@ interface Notification {
   message: string;
   createdAt: string;
   read: boolean;
+  userId?: string;
+  companyId?: string;
 }
 
 const NotificationCenter = () => {
