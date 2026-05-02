@@ -33,6 +33,8 @@ const NotificationCenter = () => {
 
   // Initial fetch and Realtime subscription
   useEffect(() => {
+    if (!user?.id || !user?.companyId) return;
+
     fetchNotifications();
 
     // Fallback Polling (toutes les 30 secondes au cas où le Realtime échoue)
@@ -40,15 +42,18 @@ const NotificationCenter = () => {
 
     if (!supabase) return;
 
+    console.log(`Tentative de connexion Realtime pour l'entreprise: ${user.companyId}`);
+
     const channel = supabase
-      .channel(`notifications-${user?.companyId}`)
+      .channel(`notifications-${user.companyId}`)
       .on('postgres_changes', { 
         event: 'INSERT', 
         schema: 'public', 
         table: 'Notification',
-        filter: `companyId=eq.${user?.companyId}`
+        filter: `companyId=eq.${user.companyId}`
       }, (payload: { new: Notification }) => {
         const newNotif = payload.new;
+        console.log("Notification reçue en direct !", newNotif);
         
         // On ne traite la notification que si elle est destinée à cet utilisateur spécifique
         // ou si c'est une notification globale de l'entreprise (userId null)
@@ -57,13 +62,15 @@ const NotificationCenter = () => {
           setUnreadCount(prev => prev + 1);
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`Statut de la connexion Realtime: ${status}`);
+      });
 
     return () => {
       clearInterval(interval);
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, user?.companyId]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
