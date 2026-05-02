@@ -62,7 +62,7 @@ const NotificationCenter = () => {
           setUnreadCount(prev => prev + 1);
         }
       })
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         console.log(`Statut de la connexion Realtime: ${status}`);
       });
 
