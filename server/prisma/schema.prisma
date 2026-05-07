@@ -37,6 +37,7 @@ model Company {
   departments   Department[]
   payments      Payment[]
   tasks         Task[]
+  customRoles   CustomRole[]
 }
 
 /// Modèle Paiement (Payment)
