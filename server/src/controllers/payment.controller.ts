@@ -38,7 +38,8 @@ export const initiatePayment = async (req: Request, res: Response) => {
       metadata: {
         companyId: companyId,
         plan: plan,
-        extraEmployees: req.body.extraEmployees || 0
+        extraEmployees: req.body.extraEmployees || 0,
+        isAddOn: req.body.isAddOn || false
       },
       success_url: `${process.env.FRONTEND_URL}/payment-success?companyId=${companyId}`,
       error_url: `${process.env.FRONTEND_URL}/payment-cancelled`,
@@ -144,6 +145,7 @@ export const handleWebhook = async (req: Request, res: Response) => {
     if (isSuccess && data) {
       const companyId = data.metadata?.companyId;
       const extraEmployees = parseInt(data.metadata?.extraEmployees || '0');
+      const isAddOn = data.metadata?.isAddOn === 'true' || data.metadata?.isAddOn === true;
       let plan = data.metadata?.plan;
 
       // Fallback: chercher le paiement correspondant pour retrouver le plan
@@ -164,16 +166,25 @@ export const handleWebhook = async (req: Request, res: Response) => {
         await logger.info(`Traitement Webhook pour Company: ${companyId}`, { event, plan, extraEmployees }, "PaymentController");
         
         // 1. Mettre à jour l'entreprise
+        const updateData: any = {
+          subscriptionStatus: "ACTIVE",
+          isActive: true,
+          isLocked: false,
+          subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        };
+
+        if (isAddOn) {
+          // Cas "Ajout d'employé" : on incrémente
+          updateData.extraEmployees = { increment: extraEmployees };
+        } else {
+          // Cas "Nouvel abonnement / Renouvellement" : on écrase avec le plan et le quota choisi
+          updateData.plan = plan;
+          updateData.extraEmployees = extraEmployees;
+        }
+
         const company = await (prisma.company.update({
           where: { id: companyId },
-          data: {
-            plan: plan,
-            subscriptionStatus: "ACTIVE",
-            isActive: true,
-            isLocked: false,
-            extraEmployees: extraEmployees,
-            subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-          } as any,
+          data: updateData,
           include: { users: { where: { role: 'COMPANY_ADMIN' }, take: 1 } }
         }) as any);
 

@@ -35,9 +35,11 @@ const Payment = () => {
     try {
       const response = await api.post('/payment/initiate', {
         amount: plan.finalPrice.toString(),
-        description: `Abonnement Bamousso - Formule ${plan.name}`,
+        description: `Abonnement Bamousso - Formule ${plan.name}${location.state?.extraEmployees > 0 ? ` (+${location.state.extraEmployees} employés)` : ''}`,
         companyId: companyId,
-        plan: plan.name 
+        plan: plan.name,
+        extraEmployees: location.state?.extraEmployees || 0,
+        isAddOn: location.state?.isAddOn || false
       });
 
       if (response.data.success && response.data.url) {
@@ -176,7 +178,7 @@ const Payment = () => {
                   <Loader2 className="w-6 h-6 animate-spin" />
                 ) : (
                   <>
-                    <Lock className="w-5 h-5" /> Payer {plan.price} FCFA
+                    <Lock className="w-5 h-5" /> Payer {plan.finalPrice.toLocaleString()} FCFA
                   </>
                 )}
               </button>
