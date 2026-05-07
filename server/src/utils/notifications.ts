@@ -3,6 +3,8 @@ import prisma from "./prisma.js";
 export const createNotification = async (data: {
   title: string;
   message: string;
+  type?: string;
+  resourceId?: string;
   userId?: string;
   companyId?: string;
 }) => {
@@ -15,13 +17,15 @@ export const createNotification = async (data: {
         where: { id: data.userId },
         select: { companyId: true }
       });
-      if (user) finalCompanyId = user.companyId;
+      if (user) finalCompanyId = user.companyId || undefined;
     }
 
     const notification = await prisma.notification.create({
       data: {
         title: data.title,
         message: data.message,
+        type: data.type,
+        resourceId: data.resourceId,
         userId: data.userId,
         companyId: finalCompanyId,
       },
@@ -36,7 +40,7 @@ export const createNotification = async (data: {
 /**
  * Notifie tous les administrateurs d'une entreprise
  */
-export const notifyAdmins = async (companyId: string, title: string, message: string) => {
+export const notifyAdmins = async (companyId: string, title: string, message: string, type?: string, resourceId?: string) => {
   try {
     const admins = await prisma.user.findMany({
       where: {
@@ -52,6 +56,8 @@ export const notifyAdmins = async (companyId: string, title: string, message: st
           data: {
             title,
             message,
+            type,
+            resourceId,
             userId: admin.id,
             companyId
           }

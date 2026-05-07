@@ -45,7 +45,10 @@ export const uploadDocument = async (req: Request, res: Response): Promise<any> 
     await createNotification({
       title: "Nouveau document",
       message: `Un nouveau document (${title}) a été ajouté à votre espace.`,
-      userId: employeeId
+      type: "DOCUMENT",
+      resourceId: doc.id,
+      userId: employeeId,
+      companyId: currentUser.companyId
     });
 
     res.status(201).json(doc);

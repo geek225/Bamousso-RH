@@ -34,6 +34,8 @@ export const createAnnouncement = async (req: Request, res: Response): Promise<a
       data: {
         title: `Nouvelle annonce : ${title}`,
         message: content.substring(0, 100) + (content.length > 100 ? "..." : ""),
+        type: "ANNOUNCEMENT",
+        resourceId: post.id,
         companyId: post.author.companyId,
       }
     });

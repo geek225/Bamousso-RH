@@ -7,16 +7,27 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
+  type?: string;
+  resourceId?: string;
   createdAt: string;
   read: boolean;
   userId?: string;
   companyId?: string;
 }
 
+interface BadgeCounts {
+  suggestions: number;
+  explanations: number;
+  documents: number;
+  announcements: number;
+}
+
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
+  badgeCounts: BadgeCounts;
   markAsRead: (id: string) => Promise<void>;
+  markTypeAsRead: (type: string) => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
   fetchNotifications: () => Promise<void>;
 }
@@ -27,6 +38,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [badgeCounts, setBadgeCounts] = useState<BadgeCounts>({
+    suggestions: 0,
+    explanations: 0,
+    documents: 0,
+    announcements: 0
+  });
+
+  const calculateBadgeCounts = (notifs: Notification[]) => {
+    const unread = notifs.filter(n => !n.read);
+    setBadgeCounts({
+      suggestions: unread.filter(n => n.type === 'SUGGESTION').length,
+      explanations: unread.filter(n => n.type === 'EXPLANATION').length,
+      documents: unread.filter(n => n.type === 'DOCUMENT').length,
+      announcements: unread.filter(n => n.type === 'ANNOUNCEMENT').length,
+    });
+  };
 
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
@@ -34,6 +61,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const response = await api.get('/notifications');
       setNotifications(response.data);
       setUnreadCount(response.data.filter((n: Notification) => !n.read).length);
+      calculateBadgeCounts(response.data);
     } catch (error) {
       console.error("Error fetching notifications", error);
     }
@@ -63,7 +91,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         
         // Only process if for this specific user or global to company
         if (!newNotif.userId || newNotif.userId === user?.id) {
-          setNotifications(prev => [newNotif, ...prev]);
+          setNotifications(prev => {
+            const updated = [newNotif, ...prev];
+            calculateBadgeCounts(updated);
+            return updated;
+          });
           setUnreadCount(prev => prev + 1);
           
           // Browser Notification
@@ -83,10 +115,33 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const markAsRead = async (id: string) => {
     try {
       await api.patch(`/notifications/${id}/read`);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      setNotifications(prev => {
+        const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
+        calculateBadgeCounts(updated);
+        return updated;
+      });
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error("Error marking as read", error);
+    }
+  };
+
+  const markTypeAsRead = async (type: string) => {
+    try {
+      // Find all unread notifications of this type
+      const toMark = notifications.filter(n => n.type === type && !n.read);
+      if (toMark.length === 0) return;
+
+      await Promise.all(toMark.map(n => api.patch(`/notifications/${n.id}/read`)));
+      
+      setNotifications(prev => {
+        const updated = prev.map(n => n.type === type ? { ...n, read: true } : n);
+        calculateBadgeCounts(updated);
+        return updated;
+      });
+      setUnreadCount(prev => Math.max(0, prev - toMark.length));
+    } catch (error) {
+      console.error("Error marking type as read", error);
     }
   };
 
@@ -98,7 +153,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (notif && !notif.read) {
           setUnreadCount(c => Math.max(0, c - 1));
         }
-        return prev.filter(n => n.id !== id);
+        const updated = prev.filter(n => n.id !== id);
+        calculateBadgeCounts(updated);
+        return updated;
       });
     } catch (error) {
       console.error("Error deleting notification", error);
@@ -116,7 +173,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     <NotificationContext.Provider value={{ 
       notifications, 
       unreadCount, 
+      badgeCounts,
       markAsRead, 
+      markTypeAsRead,
       deleteNotification, 
       fetchNotifications 
     }}>
@@ -130,3 +189,4 @@ export const useNotifications = () => {
   if (!context) throw new Error('useNotifications must be used within a NotificationProvider');
   return context;
 };
+

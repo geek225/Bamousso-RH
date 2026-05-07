@@ -25,7 +25,7 @@ export const reportSuggestion = async (req: any, res: Response) => {
     });
 
     // Notifier les admins
-    await notifyAdmins(user.companyId, "Nouvelle suggestion", `Une nouvelle suggestion (${nature}) a été déposée.`);
+    await notifyAdmins(user.companyId, "Nouvelle suggestion", `Une nouvelle suggestion (${nature}) a été déposée.`, "SUGGESTION", suggestion.id);
 
     res.status(201).json(suggestion);
   } catch (error: any) {

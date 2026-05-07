@@ -32,6 +32,8 @@ export const createExplanation = async (req: any, res: Response) => {
     await createNotification({
       title: "Demande d'explication",
       message: `Vous avez reçu une demande d'explication : ${title}`,
+      type: "EXPLANATION",
+      resourceId: explanation.id,
       userId: employeeId,
       companyId: user.companyId
     });
@@ -93,6 +95,8 @@ export const respondExplanation = async (req: any, res: Response) => {
     await createNotification({
       title: "Réponse à demande d'explication",
       message: `${user.firstName} ${user.lastName} a répondu à votre demande d'explication.`,
+      type: "EXPLANATION",
+      resourceId: updated.id,
       userId: updated.createdBy,
       companyId: user.companyId
     });

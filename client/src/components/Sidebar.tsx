@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useNotifications } from '../context/NotificationContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Building2, LayoutDashboard, LogOut, Moon, Sun, Users, Layers, X, 
@@ -7,6 +8,7 @@ import {
   ListTodo, Banknote, MessageCircle, MessageSquare, FileWarning, BarChart3, Shield
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmationModal from './ConfirmationModal';
 
 interface SidebarProps {
@@ -14,9 +16,23 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+const SidebarBadge = ({ count }: { count: number }) => {
+  if (count <= 0) return null;
+  return (
+    <motion.span 
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      className="ml-auto bg-brand-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-brand-primary/20"
+    >
+      {count > 9 ? '9+' : count}
+    </motion.span>
+  );
+};
+
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { user, company, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { badgeCounts, markTypeAsRead } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -34,6 +50,14 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 
   useEffect(() => {
     onClose();
+  }, [location.pathname]);
+
+  // Nettoyer les badges quand on visite la page correspondante
+  useEffect(() => {
+    if (location.pathname === '/suggestions') markTypeAsRead('SUGGESTION');
+    if (location.pathname === '/explanations') markTypeAsRead('EXPLANATION');
+    if (location.pathname === '/documents') markTypeAsRead('DOCUMENT');
+    if (location.pathname === '/announcements') markTypeAsRead('ANNOUNCEMENT');
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -147,11 +171,13 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                   <Link to="/suggestions" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/suggestions' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                     <MessageSquare className="w-5 h-5" />
                     Suggestions
+                    <SidebarBadge count={badgeCounts.suggestions} />
                   </Link>
 
                   <Link to="/explanations" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/explanations' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                     <FileWarning className="w-5 h-5" />
                     Explications
+                    <SidebarBadge count={badgeCounts.explanations} />
                   </Link>
 
                   {canManageHr && (
@@ -173,6 +199,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               <Link to="/documents" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/documents' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                 <FileText className="w-5 h-5" />
                 Documents
+                <SidebarBadge count={badgeCounts.documents} />
               </Link>
 
               <Link
@@ -181,6 +208,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
               >
                 <Megaphone className="w-5 h-5" />
                 Annonces
+                <SidebarBadge count={badgeCounts.announcements} />
               </Link>
             </>
           )}
@@ -250,3 +278,4 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
 };
 
 export default Sidebar;
+

@@ -245,6 +245,8 @@ model Notification {
   id        String   @id @default(uuid())
   title     String
   message   String
+  type      String?  // SUGGESTION, EXPLANATION, DOCUMENT, ANNOUNCEMENT, etc.
+  resourceId String? // ID of the related resource
   userId    String?
   companyId String? // Pour les annonces globales à l'entreprise
   read      Boolean  @default(false)
