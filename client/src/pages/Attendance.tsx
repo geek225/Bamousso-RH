@@ -1,8 +1,24 @@
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Clock, Play, Square, AlertCircle, MapPin } from 'lucide-react';
+import { Clock, Play, Square, AlertCircle, MapPin, User } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { supabase } from '../utils/supabase';
+
+// Fix for Leaflet default marker icons in React
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+const DefaultIcon = L.icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface Attendance {
   id: string;
@@ -39,8 +55,45 @@ const AttendancePage = () => {
   };
 
   useEffect(() => {
-    void fetchLogs();
-  }, []);
+    fetchLogs();
+
+    // Abonnement Temps Réel via Supabase pour les pointages
+    const channel = supabase
+      .channel('attendance-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'Attendance',
+          filter: `employeeId=eq.${user?.id}` // Pour les logs de l'employé
+        },
+        () => fetchLogs()
+      )
+      .subscribe();
+
+    // Si admin, écouter tous les pointages de l'entreprise
+    let adminChannel: any;
+    if (canManage) {
+      adminChannel = supabase
+        .channel('admin-attendance-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'Attendance'
+          },
+          () => fetchLogs()
+        )
+        .subscribe();
+    }
+
+    return () => {
+      void supabase.removeChannel(channel);
+      if (adminChannel) void supabase.removeChannel(adminChannel);
+    };
+  }, [user?.id, canManage]);
 
   const handleToggle = async () => {
     setIsLoading(true);
@@ -236,6 +289,55 @@ const AttendancePage = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Carte de Géolocalisation en Temps Réel */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden"
+      >
+        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-orange-500" /> Géolocalisation en direct
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">Positions des derniers pointages effectués aujourd'hui.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs font-bold text-gray-500 uppercase">Live</span>
+          </div>
+        </div>
+
+        <div className="h-[400px] w-full relative z-0">
+          <MapContainer 
+            center={[5.3484, -4.0305]} // Abidjan par défaut
+            zoom={12} 
+            scrollWheelZoom={false}
+            className="h-full w-full"
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {logs.filter(log => log.latitude && log.longitude).map(log => (
+              <Marker 
+                key={log.id} 
+                position={[log.latitude!, log.longitude!]}
+              >
+                <Popup>
+                  <div className="p-1">
+                    <p className="font-bold text-orange-600">{log.employee?.firstName} {log.employee?.lastName}</p>
+                    <p className="text-xs text-gray-500">Arrivée: {log.checkIn ? new Date(log.checkIn).toLocaleTimeString() : '-'}</p>
+                    <p className="text-xs text-gray-500">Statut: {log.status}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        </div>
+      </motion.div>
     </div>
   );
 };
