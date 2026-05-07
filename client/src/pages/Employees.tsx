@@ -6,10 +6,15 @@ import { Lock, Unlock, Download, Trash2, Edit2, Check, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-type Role = 'COMPANY_ADMIN' | 'HR_MANAGER' | 'HR_ASSISTANT' | 'EMPLOYEE';
+type Role = 'COMPANY_ADMIN' | 'HR_MANAGER' | 'COMMERCIAL' | 'EMPLOYEE';
 type Status = 'INVITED' | 'ACTIVE' | 'INACTIVE';
 
 interface Department {
+  id: string;
+  name: string;
+}
+
+interface CustomRole {
   id: string;
   name: string;
 }
@@ -25,11 +30,14 @@ interface Employee {
   phone?: string | null;
   hireDate?: string | null;
   department?: { id: string; name: string } | null;
+  customRoleId?: string | null;
+  customRole?: { id: string; name: string } | null;
 }
 
 const Employees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [customRoles, setCustomRoles] = useState<CustomRole[]>([]);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -37,11 +45,14 @@ const Employees = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<Role>('EMPLOYEE');
   const [departmentId, setDepartmentId] = useState<string>('');
+  const [customRoleId, setCustomRoleId] = useState<string>('');
 
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
+  const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
   const [selectedNewDept, setSelectedNewDept] = useState<string>('');
+  const [selectedNewRole, setSelectedNewRole] = useState<string>('');
   const { user } = useAuth();
 
   const fetchEmployees = async () => {
@@ -49,14 +60,17 @@ const Employees = () => {
     setEmployees(res.data);
   };
 
-  const fetchDepartments = async () => {
-    const res = await api.get<Department[]>('/departments');
-    setDepartments(res.data);
+  const fetchCustomRoles = async () => {
+    try {
+      const res = await api.get<CustomRole[]>('/roles');
+      setCustomRoles(res.data);
+    } catch (err) { console.error(err); }
   };
 
   useEffect(() => {
     void fetchEmployees();
     void fetchDepartments();
+    void fetchCustomRoles();
   }, []);
 
   const canPickDepartment = departments.length > 0;
@@ -76,6 +90,7 @@ const Employees = () => {
     setPassword('');
     setRole('EMPLOYEE');
     setDepartmentId('');
+    setCustomRoleId('');
   };
 
   const createEmployee = async () => {
@@ -90,6 +105,7 @@ const Employees = () => {
         role,
         status: 'INVITED',
         ...(departmentId ? { departmentId } : {}),
+        ...(customRoleId ? { customRoleId } : {}),
       });
       resetForm();
       await fetchEmployees();
@@ -236,9 +252,23 @@ const Employees = () => {
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white dark:bg-gray-700"
             >
               <option value="EMPLOYEE">Employé</option>
-              <option value="HR_ASSISTANT">Assistant RH</option>
+              <option value="COMMERCIAL">Commercial</option>
               <option value="HR_MANAGER">RH Manager</option>
               <option value="COMPANY_ADMIN">Admin entreprise</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Rôle Spécifique (LOUBA/KORO)</label>
+            <select
+              value={customRoleId}
+              onChange={(e) => setCustomRoleId(e.target.value)}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded text-black dark:text-white dark:bg-gray-700"
+            >
+              <option value="">— Aucun rôle personnalisé —</option>
+              {customRoles.map(r => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
             </select>
           </div>
 
@@ -294,7 +324,50 @@ const Employees = () => {
                 <tr key={e.id} className="border-t border-gray-200 dark:border-gray-700">
                   <td className="p-3 text-gray-900 dark:text-white">{e.lastName} {e.firstName}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">{e.email}</td>
-                  <td className="p-3 text-gray-700 dark:text-gray-300">{e.role}</td>
+                  <td className="p-3 text-gray-700 dark:text-gray-300">
+                    {editingRoleId === e.id ? (
+                      <div className="flex items-center gap-1">
+                        <select 
+                          value={selectedNewRole}
+                          onChange={(e) => setSelectedNewRole(e.target.value)}
+                          className="text-xs p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-black dark:text-white"
+                        >
+                          <option value="">— Aucun —</option>
+                          {customRoles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                        </select>
+                        <button 
+                          onClick={async () => {
+                            try {
+                              await api.put(`/employees/${e.id}`, { customRoleId: selectedNewRole || null });
+                              setEditingRoleId(null);
+                              void fetchEmployees();
+                            } catch (err) { alert("Erreur"); }
+                          }}
+                          className="p-1 text-green-500 hover:bg-green-500/10 rounded"
+                        >
+                          <Check className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => setEditingRoleId(null)} className="p-1 text-red-500 hover:bg-red-500/10 rounded">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between group/role">
+                        <span>{e.customRole?.name || e.role}</span>
+                        {(user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER') && (
+                          <button 
+                            onClick={() => {
+                              setEditingRoleId(e.id);
+                              setSelectedNewRole(e.customRoleId || '');
+                            }}
+                            className="p-1 text-gray-400 hover:text-brand-primary opacity-0 group-hover/role:opacity-100 transition-opacity"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                       e.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :

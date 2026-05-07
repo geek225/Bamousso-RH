@@ -17,7 +17,7 @@ const MobileNavbar = ({ onMenuClick }: MobileNavbarProps) => {
       ? '/dashboard/super-admin'
       : user.role === 'COMPANY_ADMIN'
         ? '/dashboard/admin'
-        : user.role === 'HR_MANAGER' || user.role === 'HR_ASSISTANT'
+        : user.role === 'HR_MANAGER' || user.role === 'COMMERCIAL'
           ? '/dashboard/hr'
           : '/dashboard/employee';
 

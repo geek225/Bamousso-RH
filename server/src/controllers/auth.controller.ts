@@ -23,7 +23,7 @@ const registerSchema = z.object({
       "SUPER_ADMIN",
       "COMPANY_ADMIN",
       "HR_MANAGER",
-      "HR_ASSISTANT",
+      "COMMERCIAL",
       "EMPLOYEE",
     ])
     .optional(),
@@ -257,7 +257,7 @@ export const login = async (req: Request, res: Response) => {
     // Les COMPANY_ADMIN peuvent toujours se connecter (même si l'entreprise est suspendue)
     // pour accéder à la page de paiement ou voir leur statut.
     // Seuls les simples employés/RH sont bloqués si l'entreprise est suspendue.
-    const blockedRoles = ['EMPLOYEE', 'HR_MANAGER', 'HR_ASSISTANT'];
+    const blockedRoles = ['EMPLOYEE', 'HR_MANAGER', 'COMMERCIAL'];
     if (user.company && !user.company.isActive && blockedRoles.includes(user.role)) {
       return res.status(403).json({ 
         message: "L'accès à cette entreprise a été suspendu. Veuillez contacter l'administrateur." 

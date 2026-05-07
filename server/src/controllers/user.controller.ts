@@ -17,7 +17,7 @@ const createUserSchema = z.object({
     "SUPER_ADMIN", 
     "COMPANY_ADMIN", 
     "HR_MANAGER", 
-    "HR_ASSISTANT", 
+    "COMMERCIAL", 
     "EMPLOYEE", 
   ]), 
   companyId: z.string().optional(), 
@@ -26,6 +26,7 @@ const createUserSchema = z.object({
   hireDate: z.coerce.date().optional(), 
   status: z.enum(["INVITED", "ACTIVE", "INACTIVE"]).optional(), 
   departmentId: z.string().optional(), 
+  customRoleId: z.string().optional(), 
   managerId: z.string().optional(), 
   baseSalary: z.number().optional(),
   salaryCurrency: z.string().optional(),
@@ -45,9 +46,9 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
     if (!currentUser) return res.status(401).json({ message: "Unauthorized" }); 
 
-    if (currentUser.role === "HR_ASSISTANT" && data.role !== "EMPLOYEE") { 
+    if (currentUser.role === "COMMERCIAL" && data.role !== "EMPLOYEE") { 
       return res.status(403).json({ 
-        message: "HR Assistant ne peut créer que des employés.", 
+        message: "Le profil Commercial ne peut créer que des employés.", 
       }); 
     } 
 
@@ -101,6 +102,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         hireDate: data.hireDate || null, 
         status: data.status || "INVITED", 
         departmentId: data.departmentId || null, 
+        customRoleId: data.customRoleId || null, 
         managerId: data.managerId || null, 
         baseSalary: data.baseSalary || null,
         bankDetails: data.bankDetails || null,
@@ -134,7 +136,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
       "SUPER_ADMIN",
       "COMPANY_ADMIN",
       "HR_MANAGER",
-      "HR_ASSISTANT",
+      "COMMERCIAL",
       "EMPLOYEE",
     ];
 
@@ -175,6 +177,10 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
         status: true, 
         departmentId: true, 
         department: {
+          select: { id: true, name: true }
+        },
+        customRoleId: true,
+        customRole: {
           select: { id: true, name: true }
         },
         managerId: true, 
@@ -220,6 +226,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       ...(data.hireDate !== undefined && { hireDate: data.hireDate }), 
       ...(data.status !== undefined && { status: data.status }), 
       ...(data.departmentId !== undefined && { departmentId: data.departmentId }), 
+      ...(data.customRoleId !== undefined && { customRoleId: data.customRoleId }), 
       ...(data.managerId !== undefined && { managerId: data.managerId }), 
       ...(data.baseSalary !== undefined && { baseSalary: data.baseSalary }),
       ...(req.body.salaryCurrency !== undefined && { salaryCurrency: req.body.salaryCurrency }),
@@ -232,7 +239,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       if (data.role !== undefined) updateData.role = data.role;
       if (data.companyId !== undefined) updateData.companyId = data.companyId;
     } else if (data.role !== undefined || data.companyId !== undefined || data.email !== undefined) {
-        if (data.role && ["HR_MANAGER", "HR_ASSISTANT", "EMPLOYEE"].includes(data.role)) {
+        if (data.role && ["HR_MANAGER", "COMMERCIAL", "EMPLOYEE"].includes(data.role)) {
            updateData.role = data.role;
         } else if (data.role) {
            return res.status(403).json({ message: "Action non autorisée : vous ne pouvez pas attribuer ce rôle." });

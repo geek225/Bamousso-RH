@@ -70,7 +70,7 @@ function App() {
                     <Route path="/roles" element={<Roles />} />
                   </Route>
 
-                  <Route element={<ProtectedRoute allowedRoles={['HR_MANAGER', 'HR_ASSISTANT']} />}>
+                  <Route element={<ProtectedRoute allowedRoles={['HR_MANAGER', 'COMMERCIAL']} />}>
                     <Route path="/dashboard/hr" element={<DashboardHR />} />
                   </Route>
 
@@ -79,7 +79,7 @@ function App() {
                   </Route>
 
                   {/* Pages RH */}
-                  <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN', 'HR_MANAGER', 'HR_ASSISTANT']} />}>
+                  <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN', 'HR_MANAGER', 'COMMERCIAL']} />}>
                     <Route path="/employees" element={<Employees />} />
                     <Route path="/departments" element={<Departments />} />
                     <Route path="/settings" element={<Settings />} />
