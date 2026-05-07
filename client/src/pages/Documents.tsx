@@ -49,6 +49,8 @@ const DocumentsPage = () => {
     }
   };
 
+  const canManage = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'COMMERCIAL';
+
   useEffect(() => {
     void fetchDocuments();
     void fetchEmployees();
@@ -83,7 +85,6 @@ const DocumentsPage = () => {
     }
   };
 
-  const canManage = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'HR_ASSISTANT';
 
   const getTypeColor = (docType: string) => {
     switch (docType) {
