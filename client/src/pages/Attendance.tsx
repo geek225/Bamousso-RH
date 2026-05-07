@@ -8,17 +8,13 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { supabase } from '../utils/supabase';
 
-// Fix for Leaflet default marker icons in React
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-const DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+// Configuration globale des icônes Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface Attendance {
   id: string;
@@ -127,11 +123,14 @@ const AttendancePage = () => {
     }
   };
 
-  const todayLog = logs.find(
-    log => new Date(log.date).toDateString() === new Date().toDateString() && log.employee?.firstName === user?.firstName
-  ) || logs.find(
-    log => new Date(log.date).toDateString() === new Date().toDateString()
-  );
+  const todayLog = logs.find(log => {
+    if (!log.date) return false;
+    const logDate = new Date(log.date);
+    return logDate.toDateString() === new Date().toDateString() && log.employee?.firstName === user?.firstName;
+  }) || logs.find(log => {
+    if (!log.date) return false;
+    return new Date(log.date).toDateString() === new Date().toDateString();
+  });
 
   const isCheckedIn = todayLog?.checkIn && !todayLog?.checkOut;
   const isFinished = todayLog?.checkOut;
