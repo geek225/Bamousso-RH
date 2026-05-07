@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { ShieldCheck, UserX, Send, MessageSquare, Info, Lightbulb } from 'lucide-react';
+import { ShieldCheck, UserX, MessageSquare, Info, Lightbulb } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { supabase } from '../utils/supabase';
 import { useAuth } from '../context/AuthContext';
 
 interface Suggestion {
@@ -40,7 +41,7 @@ const Suggestions = () => {
     fetchSuggestions();
 
     // Abonnement Temps Réel via Supabase
-    const channel = api.supabase
+    const channel = supabase
       .channel('suggestions-changes')
       .on(
         'postgres_changes',
@@ -57,7 +58,7 @@ const Suggestions = () => {
       .subscribe();
 
     return () => {
-      void api.supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [user?.companyId]);
 
