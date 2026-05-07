@@ -60,6 +60,13 @@ const Employees = () => {
     setEmployees(res.data);
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const res = await api.get<Department[]>('/departments');
+      setDepartments(res.data);
+    } catch (err) { console.error(err); }
+  };
+
   const fetchCustomRoles = async () => {
     try {
       const res = await api.get<CustomRole[]>('/roles');
