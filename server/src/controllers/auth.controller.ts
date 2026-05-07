@@ -309,6 +309,8 @@ export const login = async (req: Request, res: Response) => {
             isLocked: (user.company as any).isLocked,
             isActive: user.company.isActive,
             trialEndsAt: (user.company as any).trialEndsAt,
+            subscriptionStatus: (user.company as any).subscriptionStatus,
+            extraEmployees: (user.company as any).extraEmployees,
           }
         : null,
     };
@@ -372,6 +374,8 @@ export const getCurrentUser = async (req: any, res: Response) => {
         isActive: user.company.isActive,
         isLocked: (user.company as any).isLocked,
         trialEndsAt: (user.company as any).trialEndsAt,
+        subscriptionStatus: (user.company as any).subscriptionStatus,
+        extraEmployees: (user.company as any).extraEmployees,
       } : null
     });
   } catch (error) {

@@ -31,6 +31,8 @@ interface Company {
   plan?: 'FITINI' | 'LOUBA' | 'KORO';
   trialEndsAt?: string | null;
   subscriptionEndsAt?: string | null;
+  subscriptionStatus?: string;
+  extraEmployees?: number;
 }
 
 // Définition du type de contexte
