@@ -1,6 +1,6 @@
 // --- Configuration Prisma ---
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -14,98 +14,98 @@ datasource db {
 /// Modèle Organisation (Company)
 /// Représente une entreprise cliente du SaaS.
 model Company {
-  id        String   @id @default(uuid())
-  name      String   // Nom de l'entreprise
-  address   String?  // Adresse physique (optionnel)
-  isActive  Boolean  @default(true) 
-  logoUrl   String?  // Logo de l'entreprise
+  id       String  @id @default(uuid())
+  name     String // Nom de l'entreprise
+  address  String? // Adresse physique (optionnel)
+  isActive Boolean @default(true)
+  logoUrl  String? // Logo de l'entreprise
 
-  subscriptionStatus String   @default("ACTIVE") // ACTIVE | PAST_DUE | SUSPENDED
+  subscriptionStatus String    @default("ACTIVE") // ACTIVE | PAST_DUE | SUSPENDED
   subscriptionEndsAt DateTime?
   trialEndsAt        DateTime? // Fin de la période d'essai (7j)
-  plan               String   @default("FITINI")  // FITINI | LOUBA | KORO
-  extraEmployees     Int      @default(0)
-  isLocked           Boolean  @default(false) 
+  plan               String    @default("FITINI") // FITINI | LOUBA | KORO
+  extraEmployees     Int       @default(0)
+  isLocked           Boolean   @default(false)
   lockedAt           DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  managerId String?  @unique
-  manager   User?    @relation("CompanyManager", fields: [managerId], references: [id])
+  managerId String? @unique
+  manager   User?   @relation("CompanyManager", fields: [managerId], references: [id])
 
-  users         User[] @relation("CompanyUsers")
-  departments   Department[]
-  payments      Payment[]
-  tasks         Task[]
-  customRoles   CustomRole[]
+  users       User[]       @relation("CompanyUsers")
+  departments Department[]
+  payments    Payment[]
+  tasks       Task[]
+  customRoles CustomRole[]
 }
 
 /// Modèle Paiement (Payment)
 model Payment {
-  id            String   @id @default(uuid())
-  amount        Float    // Montant de la transaction
-  currency      String   @default("XOF")
-  status        String   @default("PENDING") // PENDING | SUCCESS | FAILED
-  reference     String   @unique // Référence interne
-  externalId    String?  // ID transaction GeniusPay
-  paymentMethod String?  // Orange Money, Wave, etc.
+  id            String  @id @default(uuid())
+  amount        Float // Montant de la transaction
+  currency      String  @default("XOF")
+  status        String  @default("PENDING") // PENDING | SUCCESS | FAILED
+  reference     String  @unique // Référence interne
+  externalId    String? // ID transaction GeniusPay
+  paymentMethod String? // Orange Money, Wave, etc.
   description   String?
-  
-  companyId     String
-  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// Modèle Utilisateur (Employé)
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String   // Mot de passe crypté (Haché)
+  id        String  @id @default(uuid())
+  email     String  @unique
+  password  String // Mot de passe crypté (Haché)
   firstName String
   lastName  String
-  role      String   @default("EMPLOYEE") // SUPER_ADMIN, COMPANY_ADMIN, HR_MANAGER, HR_ASSISTANT, EMPLOYEE
-  isOnline  Boolean  @default(false)
+  role      String  @default("EMPLOYEE") // SUPER_ADMIN, COMPANY_ADMIN, HR_MANAGER, HR_ASSISTANT, EMPLOYEE
+  isOnline  Boolean @default(false)
 
   // Champs RH
-  jobTitle  String?
-  phone     String?
-  hireDate  DateTime?
-  status    String   @default("ACTIVE") // INVITED | ACTIVE | INACTIVE
-  
-  baseSalary Float?    // Salaire de base pour la paie
-  salaryCurrency String @default("XOF") // Devise (FCFA, etc.)
-  bankDetails String?   // Infos bancaires (RIB, etc.)
+  jobTitle String?
+  phone    String?
+  hireDate DateTime?
+  status   String    @default("ACTIVE") // INVITED | ACTIVE | INACTIVE
+
+  baseSalary     Float? // Salaire de base pour la paie
+  salaryCurrency String  @default("XOF") // Devise (FCFA, etc.)
+  bankDetails    String? // Infos bancaires (RIB, etc.)
 
   passwordResetToken     String?
   passwordResetExpiresAt DateTime?
 
   // Relation avec l'entreprise
-  companyId  String?  
-  company    Company? @relation("CompanyUsers", fields: [companyId], references: [id], onDelete: SetNull)
+  companyId String?
+  company   Company? @relation("CompanyUsers", fields: [companyId], references: [id], onDelete: SetNull)
 
   // Si l'utilisateur est un gestionnaire d'entreprise
   managedCompany Company? @relation("CompanyManager")
 
   // Département
-  departmentId String?     
+  departmentId String?
   department   Department? @relation("DepartmentEmployees", fields: [departmentId], references: [id], onDelete: SetNull)
 
   // Hiérarchie (manager)
-  managerId    String?
-  manager      User?   @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
-  directReports User[] @relation("UserManager")
+  managerId     String?
+  manager       User?   @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
+  directReports User[]  @relation("UserManager")
 
   // HR Relations
-  leaveRequests   LeaveRequest[] @relation("EmployeeLeaves")
-  approvedLeaves  LeaveRequest[] @relation("ApprovedLeaves")
-  documents       Document[]
-  attendances     Attendance[]
-  
+  leaveRequests  LeaveRequest[] @relation("EmployeeLeaves")
+  approvedLeaves LeaveRequest[] @relation("ApprovedLeaves")
+  documents      Document[]
+  attendances    Attendance[]
+
   // Messagerie & Communications
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
   forumPosts       ForumPost[]
   forumComments    ForumComment[]
 
@@ -120,100 +120,100 @@ model User {
   customRoleId String?
   customRole   CustomRole? @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  assignedTasks   Task[] @relation("AssignedTasks")
-  createdTasks    Task[] @relation("CreatedTasks")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  assignedTasks Task[]   @relation("AssignedTasks")
+  createdTasks  Task[]   @relation("CreatedTasks")
 }
 
 model Suggestion {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   nature      String
   description String
-  isAnonymous Boolean  @default(false)
-  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED
-  
-  reporterId  String
-  reporter    User     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
-  
-  companyId   String
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isAnonymous Boolean @default(false)
+  status      String  @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED
+
+  reporterId String
+  reporter   User   @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  companyId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ExplanationRequest {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   title       String
   description String
   response    String?
-  status      String   @default("PENDING") // PENDING, RESPONDED, CLOSED
-  
-  employeeId  String
-  employee    User     @relation("TargetEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
-  
-  createdBy   String
-  creator     User     @relation("CreatorEmployee", fields: [createdBy], references: [id], onDelete: Cascade)
-  
-  companyId   String
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status      String  @default("PENDING") // PENDING, RESPONDED, CLOSED
+
+  employeeId String
+  employee   User   @relation("TargetEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdBy String
+  creator   User   @relation("CreatorEmployee", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  companyId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// Modèle Département (Department)
 model Department {
-  id        String   @id @default(uuid())
-  name      String   // ex: "Ressources Humaines", "Développement"
-  companyId String 
+  id        String  @id @default(uuid())
+  name      String // ex: "Ressources Humaines", "Développement"
+  companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  employees   User[] @relation("DepartmentEmployees")
-  messages    Message[]
+
+  employees User[]    @relation("DepartmentEmployees")
+  messages  Message[]
 }
 
 /// Modèle Congés (LeaveRequest)
 model LeaveRequest {
   id        String   @id @default(uuid())
-  type      String   // PAID, UNPAID, SICK, MATERNITY
+  type      String // PAID, UNPAID, SICK, MATERNITY
   startDate DateTime
   endDate   DateTime
   reason    String?
   status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
-  
+
   employeeId String
-  employee   User    @relation("EmployeeLeaves", fields: [employeeId], references: [id], onDelete: Cascade)
-  
+  employee   User   @relation("EmployeeLeaves", fields: [employeeId], references: [id], onDelete: Cascade)
+
   approverId String?
   approver   User?   @relation("ApprovedLeaves", fields: [approverId], references: [id])
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 /// Modèle Document (Fiches de paie, Contrats)
 model Document {
-  id        String   @id @default(uuid())
-  title     String
-  type      String   // PAYSLIP, CONTRACT, POLICY, OTHER
-  url       String   // Lien vers le fichier
-  
+  id    String @id @default(uuid())
+  title String
+  type  String // PAYSLIP, CONTRACT, POLICY, OTHER
+  url   String // Lien vers le fichier
+
   employeeId String
-  employee   User    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee   User   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 }
 
 /// Modèle Présence (Attendance)
 model Attendance {
-  id        String   @id @default(uuid())
-  date      DateTime
-  checkIn   DateTime?
-  checkOut  DateTime?
-  status    String   @default("PRESENT") // PRESENT, ABSENT, LATE, HALF_DAY
-  
+  id       String    @id @default(uuid())
+  date     DateTime
+  checkIn  DateTime?
+  checkOut DateTime?
+  status   String    @default("PRESENT") // PRESENT, ABSENT, LATE, HALF_DAY
+
   employeeId String
-  employee   User    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee   User   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   // Géolocalisation
   latitude  Float?
@@ -225,19 +225,19 @@ model Attendance {
 
 /// Modèle Message (Messagerie Instantanée)
 model Message {
-  id          String   @id @default(uuid())
-  content     String
-  senderId    String
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
-  recipientId String?  
-  recipient   User?    @relation("ReceivedMessages", fields: [recipientId], references: [id])
-  departmentId String? 
+  id           String      @id @default(uuid())
+  content      String
+  senderId     String
+  sender       User        @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId  String?
+  recipient    User?       @relation("ReceivedMessages", fields: [recipientId], references: [id])
+  departmentId String?
   department   Department? @relation(fields: [departmentId], references: [id])
-  
-  attachmentUrl  String? 
-  attachmentType String? 
 
-  createdAt   DateTime @default(now())
+  attachmentUrl  String?
+  attachmentType String?
+
+  createdAt DateTime @default(now())
 }
 
 /// Modèle Notification
@@ -245,8 +245,8 @@ model Notification {
   id        String   @id @default(uuid())
   title     String
   message   String
-  userId    String?  
-  companyId String?  // Pour les annonces globales à l'entreprise
+  userId    String?
+  companyId String? // Pour les annonces globales à l'entreprise
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
@@ -270,55 +270,54 @@ model Task {
 
 /// Modèles Annonces / Forum d'entreprise
 model ForumPost {
-  id        String   @id @default(uuid())
-  title     String
-  content   String
-  category  String   @default("GENERAL") // GENERAL, ANNOUNCEMENT, EVENT
-  fileUrl   String?
-  fileType  String?  
-  
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  comments  ForumComment[]
-  
+  id       String  @id @default(uuid())
+  title    String
+  content  String
+  category String  @default("GENERAL") // GENERAL, ANNOUNCEMENT, EVENT
+  fileUrl  String?
+  fileType String?
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  comments ForumComment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model ForumComment {
-  id        String   @id @default(uuid())
-  content   String
-  
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  postId    String
-  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+  id      String @id @default(uuid())
+  content String
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  postId String
+  post   ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
 }
 
 model SystemLog {
   id        String   @id @default(uuid())
-  level     String   // INFO, WARN, ERROR
+  level     String // INFO, WARN, ERROR
   message   String
   details   Json?
-  source    String?  // ex: "PaymentController"
+  source    String? // ex: "PaymentController"
   createdAt DateTime @default(now())
 }
 
 /// Modèle pour les rôles personnalisés (Permissions Dynamiques)
 model CustomRole {
   id          String   @id @default(uuid())
-  name        String   // ex: "Comptable", "Directeur", etc.
+  name        String // ex: "Comptable", "Directeur", etc.
   permissions String[] // ex: ["VIEW_SALARIES", "MANAGE_USERS", ...]
-  
-  companyId   String
-  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  
-  users       User[]
 
-  createdAt   DateTime @default(now())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  users User[]
+
+  createdAt DateTime @default(now())
 }
-
