@@ -36,6 +36,8 @@ interface Attendance {
 
 const AttendancePage = () => {
   const { user } = useAuth();
+  const canManage = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'COMMERCIAL';
+  
   const [logs, setLogs] = useState<Attendance[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [time, setTime] = useState(new Date());
@@ -124,8 +126,6 @@ const AttendancePage = () => {
       postClock();
     }
   };
-
-  const canManage = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'COMMERCIAL';
 
   const todayLog = logs.find(
     log => new Date(log.date).toDateString() === new Date().toDateString() && log.employee?.firstName === user?.firstName
