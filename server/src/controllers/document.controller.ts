@@ -53,7 +53,11 @@ export const uploadDocument = async (req: Request, res: Response): Promise<any> 
 
     res.status(201).json(doc);
   } catch (error: any) {
-    res.status(500).json({ message: "Erreur serveur.", error: error.message });
+    console.error("DEBUG UPLOAD ERROR:", error);
+    res.status(500).json({ 
+      message: "Erreur serveur lors de l'upload.", 
+      error: error.message 
+    });
   }
 };
 

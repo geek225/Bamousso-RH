@@ -72,8 +72,9 @@ const Suggestions = () => {
       setIsAnonymous(false);
       void fetchSuggestions();
       alert('Votre suggestion a été envoyée avec succès.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error reporting suggestion', error);
+      alert(error.response?.data?.message || "Erreur lors de l'envoi de la suggestion. Vérifiez votre connexion.");
     } finally {
       setIsLoading(false);
     }
@@ -118,10 +119,10 @@ const Suggestions = () => {
                     onChange={e => setNature(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl text-white font-bold outline-none focus:ring-2 focus:ring-brand-primary appearance-none"
                   >
-                    <option className="bg-brand-900">Amélioration du cadre de travail</option>
-                    <option className="bg-brand-900">Processus interne</option>
-                    <option className="bg-brand-900">Bien-être au travail</option>
-                    <option className="bg-brand-900">Autre</option>
+                    <option className="bg-gray-800 text-white">Amélioration du cadre de travail</option>
+                    <option className="bg-gray-800 text-white">Processus interne</option>
+                    <option className="bg-gray-800 text-white">Bien-être au travail</option>
+                    <option className="bg-gray-800 text-white">Autre</option>
                   </select>
                 </div>
 
@@ -131,7 +132,7 @@ const Suggestions = () => {
                     required
                     value={description}
                     onChange={e => setDescription(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 p-6 rounded-2xl text-white font-medium outline-none focus:ring-2 focus:ring-brand-primary h-40 resize-none"
+                    className="w-full bg-white/5 border border-white/10 p-6 rounded-2xl text-white font-medium outline-none focus:ring-2 focus:ring-brand-primary h-40 resize-none placeholder-gray-500"
                     placeholder="Comment pourrions-nous améliorer les choses ?..."
                   />
                 </div>

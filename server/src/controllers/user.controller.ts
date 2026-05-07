@@ -142,8 +142,12 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
 
     const whereClause: Record<string, any> = {};
 
-    if (role && validRoles.includes(role)) {
-      whereClause.role = role as string;
+    if (role) {
+      if (Array.isArray(role)) {
+        whereClause.role = { in: role.filter(r => validRoles.includes(r)) };
+      } else if (validRoles.includes(role)) {
+        whereClause.role = role;
+      }
     }
 
     if (departmentId) {

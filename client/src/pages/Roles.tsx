@@ -30,6 +30,11 @@ const RolesPage = () => {
   const [editingRole, setEditingRole] = useState<Role | null>(null);
 
   const [formData, setFormData] = useState({ name: '', permissions: [] as string[] });
+  
+  // Assignment State
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [assignment, setAssignment] = useState({ userId: '', roleId: '' });
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const fetchRoles = async () => {
     try {
@@ -42,9 +47,17 @@ const RolesPage = () => {
     }
   };
 
+  const fetchEmployees = async () => {
+    try {
+      const res = await api.get('/users?role=EMPLOYEE&role=COMMERCIAL&role=HR_MANAGER');
+      setEmployees(res.data);
+    } catch (err) { console.error(err); }
+  };
+
   useEffect(() => {
     if (plan !== 'FITINI') {
       void fetchRoles();
+      void fetchEmployees();
     } else {
       setLoading(false);
     }
@@ -87,6 +100,23 @@ const RolesPage = () => {
       void fetchRoles();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Impossible de supprimer ce rôle.');
+    }
+  };
+
+  const handleAssign = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignment.userId || !assignment.roleId) return;
+    setIsAssigning(true);
+    try {
+      await api.put(`/users/${assignment.userId}`, { customRoleId: assignment.roleId });
+      alert('Rôle assigné avec succès !');
+      setAssignment({ userId: '', roleId: '' });
+      void fetchRoles();
+      void fetchEmployees();
+    } catch (error: any) {
+      alert(error.response?.data?.message || "Erreur lors de l'assignation.");
+    } finally {
+      setIsAssigning(false);
     }
   };
 
@@ -168,6 +198,54 @@ const RolesPage = () => {
         ))}
       </div>
 
+      {/* Section Assignation */}
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-[2rem] shadow-xl border border-gray-100 dark:border-gray-700">
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+             Assigner un rôle à un employé
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">Sélectionnez un employé existant et attribuez-lui un profil spécifique.</p>
+        </div>
+
+        <form onSubmit={handleAssign} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Employé</label>
+            <select 
+              value={assignment.userId}
+              onChange={e => setAssignment({ ...assignment, userId: e.target.value })}
+              className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Sélectionner un employé...</option>
+              {employees.map(emp => (
+                <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName} ({emp.email})</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Rôle à attribuer</label>
+            <select 
+              value={assignment.roleId}
+              onChange={e => setAssignment({ ...assignment, roleId: e.target.value })}
+              className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Sélectionner un rôle...</option>
+              {roles.map(role => (
+                <option key={role.id} value={role.id}>{role.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <button 
+            type="submit"
+            disabled={!assignment.userId || !assignment.roleId || isAssigning}
+            className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-xl font-bold hover:shadow-lg disabled:opacity-50 transition-all"
+          >
+            {isAssigning ? 'Assignation...' : 'Confirmer l\'assignation'}
+          </button>
+        </form>
+      </div>
+
       {/* Modal Création/Édition */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -189,7 +267,7 @@ const RolesPage = () => {
                   required
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 focus:ring-2 focus:ring-orange-500 outline-none"
+                  className="w-full p-4 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 outline-none"
                   placeholder="Manager IT"
                 />
               </div>

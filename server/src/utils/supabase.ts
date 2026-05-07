@@ -48,7 +48,8 @@ export const uploadToSupabase = async (file: MulterFile, bucket: string = 'bamou
           });
 
         if (error) {
-          console.error('Supabase upload error:', error);
+          console.error(`Supabase upload error (Bucket: ${bucket}):`, error.message);
+          console.error('Full Error:', error);
           // Don't return null yet, try fallback
         } else {
           const { data: { publicUrl } } = supabase.storage
