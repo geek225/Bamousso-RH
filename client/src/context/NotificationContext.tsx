@@ -1,16 +1,24 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '../utils/supabase';
 import { useAuth } from './AuthContext';
+import api from '../utils/api';
 
-interface Notification {
+export interface Notification {
   id: string;
   title: string;
   message: string;
   createdAt: string;
+  read: boolean;
+  userId?: string;
+  companyId?: string;
 }
 
 interface NotificationContextType {
   notifications: Notification[];
+  unreadCount: number;
+  markAsRead: (id: string) => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
+  fetchNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -18,38 +26,100 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const response = await api.get('/notifications');
+      setNotifications(response.data);
+      setUnreadCount(response.data.filter((n: Notification) => !n.read).length);
+    } catch (error) {
+      console.error("Error fetching notifications", error);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
-    if (user?.companyId) {
-      // Écouter les nouvelles notifications pour cette entreprise
-      if (!supabase) return;
+    if (!user?.id || !user?.companyId) return;
 
-      const channel = supabase
-        .channel(`notifications-${user.companyId}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'Notification',
-          filter: `companyId=eq.${user.companyId}`,
-        }, (payload: any) => {
-          const newNotif = payload.new as Notification;
+    // Fetch initial notifications
+    fetchNotifications();
+
+    // Polling fallback
+    const interval = setInterval(fetchNotifications, 30000);
+
+    if (!supabase) return;
+
+    // Supabase Realtime
+    const channel = supabase
+      .channel(`notifications-${user.companyId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'Notification',
+        filter: `companyId=eq.${user.companyId}`,
+      }, (payload: { new: Notification }) => {
+        const newNotif = payload.new;
+        
+        // Only process if for this specific user or global to company
+        if (!newNotif.userId || newNotif.userId === user?.id) {
           setNotifications(prev => [newNotif, ...prev]);
+          setUnreadCount(prev => prev + 1);
           
-          // Notification système (optionnel)
+          // Browser Notification
           if (Notification.permission === 'granted') {
             new Notification(newNotif.title, { body: newNotif.message });
           }
-        })
-        .subscribe();
+        }
+      })
+      .subscribe();
 
-      return () => {
-        void supabase.removeChannel(channel);
-      };
+    return () => {
+      clearInterval(interval);
+      void supabase.removeChannel(channel);
+    };
+  }, [user?.id, user?.companyId, fetchNotifications]);
+
+  const markAsRead = async (id: string) => {
+    try {
+      await api.patch(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking as read", error);
     }
-  }, [user?.companyId]);
+  };
+
+  const deleteNotification = async (id: string) => {
+    try {
+      await api.delete(`/notifications/${id}`);
+      setNotifications(prev => {
+        const notif = prev.find(n => n.id === id);
+        if (notif && !notif.read) {
+          setUnreadCount(c => Math.max(0, c - 1));
+        }
+        return prev.filter(n => n.id !== id);
+      });
+    } catch (error) {
+      console.error("Error deleting notification", error);
+    }
+  };
+
+  // Request browser notification permission
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   return (
-    <NotificationContext.Provider value={{ notifications }}>
+    <NotificationContext.Provider value={{ 
+      notifications, 
+      unreadCount, 
+      markAsRead, 
+      deleteNotification, 
+      fetchNotifications 
+    }}>
       {children}
     </NotificationContext.Provider>
   );

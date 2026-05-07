@@ -36,21 +36,21 @@ const DashboardAdmin = () => {
   useEffect(() => {
     void fetchStats();
 
-    if (!supabase) {
-      console.warn("Supabase non initialisé. Le temps réel est désactivé.");
+    if (!supabase || !user?.companyId) {
+      console.warn("Supabase non initialisé ou companyId manquant. Le temps réel est désactivé.");
       return;
     }
 
     const channel = supabase
-      .channel('dashboard-stats')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'User' }, () => void fetchStats())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'Department' }, () => void fetchStats())
+      .channel(`dashboard-stats-${user.companyId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'User', filter: `companyId=eq.${user.companyId}` }, () => void fetchStats())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'Department', filter: `companyId=eq.${user.companyId}` }, () => void fetchStats())
       .subscribe();
 
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user?.companyId]);
 
   const maxEmp = PLAN_MAX_EMPLOYEES[plan];
   const badge = PLAN_BADGE[plan] || PLAN_BADGE['FITINI'];

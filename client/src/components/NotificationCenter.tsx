@@ -1,76 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, Trash2, X } from 'lucide-react';
-import api from '../utils/api';
-import { supabase } from '../utils/supabase';
-import { useAuth } from '../context/AuthContext';
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  createdAt: string;
-  read: boolean;
-  userId?: string;
-  companyId?: string;
-}
+import { useNotifications } from '../context/NotificationContext';
 
 const NotificationCenter = () => {
-  const { user } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { notifications, unreadCount, markAsRead, deleteNotification } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await api.get('/notifications');
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter((n: Notification) => !n.read).length);
-    } catch (error) {
-      console.error("Error fetching notifications", error);
-    }
-  };
-
-  // Initial fetch and Realtime subscription
-  useEffect(() => {
-    if (!user?.id || !user?.companyId) return;
-
-    fetchNotifications();
-
-    // Fallback Polling (toutes les 30 secondes au cas où le Realtime échoue)
-    const interval = setInterval(fetchNotifications, 30000);
-
-    if (!supabase) return;
-
-    console.log(`Tentative de connexion Realtime pour l'entreprise: ${user.companyId}`);
-
-    const channel = supabase
-      .channel(`notifications-${user.companyId}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'Notification',
-        filter: `companyId=eq.${user.companyId}`
-      }, (payload: { new: Notification }) => {
-        const newNotif = payload.new;
-        console.log("Notification reçue en direct !", newNotif);
-        
-        // On ne traite la notification que si elle est destinée à cet utilisateur spécifique
-        // ou si c'est une notification globale de l'entreprise (userId null)
-        if (!newNotif.userId || newNotif.userId === user?.id) {
-          setNotifications(prev => [newNotif, ...prev]);
-          setUnreadCount(prev => prev + 1);
-        }
-      })
-      .subscribe((status: string) => {
-        console.log(`Statut de la connexion Realtime: ${status}`);
-      });
-
-    return () => {
-      clearInterval(interval);
-      void supabase.removeChannel(channel);
-    };
-  }, [user?.id, user?.companyId]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -83,32 +18,10 @@ const NotificationCenter = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const markAsRead = async (id: string) => {
-    try {
-      await api.patch(`/notifications/${id}/read`);
-      
-      // Update local state
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error("Error marking as read", error);
-    }
-  };
-
-  const deleteNotification = async (id: string, e: React.MouseEvent) => {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-        await api.delete(`/notifications/${id}`);
-        setNotifications(prev => prev.filter(n => n.id !== id));
-        // Recalculate unread just in case
-        const notif = notifications.find(n => n.id === id);
-        if (notif && !notif.read) {
-            setUnreadCount(prev => Math.max(0, prev - 1));
-        }
-    } catch (error) {
-        console.error("Error deleting notification", error);
-    }
-  }
+    deleteNotification(id);
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -153,7 +66,7 @@ const NotificationCenter = () => {
                         </span>
                         <div className="flex items-center gap-2">
                             <button 
-                                onClick={(e) => deleteNotification(notification.id, e)}
+                                onClick={(e) => handleDelete(notification.id, e)}
                                 className="text-gray-600 hover:text-rose-500 p-1 opacity-0 group-hover:opacity-100 transition-all"
                                 title="Supprimer"
                             >

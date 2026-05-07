@@ -9,6 +9,7 @@ import api from '../utils/api';
 import LockedFeature from '../components/LockedFeature';
 import { usePlan } from '../hooks/usePlan';
 import { supabase } from '../utils/supabase';
+import { useAuth } from '../context/AuthContext';
 
 interface Summary {
   totalEmployees: number;
@@ -22,6 +23,7 @@ interface Summary {
 
 const Analytics = () => {
   const { canUse, requiredPlanFor } = usePlan();
+  const { user } = useAuth();
   const [summary, setSummary] = useState<Summary | null>(null);
   const [leavesData, setLeavesData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
@@ -53,19 +55,19 @@ const Analytics = () => {
     void fetchAll();
 
     // Real-time subscription pour mettre à jour les graphiques
-    if (!supabase) return;
+    if (!supabase || !user?.companyId) return;
 
     const channel = supabase
-      .channel('analytics-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'User' }, () => void fetchAll())
+      .channel(`analytics-realtime-${user.companyId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'User', filter: `companyId=eq.${user.companyId}` }, () => void fetchAll())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'Attendance' }, () => void fetchAll())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'Leave' }, () => void fetchAll())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'LeaveRequest' }, () => void fetchAll())
       .subscribe();
 
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [canUse]);
+  }, [canUse, user?.companyId]);
 
   if (!canUse('analytics')) {
     return <LockedFeature featureName="Analytique RH" requiredPlan={requiredPlanFor('analytics')} />;

@@ -116,7 +116,7 @@ export const broadcastNotification = async (req: AuthRequest, res: Response) => 
 
     const users = await prisma.user.findMany({
       where: whereClause,
-      select: { id: true },
+      select: { id: true, companyId: true },
     });
 
     if (users.length === 0) {
@@ -131,6 +131,7 @@ export const broadcastNotification = async (req: AuthRequest, res: Response) => 
             title,
             message,
             userId: u.id,
+            companyId: u.companyId,
             read: false
         }))
     });

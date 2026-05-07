@@ -28,6 +28,11 @@ const Messaging = () => {
   const { user } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const selectedContactRef = useRef<Contact | null>(null);
+
+  useEffect(() => {
+    selectedContactRef.current = selectedContact;
+  }, [selectedContact]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [search, setSearch] = useState('');
@@ -69,33 +74,60 @@ const Messaging = () => {
   useEffect(() => {
     if (selectedContact) {
       void fetchMessages(selectedContact.id);
-
-      // Real-time subscription - Optimisé
-      if (!supabase) return;
-
-      const channel = supabase
-        .channel(`chat-${selectedContact.id}`)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'Message',
-        }, (payload: any) => {
-          const msg = payload.new as Message;
-          if ((msg.senderId === selectedContact.id && msg.recipientId === user?.id) ||
-              (msg.senderId === user?.id && msg.recipientId === selectedContact.id)) {
-            setMessages(prev => {
-              if (prev.some(m => m.id === msg.id)) return prev;
-              return [...prev, msg];
-            });
-          }
-        })
-        .subscribe();
-
-      return () => {
-        void supabase.removeChannel(channel);
-      };
     }
-  }, [selectedContact, user?.id]);
+  }, [selectedContact]);
+
+  useEffect(() => {
+    if (!user?.id || !supabase) return;
+
+    const handleNewMessage = (msg: Message) => {
+      const activeContact = selectedContactRef.current;
+      
+      // Update the active discussion if the message belongs to it
+      if (activeContact && (
+        (msg.senderId === activeContact.id && msg.recipientId === user.id) ||
+        (msg.senderId === user.id && msg.recipientId === activeContact.id)
+      )) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
+      } else if (msg.recipientId === user.id) {
+        // Message from another contact: increment unread badge
+        setContacts(prev => prev.map(c => {
+          if (c.id === msg.senderId) {
+            return { 
+              ...c, 
+              unread: (c.unread || 0) + 1, 
+              lastMsg: msg.content, 
+              time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+            };
+          }
+          return c;
+        }));
+      }
+    };
+
+    const channel = supabase
+      .channel(`messages-${user.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'Message',
+        filter: `recipientId=eq.${user.id}`,
+      }, (payload) => handleNewMessage(payload.new as Message))
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'Message',
+        filter: `senderId=eq.${user.id}`,
+      }, (payload) => handleNewMessage(payload.new as Message))
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
