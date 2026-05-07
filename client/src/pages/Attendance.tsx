@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Clock, Play, Square, AlertCircle, MapPin, User } from 'lucide-react';
+import { Clock, Play, Square, AlertCircle, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -125,6 +125,8 @@ const AttendancePage = () => {
     }
   };
 
+  const canManage = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'COMMERCIAL';
+
   const todayLog = logs.find(
     log => new Date(log.date).toDateString() === new Date().toDateString() && log.employee?.firstName === user?.firstName
   ) || logs.find(
@@ -133,8 +135,6 @@ const AttendancePage = () => {
 
   const isCheckedIn = todayLog?.checkIn && !todayLog?.checkOut;
   const isFinished = todayLog?.checkOut;
-
-  const canManage = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'HR_ASSISTANT';
 
   const calculateHours = (checkIn: string | null, checkOut: string | null) => {
     if (!checkIn || !checkOut) return '-';
