@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Building2, LayoutDashboard, LogOut, Moon, Sun, Users, Layers, X, 
   Calendar, Clock, FileText, Megaphone, Settings as SettingsIcon,
-  ListTodo, Banknote, MessageCircle, MessageSquare, FileWarning, BarChart3
+  ListTodo, Banknote, MessageCircle, MessageSquare, FileWarning, BarChart3, Shield
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ConfirmationModal from './ConfirmationModal';
@@ -185,13 +185,24 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             </>
           )}
           {canManageHr ? (
-            <Link
-              to="/settings"
-              className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/settings' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
-            >
-              <SettingsIcon className="w-5 h-5" />
-              Paramètres
-            </Link>
+            <>
+              <Link
+                to="/settings"
+                className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/settings' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+              >
+                <SettingsIcon className="w-5 h-5" />
+                Paramètres
+              </Link>
+              {user.role === 'COMPANY_ADMIN' && (
+                <Link
+                  to="/roles"
+                  className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/roles' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}
+                >
+                  <Shield className="w-5 h-5" />
+                  Rôles & Permissions
+                </Link>
+              )}
+            </>
           ) : null}
         </nav>
 

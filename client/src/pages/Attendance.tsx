@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Clock, Play, Square, AlertCircle } from 'lucide-react';
+import { Clock, Play, Square, AlertCircle, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Attendance {
@@ -10,6 +10,8 @@ interface Attendance {
   checkIn: string | null;
   checkOut: string | null;
   status: string;
+  latitude?: number;
+  longitude?: number;
   employee?: {
     firstName: string;
     lastName: string;
@@ -42,13 +44,31 @@ const AttendancePage = () => {
 
   const handleToggle = async () => {
     setIsLoading(true);
-    try {
-      await api.post('/attendances/toggle');
-      void fetchLogs();
-    } catch (error) {
-      console.error('Error toggling clock', error);
-    } finally {
-      setIsLoading(false);
+
+    const postClock = async (lat?: number, lng?: number) => {
+      try {
+        await api.post('/attendances/toggle', { latitude: lat, longitude: lng });
+        void fetchLogs();
+      } catch (error) {
+        console.error('Error toggling clock', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          postClock(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.warn("Geolocation denied or error", error);
+          postClock(); // Proceed without GPS if blocked
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    } else {
+      postClock();
     }
   };
 
@@ -77,7 +97,7 @@ const AttendancePage = () => {
         <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white flex items-center gap-3">
           <Clock className="w-8 h-8 text-orange-500" /> Pointage
         </h1>
-        <p className="text-gray-500 mt-1">Gérez votre temps de travail et suivez les présences de l'équipe.</p>
+        <p className="text-gray-500 mt-1">Gérez votre temps de travail et suivez les présences de l'équipe avec géolocalisation.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -132,6 +152,12 @@ const AttendancePage = () => {
                 <span>Départ:</span>
                 <span className="font-semibold text-gray-900">{todayLog?.checkOut ? new Date(todayLog.checkOut).toLocaleTimeString() : '--:--'}</span>
               </div>
+              {todayLog?.latitude && todayLog?.longitude && (
+                <div className="flex justify-between items-center text-xs mt-2 pt-2 border-t border-gray-200">
+                  <span className="flex items-center gap-1"><MapPin className="w-3 h-3"/> Position:</span>
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${todayLog.latitude},${todayLog.longitude}`} target="_blank" rel="noreferrer" className="text-orange-500 font-bold hover:underline">Voir carte</a>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -158,6 +184,7 @@ const AttendancePage = () => {
                   <th className="p-4 font-semibold">Arrivée</th>
                   <th className="p-4 font-semibold">Départ</th>
                   <th className="p-4 font-semibold">Durée</th>
+                  <th className="p-4 font-semibold">Position</th>
                   <th className="p-4 font-semibold">Statut</th>
                 </tr>
               </thead>
@@ -182,6 +209,15 @@ const AttendancePage = () => {
                       {calculateHours(log.checkIn, log.checkOut)}
                     </td>
                     <td className="p-4">
+                      {log.latitude && log.longitude ? (
+                        <a href={`https://www.google.com/maps/search/?api=1&query=${log.latitude},${log.longitude}`} target="_blank" rel="noreferrer" className="text-blue-500 hover:bg-blue-50 p-2 rounded-full inline-flex">
+                          <MapPin className="w-5 h-5" />
+                        </a>
+                      ) : (
+                        <span className="text-gray-300 text-xs">-</span>
+                      )}
+                    </td>
+                    <td className="p-4">
                       <span className="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full text-xs font-bold uppercase tracking-wider">
                         {log.status}
                       </span>
@@ -190,7 +226,7 @@ const AttendancePage = () => {
                 ))}
                 {logs.length === 0 && (
                   <tr>
-                    <td colSpan={canManage ? 6 : 5} className="p-8 text-center text-gray-500">
+                    <td colSpan={canManage ? 7 : 6} className="p-8 text-center text-gray-500">
                       Aucun pointage trouvé.
                     </td>
                   </tr>
@@ -205,3 +241,4 @@ const AttendancePage = () => {
 };
 
 export default AttendancePage;
+

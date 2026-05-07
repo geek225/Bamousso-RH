@@ -115,6 +115,10 @@ model User {
   receivedExplanations ExplanationRequest[] @relation("TargetEmployee")
   createdExplanations  ExplanationRequest[] @relation("CreatorEmployee")
 
+  // Custom Role (RBAC)
+  customRoleId String?
+  customRole   CustomRole? @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   assignedTasks   Task[] @relation("AssignedTasks")
@@ -210,6 +214,10 @@ model Attendance {
   employeeId String
   employee   User    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
+  // Géolocalisation
+  latitude  Float?
+  longitude Float?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -298,3 +306,18 @@ model SystemLog {
   source    String?  // ex: "PaymentController"
   createdAt DateTime @default(now())
 }
+
+/// Modèle pour les rôles personnalisés (Permissions Dynamiques)
+model CustomRole {
+  id          String   @id @default(uuid())
+  name        String   // ex: "Comptable", "Directeur", etc.
+  permissions String[] // ex: ["VIEW_SALARIES", "MANAGE_USERS", ...]
+  
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  users       User[]
+
+  createdAt   DateTime @default(now())
+}
+

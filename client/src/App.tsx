@@ -31,6 +31,7 @@ import Messaging from './pages/Messaging';
 import Suggestions from './pages/Suggestions';
 import Explanations from './pages/Explanations';
 import Salaries from './pages/Salaries';
+import Roles from './pages/Roles';
 
 import { NotificationProvider } from './context/NotificationContext';
 
@@ -66,6 +67,7 @@ function App() {
                   {/* Modules protégés par rôle (RH/Admin) */}
                   <Route element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']} />}>
                     <Route path="/dashboard/admin" element={<DashboardAdmin />} />
+                    <Route path="/roles" element={<Roles />} />
                   </Route>
 
                   <Route element={<ProtectedRoute allowedRoles={['HR_MANAGER', 'HR_ASSISTANT']} />}>

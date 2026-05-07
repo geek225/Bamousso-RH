@@ -32,6 +32,7 @@ import suggestionsRoutes from "./routes/suggestions.routes.js";
 import explanationRoutes from "./routes/explanation.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import messageRoutes from "./routes/message.routes.js";
+import rolesRoutes from "./routes/roles.routes.js";
 
 // Chargement des variables d'environnement
 dotenv.config();
@@ -93,6 +94,7 @@ app.use("/api/suggestions", apiLimiter, suggestionsRoutes);
 app.use("/api/explanations", apiLimiter, explanationRoutes);
 app.use("/api/tasks", apiLimiter, taskRoutes);
 app.use("/api/messages", apiLimiter, messageRoutes);
+app.use("/api/roles", apiLimiter, rolesRoutes);
 
 // Route de test pour vérifier que l'API est en ligne
 app.get("/", (req, res) => {

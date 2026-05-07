@@ -77,3 +77,43 @@ export const authorize = (roles: string[]) => {
     next();
   };
 };
+
+export const requirePermission = (permission: string) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // SUPER_ADMIN and COMPANY_ADMIN bypass all permissions
+    if (req.user.role === "SUPER_ADMIN" || req.user.role === "COMPANY_ADMIN") {
+      return next();
+    }
+
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        include: { customRole: true }
+      });
+
+      if (!dbUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // If user has a custom role, check permissions
+      if (dbUser.customRole && dbUser.customRole.permissions.includes(permission)) {
+        return next();
+      }
+
+      // Fallback for basic roles if they don't have a custom role (legacy support)
+      // e.g. HR_MANAGER can do almost everything
+      if (req.user.role === "HR_MANAGER" || req.user.role === "HR_ASSISTANT") {
+        // Here you can define default permissions for HR roles if needed.
+        // For strict RBAC, you might want to return 403.
+      }
+
+      return res.status(403).json({ message: "Access denied. Missing permission: " + permission });
+    } catch (error) {
+      return res.status(500).json({ message: "Error checking permissions" });
+    }
+  };
+};

@@ -6,6 +6,7 @@ import { notifyAdmins } from "../utils/notifications.js";
 export const toggleClock = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = (req as any).user.id;
+    const { latitude, longitude } = req.body;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -26,7 +27,9 @@ export const toggleClock = async (req: Request, res: Response): Promise<any> => 
           employeeId: userId,
           date: new Date(),
           checkIn: new Date(),
-          status: "PRESENT"
+          status: "PRESENT",
+          latitude,
+          longitude
         }
       });
 
@@ -40,7 +43,11 @@ export const toggleClock = async (req: Request, res: Response): Promise<any> => 
       // Pointage de départ (Check Out)
       attendance = await prisma.attendance.update({
         where: { id: attendance.id },
-        data: { checkOut: new Date() }
+        data: { 
+          checkOut: new Date(),
+          latitude, // on peut mettre à jour ou garder l'ancien
+          longitude
+        }
       });
 
       // Notifier les admins
