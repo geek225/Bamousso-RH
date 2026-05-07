@@ -168,18 +168,22 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                     Messagerie
                   </Link>
 
-                  <Link to="/suggestions" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/suggestions' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
-                    <MessageSquare className="w-5 h-5" />
-                    Suggestions
-                    <SidebarBadge count={badgeCounts.suggestions} />
-                  </Link>
-
                   <Link to="/explanations" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/explanations' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                     <FileWarning className="w-5 h-5" />
                     Explications
                     <SidebarBadge count={badgeCounts.explanations} />
                   </Link>
+                </>
+              )}
 
+              <Link to="/suggestions" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/suggestions' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                <MessageSquare className="w-5 h-5" />
+                Suggestions
+                <SidebarBadge count={badgeCounts.suggestions} />
+              </Link>
+
+              {(plan === 'LOUBA' || plan === 'KORO') && (
+                <>
                   {canManageHr && (
                     <Link to="/salaries" className={`flex items-center gap-3 p-3.5 rounded-2xl transition-all duration-300 font-bold text-sm ${location.pathname === '/salaries' ? 'bg-brand-primary text-white shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                       <Banknote className="w-5 h-5" />

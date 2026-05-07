@@ -25,7 +25,7 @@ const Suggestions = () => {
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const isAdmin = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER';
+  const isAdmin = user?.role === 'COMPANY_ADMIN' || user?.role === 'HR_MANAGER' || user?.role === 'HR_ASSISTANT';
 
   const fetchSuggestions = async () => {
     try {
@@ -37,8 +37,29 @@ const Suggestions = () => {
   };
 
   useEffect(() => {
-    void fetchSuggestions();
-  }, []);
+    fetchSuggestions();
+
+    // Abonnement Temps Réel via Supabase
+    const channel = api.supabase
+      .channel('suggestions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'Suggestion',
+          filter: `companyId=eq.${user?.companyId}`
+        },
+        () => {
+          fetchSuggestions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void api.supabase.removeChannel(channel);
+    };
+  }, [user?.companyId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
