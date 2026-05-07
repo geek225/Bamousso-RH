@@ -77,10 +77,21 @@ const AttendancePage = () => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => postClock(pos.coords.latitude, pos.coords.longitude),
-        () => postClock(),
-        { enableHighAccuracy: true, timeout: 8000 }
+        (error) => {
+          console.error('Erreur géolocalisation:', error);
+          let errorMsg = "Impossible d'obtenir votre position.";
+          if (error.code === error.PERMISSION_DENIED) {
+            errorMsg = "Accès à la localisation refusé. Veuillez autoriser la localisation dans votre navigateur.";
+          } else if (error.code === error.TIMEOUT) {
+            errorMsg = "Délai d'attente dépassé pour la localisation.";
+          }
+          alert(errorMsg + " Le pointage sera enregistré sans coordonnées GPS.");
+          postClock();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
+      alert("La géolocalisation n'est pas supportée (nécessite HTTPS). Le pointage sera enregistré sans coordonnées GPS.");
       postClock();
     }
   };
@@ -110,11 +121,12 @@ const AttendancePage = () => {
     if (gpsLogs.length === 0) {
       return `https://www.openstreetmap.org/export/embed.html?bbox=${defaultCenter.lng - 0.05},${defaultCenter.lat - 0.05},${defaultCenter.lng + 0.05},${defaultCenter.lat + 0.05}&layer=mapnik`;
     }
-    const firstGps = gpsLogs[0];
-    const lat = firstGps.latitude!;
-    const lng = firstGps.longitude!;
-    const markers = gpsLogs.map(l => `mlat=${l.latitude}&mlon=${l.longitude}`).join('&');
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.05},${lat - 0.05},${lng + 0.05},${lat + 0.05}&layer=mapnik&${markers}`;
+    // On prend le dernier pointage (le plus récent)
+    const latestGps = gpsLogs[0];
+    const lat = latestGps.latitude!;
+    const lng = latestGps.longitude!;
+    // Ajuster le bbox pour un zoom plus proche autour du marqueur (0.005 au lieu de 0.05)
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.005},${lat - 0.005},${lng + 0.005},${lat + 0.005}&layer=mapnik&marker=${lat},${lng}`;
   };
 
   return (

@@ -37,10 +37,10 @@ import { NotificationProvider } from './context/NotificationContext';
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <BrowserRouter>
+    <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <NotificationProvider>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
@@ -101,10 +101,10 @@ function App() {
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </BrowserRouter>
-        </NotificationProvider>
-      </AuthProvider>
-    </ThemeProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 
